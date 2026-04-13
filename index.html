@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dino Days">
+<meta name="theme-color" content="#FBFEFB">
+<link rel="manifest" href="manifest.json">
+<title>Dino Days</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --almond: #D0B8AC;
+    --powder: #F3D8C7;
+    --linen: #EFE5DC;
+    --porcelain: #FBFEFB;
+    --white: #FFFFFF;
+    --ink: #1d1e1e;
+    --ink-soft: #5a5550;
+    --ink-faint: #9a908a;
+    --accent: #D0B8AC;
+    --success: #7BAE8A;
+    --danger: #C97B6E;
+    --gold: #C9A96E;
+    --card-bg: #FFFFFF;
+    --page-bg: #FBFEFB;
+    --border: #EFE5DC;
+    --shadow: rgba(208, 184, 172, 0.15);
+    --morning: #F3D8C7;
+    --morning-text: #8a5a45;
+    --night: #D0B8AC;
+    --night-text: #5a3a2a;
+    --general: #EFE5DC;
+    --general-text: #6a5a50;
+    --tab-height: 72px;
+    --header-height: 60px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LAYOUT ── */
+  #app { display: flex; flex-direction: column; min-height: 100vh; max-width: 600px; margin: 0 auto; position: relative; }
+
+  @media (min-width: 900px) {
+    body { background: var(--linen); display: flex; align-items: flex-start; justify-content: center; }
+    #app { max-width: 420px; min-height: 100vh; background: var(--page-bg); box-shadow: 0 0 60px rgba(208,184,172,0.3); }
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--page-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    height: var(--header-height);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--ink); }
+  .header-date { font-size: 12px; color: var(--ink-faint); font-weight: 300; }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: none; background: var(--linen); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background 0.2s;
+  }
+  .icon-btn:hover { background: var(--powder); }
+
+  /* ── PAGES ── */
+  .page { display: none; flex: 1; overflow-y: auto; padding-bottom: calc(var(--tab-height) + 16px); }
+  .page.active { display: block; }
+
+  /* ── TAB BAR ── */
+  .tab-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 420px;
+    height: var(--tab-height);
+    background: rgba(251,254,251,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around;
+    z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px 16px; border-radius: 12px; transition: background 0.2s; flex: 1; }
+  .tab:hover { background: var(--linen); }
+  .tab .tab-icon { font-size: 20px; line-height: 1; }
+  .tab .tab-label { font-size: 10px; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.3px; }
+  .tab.active .tab-label { color: var(--almond); font-weight: 500; }
+  .tab.active .tab-icon { filter: saturate(1.5); }
+
+  /* ── TODAY PAGE ── */
+  .today-hero {
+    background: linear-gradient(160deg, var(--linen) 0%, var(--powder) 100%);
+    padding: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .today-hero-left { flex: 1; }
+  .today-hero h2 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; margin-bottom: 4px; }
+  .today-hero .sub { font-size: 13px; color: var(--ink-soft); font-weight: 300; }
+  .dino-wrap { width: 90px; flex-shrink: 0; }
+  .dino-wrap svg { width: 100%; height: auto; }
+
+  .streak-row {
+    display: flex; gap: 10px; padding: 14px 20px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+  }
+  .streak-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--linen); border-radius: 20px;
+    padding: 6px 12px; font-size: 12px; font-weight: 500; color: var(--ink-soft);
+  }
+  .streak-chip .num { font-size: 15px; font-weight: 600; color: var(--ink); }
+
+  .section-label {
+    padding: 14px 20px 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: 1.2px;
+    color: var(--ink-faint); text-transform: uppercase;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-badge {
+    background: var(--linen); border-radius: 10px; padding: 2px 8px;
+    font-size: 10px; color: var(--ink-soft); letter-spacing: 0;
+  }
+
+  .task-list { padding: 0 12px; }
+  .task-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 12px;
+    background: var(--white);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .task-item:hover { border-color: var(--almond); box-shadow: 0 2px 12px var(--shadow); }
+  .task-item.done { opacity: 0.55; }
+  .task-item.done .task-name { text-decoration: line-through; color: var(--ink-faint); }
+
+  .task-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--almond); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    background: var(--white);
+  }
+  .task-check.checked { background: var(--success); border-color: var(--success); }
+  .task-check.checked::after { content: '✓'; color: white; font-size: 12px; font-weight: 700; }
+
+  .task-content { flex: 1; min-width: 0; }
+  .task-name { font-size: 14px; font-weight: 400; color: var(--ink); line-height: 1.4; }
+  .task-meta { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+  .task-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+  .task-item:hover .task-actions { opacity: 1; }
+  .task-action-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: var(--linen); cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .task-action-btn:hover { background: var(--powder); }
+
+  .progress-bar-wrap {
+    margin: 0 20px 16px;
+    background: var(--linen); border-radius: 100px; height: 6px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--almond), var(--powder));
+    transition: width 0.5s ease;
+  }
+
+  /* ── ADD TASK BUTTON ── */
+  .fab {
+    position: fixed; bottom: calc(var(--tab-height) + 16px); right: 20px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--ink); color: white; border: none;
+    font-size: 24px; cursor: pointer; z-index: 150;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(29,30,30,0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .fab:hover { transform: scale(1.08); }
+  @media (min-width: 900px) { .fab { right: calc(50% - 210px + 20px); } }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(29,30,30,0.4);
+    backdrop-filter: blur(4px); z-index: 300;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--white); border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 420px;
+    padding: 24px 20px 36px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-faint); margin-bottom: 6px; display: block; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 12px 14px;
+    border: 1px solid var(--border); border-radius: 12px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg); color: var(--ink);
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--almond); }
+  .form-textarea { resize: none; min-height: 60px; }
+  .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn {
+    flex: 1; padding: 14px; border-radius: 14px; border: none;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-primary:hover { background: #333; }
+  .btn-secondary { background: var(--linen); color: var(--ink-soft); }
+  .btn-secondary:hover { background: var(--powder); }
+  .btn-danger { background: var(--danger); color: white; }
+
+  /* ── GARDEN (DINO) PAGE ── */
+  .garden-page { padding: 20px; }
+  .dino-card {
+    background: linear-gradient(160deg, var(--linen), var(--powder));
+    border-radius: 24px; padding: 28px; text-align: center; margin-bottom: 20px;
+  }
+  .dino-big { width: 140px; margin: 0 auto 16px; }
+  .dino-big svg { width: 100%; height: auto; }
+  .health-label { font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .health-bar-wrap { background: rgba(255,255,255,0.5); border-radius: 100px; height: 8px; overflow: hidden; margin: 0 20px 12px; }
+  .health-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #D0B8AC, #F3D8C7); transition: width 0.6s ease, background 0.6s ease; }
+  .dino-status { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--ink-soft); }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px; text-align: center;
+  }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: var(--ink); }
+  .stat-lbl { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+  .week-dots { display: flex; gap: 8px; justify-content: center; padding: 16px 0; }
+  .week-dot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .week-dot-circle {
+    width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--ink-faint);
+  }
+  .week-dot-circle.full { background: var(--success); border-color: var(--success); color: white; }
+  .week-dot-circle.partial { background: var(--powder); border-color: var(--almond); color: var(--morning-text); }
+  .week-dot-circle.today { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+  .week-dot-day { font-size: 10px; color: var(--ink-faint); }
+
+  /* ── REWARDS PAGE ── */
+  .rewards-page { padding: 20px; }
+  .points-header {
+    background: linear-gradient(135deg, var(--ink) 0%, #3a3530 100%);
+    border-radius: 20px; padding: 20px; color: white; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .points-num { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; line-height: 1; }
+  .points-label { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+  .points-coin { font-size: 48px; }
+
+  .rewards-section-title {
+    font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 12px; margin-top: 20px;
+  }
+  .reward-list { display: flex; flex-direction: column; gap: 10px; }
+  .reward-item {
+    background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s;
+  }
+  .reward-item:hover { border-color: var(--almond); }
+  .reward-icon { font-size: 24px; width: 44px; height: 44px; background: var(--linen); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .reward-info { flex: 1; }
+  .reward-name { font-size: 14px; font-weight: 500; }
+  .reward-cost { font-size: 12px; color: var(--ink-faint); }
+  .reward-buy-btn {
+    padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--linen); font-size: 12px; font-weight: 500; color: var(--ink-soft);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: 'DM Sans', sans-serif;
+  }
+  .reward-buy-btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
+  .reward-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .reward-actions { display: flex; gap: 6px; align-items: center; }
+  .reward-del-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--white); cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; color: var(--ink-faint);
+  }
+  .reward-del-btn:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+  .add-reward-btn {
+    width: 100%; padding: 14px; border-radius: 14px;
+    border: 1.5px dashed var(--almond); background: transparent;
+    color: var(--almond); font-size: 14px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; margin-top: 10px; transition: all 0.2s;
+  }
+  .add-reward-btn:hover { background: var(--linen); }
+
+  .history-list { display: flex; flex-direction: column; gap: 6px; }
+  .history-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--linen); border-radius: 10px;
+    font-size: 13px;
+  }
+  .history-item .pts { font-weight: 500; }
+  .history-item .pts.pos { color: var(--success); }
+  .history-item .pts.neg { color: var(--danger); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: white; padding: 10px 20px; border-radius: 100px;
+    font-size: 13px; z-index: 500; opacity: 0; transition: opacity 0.3s;
+    white-space: nowrap; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── SECTION TABS ── */
+  .section-tabs {
+    display: flex; gap: 8px; padding: 12px 20px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .section-tabs::-webkit-scrollbar { display: none; }
+  .section-tab {
+    padding: 6px 16px; border-radius: 100px; border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    background: var(--white); color: var(--ink-soft); transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .section-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  /* ── SCROLLBAR ── */
+  * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── CONFIRMATION OVERLAY ── */
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(29,30,30,0.5);
+    backdrop-filter: blur(4px); z-index: 400;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box {
+    background: var(--white); border-radius: 20px; padding: 24px; width: 100%; max-width: 300px; text-align: center;
+  }
+  .confirm-box h4 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 8px; }
+  .confirm-box p { font-size: 13px; color: var(--ink-soft); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-title">Dino Days</div>
+      <div class="header-date" id="header-date"></div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="showEditModal()" title="Edit tasks">✏️</button>
+    </div>
+  </div>
+
+  <!-- TODAY PAGE -->
+  <div class="page active" id="page-today">
+    <div class="today-hero">
+      <div class="today-hero-left">
+        <h2 id="hero-greeting">Good morning</h2>
+        <div class="sub" id="hero-sub">Let's make today count</div>
+      </div>
+      <div class="dino-wrap" id="dino-small"></div>
+    </div>
+
+    <div class="streak-row">
+      <div class="streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
+      <div class="streak-chip">⭐ <span class="num" id="points-count">0</span> pts</div>
+      <div class="streak-chip">✅ <span class="num" id="done-count">0/0</span> done</div>
+    </div>
+
+    <div class="progress-bar-wrap" style="margin-top:14px;">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="filterSection('all', this)">All</button>
+      <button class="section-tab" onclick="filterSection('morning', this)">🌅 Morning</button>
+      <button class="section-tab" onclick="filterSection('general', this)">☀️ General</button>
+      <button class="section-tab" onclick="filterSection('night', this)">🌙 Night</button>
+    </div>
+
+    <div id="tasks-container"></div>
+    <div style="height: 20px;"></div>
+  </div>
+
+  <!-- GARDEN PAGE (dino stats) -->
+  <div class="page" id="page-garden">
+    <div class="garden-page">
+      <div class="dino-card">
+        <div class="dino-big" id="dino-big"></div>
+        <div class="health-label">Dino health</div>
+        <div class="health-bar-wrap">
+          <div class="health-bar-fill" id="health-bar" style="width:80%"></div>
+        </div>
+        <div class="dino-status" id="dino-status-text">Feeling great!</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-lbl">Day streak</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-points">0</div><div class="stat-lbl">Total pts</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-best">0</div><div class="stat-lbl">Best streak</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-spent">0</div><div class="stat-lbl">Pts spent</div></div>
+      </div>
+
+      <p style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin-bottom:12px;">This week</p>
+      <div class="week-dots" id="week-dots"></div>
+    </div>
+  </div>
+
+  <!-- REWARDS PAGE -->
+  <div class="page" id="page-rewards">
+    <div class="rewards-page">
+      <div class="points-header">
+        <div>
+          <div class="points-num" id="reward-points">0</div>
+          <div class="points-label">points available</div>
+        </div>
+        <div class="points-coin">🌟</div>
+      </div>
+
+      <div class="rewards-section-title">Your pleasures</div>
+      <div class="reward-list" id="reward-list"></div>
+      <button class="add-reward-btn" onclick="showAddRewardModal()">+ Add a pleasure</button>
+
+      <div class="rewards-section-title" style="margin-top:28px;">Purchase history</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('today', this)">
+      <div class="tab-icon">📋</div>
+      <div class="tab-label">Today</div>
+    </div>
+    <div class="tab" onclick="switchTab('garden', this)">
+      <div class="tab-icon">🦕</div>
+      <div class="tab-label">Dino</div>
+    </div>
+    <div class="tab" onclick="switchTab('rewards', this)">
+      <div class="tab-icon">🌟</div>
+      <div class="tab-label">Rewards</div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="showAddTaskModal()" title="Add task">+</button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <h3 id="modal-title">Add task</h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h4 id="confirm-title">Are you sure?</h4>
+    <p id="confirm-msg"></p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SVG DINO ──
+const DINO_SVG = `<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 414.71 438.18">
+  <defs><style>.cls-1{fill:CHEEK_COLOR;}.cls-2{fill:BODY_COLOR;}.cls-3{fill:BODY_FILL;}</style></defs>
+  <g id="s0Vq6E"><g>
+    <path class="cls-2" d="M304.23,192.62c8.1,14.03,13.41,28.58,17.17,43.72,1.51,6.09,2.38,12.3,2.82,18.56,.18,2.55,.97,4.07,3.83,4.33,2.71,.25,5.38,.97,7.87,2.2,2.9,1.44,4.57,3.94,4.62,6.97,.18,11.06,.57,22.16-2.78,32.94-.32,1.03-.57,2.07-.91,3.09-.73,2.21-2.08,3.23-4.61,3.09-5.32-.29-5.32-.16-5.84,5.13-2.6,26.33-12.44,49.36-31.43,68.1-2.27,2.24-2.7,4.25-1.94,7.2,1.78,6.9,3.76,13.76,4.87,20.83,.15,.97,.27,1.94,.32,2.92,.26,5.66-.79,7.77-6.21,9.01-11.15,2.56-21.86,6.77-33.14,8.75-3.54,.62-6.05-.67-7.83-3.78-1.47-2.58-2.13-5.43-2.83-8.28-.2-.82,0-2.29-1.39-2.12-1.2,.14-2,.91-1.83,2.47,.21,2.04,.05,4.11,.15,6.17,.22,4.53-1.81,7.67-5.77,9.71-5.23,2.7-10.89,4.06-16.65,4.26-10.47,.37-20.96,.62-31.43-.36-5.76-.54-6.83-1.36-8.29-6.87-.7-2.64-1.35-5.32-1.67-8.03-.22-1.8-.71-1.83-2.17-1.21-24.51,10.37-50.02,9.8-75.74,6.8-23.37-2.73-46.39-7.12-68.7-14.8-11.5-3.96-22.54-8.9-32.64-15.77-1.14-.78-2.44-1.39-1.99-3.16,.41-1.61,1.7-2.21,3.08-2.26,2.14-.09,2.42-1.06,2.3-2.99-.27-4.3-.35-8.63,.83-12.85,1.31-4.68,4.2-5.47,7.62-2.02,3.47,3.49,6.47,7.38,8.75,11.73,1.35,2.59,2.97,.84,4.49,.7,1.78-.16,1.37-1.35,1.18-2.57-.76-4.96-.74-9.97-.48-14.96,.34-6.45,4.03-8.14,9.45-4.5,5.1,3.42,8.37,8.44,11.82,13.31,.51,.71,.7,2.14,2.02,1.68,1.29-.45,.61-1.71,.59-2.58-.13-6.76-.37-13.52-.51-20.28-.05-2.37,0-4.9,2.49-6.16,2.48-1.25,4.77-.21,6.85,1.23,6.44,4.44,11.54,10.3,16.53,16.2,1.5,1.77,2.54,1.25,4.15,.65,2.07-.78,.87-2,.62-3.09-1.66-7.34-3.8-14.6-4.21-22.16-.35-6.4,3.04-8.61,8.6-5.33,7.34,4.34,14.07,9.6,20.3,15.43,1.51,1.41,2.56,1.54,4.2,.34,2.68-1.96,5.48-3.77,8.31-5.51,1.6-.98,1.94-1.88,1.2-3.76-2.95-7.45-5.93-14.9-8.11-22.63-.27-.94-.61-1.87-.79-2.83-.94-4.97,1.85-7.71,6.82-6.79,2.16,.4,4.1,1.27,5.93,2.43,6.62,4.2,13.28,8.36,18.34,14.51,.78,.94,1.28,.87,2.1,.16,2.07-1.79,4.15-3.59,6.33-5.25,1.36-1.04,1.37-1.85,.49-3.35-4.33-7.44-8.29-15.08-10.39-23.52-1.45-5.82,.58-8.6,6.52-8.25,8.77,.52,16.7,3.9,24.28,8.06,1.8,.99,2.57,.84,3.52-.94,1.42-2.68,3.03-5.26,4.7-7.78,.95-1.43,.68-2.26-.49-3.45-5.29-5.4-9.96-11.31-14.03-17.68-.89-1.39-1.73-2.87-2.3-4.41-1.72-4.61,.37-7.73,5.33-7.95,8.19-.35,16.2,1.02,24.15,2.75,2.19,.48,3.17,.12,3.77-2.08,1.02-3.67,3.66-7.49,3.09-10.81-.55-3.22-5.35-4.57-8.18-6.87-5.17-4.21-10.34-8.4-14.96-13.22-4.17-4.35-3.3-7.64,2.62-9.05,6.8-1.62,13.77-1.78,20.73-1.88,5.8-.08,5.8-.06,6.22-5.77,.2-2.73,.22-5.5,.72-8.18,.44-2.39-.65-3.13-2.61-3.53-8.57-1.72-16.26-5.46-23.53-10.2-2.84-1.85-5.85-3.7-5.66-7.58,.2-4.06,3.33-6.01,6.61-7.53,7.47-3.46,15.39-5.12,23.59-5.38,1.98-.06,2.76-.52,2.65-2.63-.16-3.22-.12-6.47,.07-9.7,.11-1.85-.62-2.48-2.3-2.9-8.17-2.04-16.13-4.72-23.53-8.83-2.79-1.56-6.31-2.97-6.29-6.72,.02-3.94,3.56-5.65,6.56-7.23,7.34-3.87,15.38-5.05,23.53-5.44,2.15-.1,3.09-.5,3.16-2.89,.09-2.92,.53-5.87,1.25-8.7,.5-1.97-.18-2.82-1.72-3.71-6.26-3.61-12.84-6.69-18.77-10.88-1.92-1.35-3.87-2.68-4.98-4.88-1.53-3.04-.94-5.73,1.81-7.74,3.06-2.23,6.63-2.84,10.28-2.95,6.67-.21,13.33,0,19.93,1.02,1.61,.25,2.44-.12,3.17-1.63,1.4-2.9,2.78-5.88,4.71-8.42,1.82-2.4,1.54-4.38,.48-6.87-3.47-8.18-8.01-15.9-10.64-24.44-.57-1.86-1.14-3.76-1.42-5.68-.57-3.95,.53-5.18,4.49-5.41,3.99-.22,7.8,.7,11.52,1.95,7.84,2.64,15.1,6.43,21.66,11.49,1.16,.9,1.92,.87,3.07,.16,5.67-3.51,11.67-6.36,18.04-8.35,1.54-.48,1.76-1.32,1.76-2.76,0-7.45,.17-14.9,1.73-22.22,.51-2.41,1.46-4.66,2.91-6.67,2.38-3.29,4.94-3.55,7.82-.74,.84,.82,1.63,1.71,2.28,2.68,4.82,7.15,9.22,14.52,11.96,22.76,.41,1.24,.97,1.64,2.27,1.61,6.28-.13,12.54,.14,18.73,1.32,1.47,.28,2.13-.34,2.76-1.47,3.18-5.66,7.46-10.53,11.46-15.6,.96-1.22,2.07-2.37,3.24-3.4,3.4-3,5.67-2.53,7.93,1.46,2.17,3.82,2.37,8.04,2.56,12.23,.19,4.31,.27,8.63,.15,12.93-.05,1.64,.43,2.4,1.87,3.1,24.04,11.59,41.89,29.67,54.18,53.12,11.28,21.53,12.82,43.68,1.74,65.92-5.03,10.1-13.29,17.31-22.32,23.72-14.28,10.14-29.95,16.53-47.65,16.81-10.06,.16-19.81-2.04-29.33-5.26-1-.34-2-.68-3.63-1.24Zm74.85-12.02c-1.09-.34-1.82-.53-2.53-.79-11.04-3.96-20.27-10.15-25.54-21.06-.73-1.52-2.33-3.73,0-4.86,2.38-1.16,2.99,1.51,3.78,3.03,5.05,9.64,13.49,14.99,23.41,18.31,4,1.33,7.79,.83,11.13-2.36,3.55-3.39,7.28-6.61,10-10.71,12.02-18.06,13.68-37.57,6.16-57.45-9.13-24.14-25.49-42.67-47.54-56.06-20.12-12.21-41.83-18.11-65.38-14.62-27.11,4.01-49.07,16.61-63.79,40.37-9.97,16.08-14.75,33.77-15.81,52.53-1.11,19.58-.56,39.19-1.03,58.79-.41,17.47-1.77,34.84-5.29,51.95-5.19,25.19-17.77,47.08-32.02,68.01-8.17,12-19.21,21.37-30.57,30.31-16.65,13.1-34.03,25.04-53.38,33.88-25.1,11.46-51.44,19.08-78.24,25.28-1.26,.29-2.66,.29-3.92,1.39,4.44,2.7,8.9,4.91,13.49,6.82,33.85,14.08,69.34,20.32,105.77,21.85,17.4,.73,34.35-1.64,50.5-8.6,1.82-.78,2.48-1.65,2.47-3.62-.02-4.32-.24-8.61-.82-12.89-.17-1.29,.14-2.34,1.64-2.64,1.59-.32,2.4,.49,2.78,1.9,.21,.75,.36,1.52,.47,2.3,.77,5.54,.82,11.13,1.07,16.71,.18,4.02,.51,8.01,1.84,11.85,.59,1.7,1.61,2.46,3.44,2.58,10.38,.66,20.77,.81,31.15,.42,4.62-.17,9.02-1.54,13.36-3.12,3.44-1.25,4.96-3.67,4.78-7.19-.16-3.23-.32-6.47-.78-9.66-.75-5.23-1.75-10.42-2.63-15.63-.13-.77-.16-1.56-.27-2.34-.2-1.43,.16-2.64,1.65-3,1.73-.42,1.88,1.2,2.12,2.19,1.29,5.41,2.45,10.86,3.69,16.47,7.5-2.89,14.36-6.56,20.84-11.02,19.12-13.18,35.57-28.82,46.22-49.83,6.51-12.84,9.27-26.71,11.02-40.84,.24-1.92-.31-2.87-2.42-3.01-2.53-.18-5.04-.69-7.55-1.1-10.83-1.75-21.55-3.92-31.75-8.13-1.67-.69-4.44-1.2-3.35-3.84,1.05-2.55,3.29-.75,4.81-.2,15.68,5.7,32.04,7.94,48.5,9.69,1.44,.15,2.11-.25,2.46-1.71,2.45-10.26,3.77-20.6,2.82-31.16-.24-2.65-1.5-4.3-4.23-4.86-4.02-.83-8.02-1.75-12-2.74-8.43-2.11-16.86-4.26-25.27-6.46-1.13-.29-2.82-.43-2.44-2.28,.38-1.87,1.91-1.99,3.48-1.78,.38,.05,.76,.2,1.14,.29,7.04,1.67,14.08,3.29,21.1,5.04,1.7,.42,2-.03,1.88-1.64-.31-4.21-.74-8.4-1.6-12.52-3.83-18.21-10.13-35.5-19.58-51.59-.71-1.2-1.64-1.87-2.78-2.46-6.9-3.55-13.29-7.88-19.28-12.8-.9-.74-1.74-1.59-2.48-2.48-.61-.74-.65-1.69,.02-2.42,.57-.62,1.39-.76,2.16-.31,1.18,.69,2.4,1.34,3.47,2.18,7.02,5.57,14.67,10.1,22.91,13.56,13.59,5.71,27.63,9.6,42.53,7.38,12.21-1.82,23.52-6.31,34.21-13.28Zm-90.94,207.28c-.96,.82-1.65,1.36-2.28,1.96-8.18,7.83-17.62,13.9-27.26,19.72-2.28,1.37-6.07,1.65-6.54,4.22-.46,2.49,1.22,5.41,2.08,8.1,.8,2.47,2.31,3.58,5.14,2.89,10.53-2.55,20.73-6.32,31.35-8.55,3.32-.7,3.28-3.13,2.81-5.68-1.37-7.5-3.32-14.86-5.31-22.66Z"/>
+    <path class="cls-1" d="M291.37,114.45c11.27,.04,19.26,8.33,19.35,19.86,.08,9.78-7.29,19.17-19.42,19.37-11.78,.19-19.94-9.08-19.94-20.19,0-10,8.69-19.71,20.01-19.04Z"/>
+    <path class="cls-2" d="M336.65,87.76c-.05,3.46-1.18,6.53-3.54,9.07-2.89,3.11-7.3,2.33-8.7-1.65-1.41-4.02-1.03-7.96,1.84-11.31,1.77-2.07,3.94-3.72,6.9-2.58,2.92,1.12,3.57,3.64,3.5,6.48Z"/>
+  </g></g>
+</svg>`;
+
+function getDinoSVG(health) {
+  // health 0–100: body color interpolates F3D8C7 (healthy) → FBFEFB (ill)
+  // outline stays #1d1e1e, just gets lighter
+  const t = Math.max(0, Math.min(1, health / 100));
+  // interpolate body fill from F3D8C7 to FBFEFB
+  const r1 = [243,216,199], r2 = [251,254,251];
+  const r = Math.round(r1[0] + (r2[0]-r1[0])*(1-t));
+  const g = Math.round(r1[1] + (r2[1]-r1[1])*(1-t));
+  const b = Math.round(r1[2] + (r2[2]-r1[2])*(1-t));
+  const bodyFill = `rgb(${r},${g},${b})`;
+  const outlineOpacity = 0.3 + 0.7*t;
+  const outlineColor = `rgba(29,30,30,${outlineOpacity.toFixed(2)})`;
+  const cheekColor = t > 0.4 ? '#f4a299' : `rgba(244,162,153,${(t/0.4).toFixed(2)})`;
+
+  return DINO_SVG
+    .replace(/BODY_COLOR/g, outlineColor)
+    .replace(/BODY_FILL/g, bodyFill)
+    .replace(/CHEEK_COLOR/g, cheekColor);
+}
+
+// ── STATE ──
+const DEFAULT_TASKS = [
+  {id:'m1', name:'Wake up & stretch', section:'morning', emoji:'🧘'},
+  {id:'m2', name:'Drink a full glass of water', section:'morning', emoji:'💧'},
+  {id:'m3', name:'Skin care routine', section:'morning', emoji:'✨'},
+  {id:'m4', name:'Eat breakfast', section:'morning', emoji:'🥣'},
+  {id:'m5', name:'Review today\'s goals', section:'morning', emoji:'📝'},
+  {id:'g1', name:'Exercise / Move my body', section:'general', emoji:'🏃'},
+  {id:'g2', name:'Read for 20 minutes', section:'general', emoji:'📖'},
+  {id:'g3', name:'Check emails & messages', section:'general', emoji:'📬'},
+  {id:'n1', name:'Wind down — no screens', section:'night', emoji:'📵'},
+  {id:'n2', name:'Journal or reflect', section:'night', emoji:'🌙'},
+  {id:'n3', name:'Skin care night routine', section:'night', emoji:'💆'},
+  {id:'n4', name:'Plan tomorrow', section:'night', emoji:'🗓️'},
+];
+
+const DEFAULT_REWARDS = [
+  {id:'r1', name:'Takeout from my fave place', cost:50, icon:'🍜'},
+  {id:'r2', name:'Movie night', cost:30, icon:'🎬'},
+  {id:'r3', name:'Night out with friends', cost:80, icon:'✨'},
+  {id:'r4', name:'Treat from the bakery', cost:20, icon:'🥐'},
+  {id:'r5', name:'Spa day', cost:120, icon:'💆'},
+];
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('dino-state');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return null;
+}
+
+function getToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+let state = loadState() || {
+  tasks: DEFAULT_TASKS,
+  rewards: DEFAULT_REWARDS,
+  points: 100,
+  totalSpent: 0,
+  streak: 0,
+  bestStreak: 0,
+  lastFullDay: null,
+  completedDays: {},
+  history: [],
+};
+
+// Ensure today key exists
+if (!state.completedDays[getToday()]) {
+  state.completedDays[getToday()] = {};
+}
+// Reset today's completions if it's a new day
+const today = getToday();
+
+function save() { localStorage.setItem('dino-state', JSON.stringify(state)); }
+
+// ── HELPERS ──
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+function lerp(a,b,t) { return Math.round(a+(b-a)*t); }
+
+function getHealth() {
+  const todayDone = state.completedDays[today] || {};
+  const total = state.tasks.length;
+  if (total === 0) return 100;
+  const done = Object.values(todayDone).filter(Boolean).length;
+  const ratio = done / total;
+  // health also depends on streak
+  const streakBonus = Math.min(state.streak * 2, 20);
+  return Math.min(100, Math.round(ratio * 80 + streakBonus));
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return ['Good morning ☀️', 'Start your day with intention'];
+  if (h < 17) return ['Good afternoon 🌤️', 'Keep the momentum going'];
+  return ['Good evening 🌙', 'Wind down with care'];
+}
+
+function formatDate(d) {
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+function showToast(msg, dur=2000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── POINTS ──
+function awardPoints(amount, reason) {
+  state.points += amount;
+  state.history.unshift({ reason, amount, date: today, pos: true });
+  if (state.history.length > 50) state.history.pop();
+  save(); updateAll();
+  showToast(`+${amount} pts — ${reason} 🌟`);
+}
+
+function spendPoints(amount, reason) {
+  state.points -= amount;
+  state.totalSpent += amount;
+  state.history.unshift({ reason, amount, date: today, pos: false });
+  save(); updateAll();
+  showToast(`Enjoyed: ${reason} 🎉`);
+}
+
+// ── STREAK ──
+function checkStreak() {
+  const todayDone = state.completedDays[today] || {};
+  const total = state.tasks.length;
+  const done = Object.values(todayDone).filter(Boolean).length;
+  if (total > 0 && done === total) {
+    if (state.lastFullDay !== today) {
+      state.lastFullDay = today;
+      state.streak++;
+      if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+      awardPoints(10 + state.streak * 2, `Streak day ${state.streak}`);
+    }
+  }
+}
+
+// ── RENDER DINO ──
+function renderDino() {
+  const health = getHealth();
+  const svg = getDinoSVG(health);
+  document.getElementById('dino-small').innerHTML = svg;
+  const big = document.getElementById('dino-big');
+  if (big) big.innerHTML = svg;
+}
+
+function getStatusText(health) {
+  if (health >= 85) return 'Thriving and happy!';
+  if (health >= 65) return 'Feeling good today';
+  if (health >= 45) return 'Could use some love…';
+  if (health >= 25) return 'Not feeling great';
+  return 'Please complete your tasks! 🥺';
+}
+
+// ── RENDER TASKS ──
+let currentFilter = 'all';
+
+function renderTasks() {
+  const container = document.getElementById('tasks-container');
+  container.innerHTML = '';
+  const todayDone = state.completedDays[today] || {};
+  const sections = currentFilter === 'all'
+    ? ['morning','general','night']
+    : [currentFilter];
+
+  const labels = { morning:'🌅 Morning routine', general:'☀️ Daily tasks', night:'🌙 Night routine' };
+
+  let totalDone = 0, totalAll = 0;
+
+  for (const sec of sections) {
+    const tasks = state.tasks.filter(t => t.section === sec);
+    if (!tasks.length) continue;
+    const doneSec = tasks.filter(t => todayDone[t.id]).length;
+
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.innerHTML = `<span>${labels[sec]}</span><span class="section-badge">${doneSec}/${tasks.length}</span>`;
+    container.appendChild(label);
+
+    const list = document.createElement('div');
+    list.className = 'task-list';
+
+    for (const task of tasks) {
+      totalAll++;
+      const done = !!todayDone[task.id];
+      if (done) totalDone++;
+      const item = document.createElement('div');
+      item.className = 'task-item' + (done ? ' done' : '');
+      item.innerHTML = `
+        <div class="task-check ${done ? 'checked' : ''}" onclick="toggleTask('${task.id}', event)"></div>
+        <div class="task-content">
+          <div class="task-name">${task.emoji ? task.emoji + ' ' : ''}${task.name}</div>
+          <div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)}</div>
+        </div>
+        <div class="task-actions">
+          <button class="task-action-btn" onclick="editTask('${task.id}', event)" title="Edit">✏️</button>
+          <button class="task-action-btn" onclick="deleteTask('${task.id}', event)" title="Delete">🗑️</button>
+        </div>`;
+      list.appendChild(item);
+    }
+    container.appendChild(list);
+  }
+
+  document.getElementById('done-count').textContent = `${totalDone}/${totalAll}`;
+  const pct = totalAll ? (totalDone/totalAll*100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function toggleTask(id, e) {
+  e.stopPropagation();
+  if (!state.completedDays[today]) state.completedDays[today] = {};
+  const wasDone = !!state.completedDays[today][id];
+  state.completedDays[today][id] = !wasDone;
+  if (!wasDone) {
+    awardPoints(5, 'Task completed');
+  }
+  checkStreak();
+  save(); updateAll();
+}
+
+function filterSection(sec, btn) {
+  currentFilter = sec;
+  document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+// ── RENDER STATS ──
+function renderStats() {
+  document.getElementById('streak-count').textContent = state.streak;
+  document.getElementById('points-count').textContent = state.points;
+  document.getElementById('stat-streak').textContent = state.streak;
+  document.getElementById('stat-points').textContent = state.points;
+  document.getElementById('stat-best').textContent = state.bestStreak;
+  document.getElementById('stat-spent').textContent = state.totalSpent;
+
+  const health = getHealth();
+  document.getElementById('health-bar').style.width = health + '%';
+  const si = document.getElementById('dino-status-text');
+  if (si) si.textContent = getStatusText(health);
+
+  // Week dots
+  const weekDots = document.getElementById('week-dots');
+  if (weekDots) {
+    weekDots.innerHTML = '';
+    const dayNames = ['S','M','T','W','T','F','S'];
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - dayOfWeek + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const isToday = key === today;
+      const dayData = state.completedDays[key] || {};
+      const total = state.tasks.length;
+      const done = Object.values(dayData).filter(Boolean).length;
+      let cls = 'week-dot-circle';
+      if (isToday) cls += ' today';
+      else if (total > 0 && done === total) cls += ' full';
+      else if (done > 0) cls += ' partial';
+      const dot = document.createElement('div');
+      dot.className = 'week-dot';
+      dot.innerHTML = `<div class="${cls}">${done===total && total>0 ? '✓' : dayNames[i]}</div><div class="week-dot-day">${d.getDate()}</div>`;
+      weekDots.appendChild(dot);
+    }
+  }
+}
+
+// ── RENDER REWARDS ──
+function renderRewards() {
+  document.getElementById('reward-points').textContent = state.points;
+  const list = document.getElementById('reward-list');
+  list.innerHTML = '';
+  for (const r of state.rewards) {
+    const canAfford = state.points >= r.cost;
+    const item = document.createElement('div');
+    item.className = 'reward-item';
+    item.innerHTML = `
+      <div class="reward-icon">${r.icon}</div>
+      <div class="reward-info">
+        <div class="reward-name">${r.name}</div>
+        <div class="reward-cost">⭐ ${r.cost} points</div>
+      </div>
+      <div class="reward-actions">
+        <button class="reward-del-btn" onclick="deleteReward('${r.id}')">🗑️</button>
+        <button class="reward-buy-btn" ${!canAfford ? 'disabled' : ''} onclick="buyReward('${r.id}')">${canAfford ? 'Redeem' : `Need ${r.cost - state.points} more`}</button>
+      </div>`;
+    list.appendChild(item);
+  }
+
+  const hist = document.getElementById('history-list');
+  hist.innerHTML = '';
+  if (!state.history.length) {
+    hist.innerHTML = '<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">No history yet</p>';
+    return;
+  }
+  for (const h of state.history.slice(0, 20)) {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `<span>${h.reason}</span><span class="pts ${h.pos ? 'pos' : 'neg'}">${h.pos ? '+' : '-'}${h.amount}</span>`;
+    hist.appendChild(item);
+  }
+}
+
+function buyReward(id) {
+  const r = state.rewards.find(x => x.id === id);
+  if (!r || state.points < r.cost) return;
+  pendingConfirm = () => { spendPoints(r.cost, r.name); };
+  document.getElementById('confirm-title').textContent = 'Redeem this?';
+  document.getElementById('confirm-msg').textContent = `Spend ${r.cost} pts on "${r.name}"?`;
+  document.getElementById('confirm-ok').textContent = 'Yes, redeem!';
+  document.getElementById('confirm-ok').className = 'btn btn-primary';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function deleteReward(id) {
+  pendingConfirm = () => {
+    state.rewards = state.rewards.filter(r => r.id !== id);
+    save(); renderRewards();
+    showToast('Reward removed');
+  };
+  document.getElementById('confirm-title').textContent = 'Remove reward?';
+  document.getElementById('confirm-msg').textContent = 'This will be removed from your pleasures list.';
+  document.getElementById('confirm-ok').textContent = 'Remove';
+  document.getElementById('confirm-ok').className = 'btn btn-danger';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+// ── MODALS ──
+function showAddTaskModal() {
+  document.getElementById('modal-title').textContent = 'Add task';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Task name</label>
+      <input class="form-input" id="f-name" placeholder="e.g. Drink water" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Section</label>
+      <select class="form-select" id="f-section">
+        <option value="morning">🌅 Morning</option>
+        <option value="general" selected>☀️ General</option>
+        <option value="night">🌙 Night</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji (optional)</label>
+      <input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddTask()">Add task</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function submitAddTask() {
+  const name = document.getElementById('f-name').value.trim();
+  const section = document.getElementById('f-section').value;
+  const emoji = document.getElementById('f-emoji').value.trim();
+  if (!name) { showToast('Please enter a task name'); return; }
+  const id = 'c' + Date.now();
+  state.tasks.push({ id, name, section, emoji });
+  save(); updateAll(); closeModal();
+  showToast('Task added! ✅');
+}
+
+function editTask(id, e) {
+  e.stopPropagation();
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  document.getElementById('modal-title').textContent = 'Edit task';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Task name</label>
+      <input class="form-input" id="f-name" value="${task.name}" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Section</label>
+      <select class="form-select" id="f-section">
+        <option value="morning" ${task.section==='morning'?'selected':''}>🌅 Morning</option>
+        <option value="general" ${task.section==='general'?'selected':''}>☀️ General</option>
+        <option value="night" ${task.section==='night'?'selected':''}>🌙 Night</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function submitEditTask(id) {
+  const name = document.getElementById('f-name').value.trim();
+  const section = document.getElementById('f-section').value;
+  const emoji = document.getElementById('f-emoji').value.trim();
+  if (!name) return;
+  const task = state.tasks.find(t => t.id === id);
+  if (task) { task.name = name; task.section = section; task.emoji = emoji; }
+  save(); updateAll(); closeModal();
+  showToast('Task updated');
+}
+
+function deleteTask(id, e) {
+  e.stopPropagation();
+  pendingConfirm = () => {
+    state.tasks = state.tasks.filter(t => t.id !== id);
+    Object.values(state.completedDays).forEach(d => delete d[id]);
+    save(); updateAll(); closeModal();
+    showToast('Task removed');
+  };
+  document.getElementById('confirm-title').textContent = 'Delete this task?';
+  document.getElementById('confirm-msg').textContent = 'This task will be removed from your daily routine.';
+  document.getElementById('confirm-ok').textContent = 'Delete';
+  document.getElementById('confirm-ok').className = 'btn btn-danger';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function showEditModal() {
+  showAddTaskModal();
+}
+
+function showAddRewardModal() {
+  document.getElementById('modal-title').textContent = 'Add a pleasure';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" id="f-name" placeholder="e.g. Sushi dinner" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cost (points)</label>
+      <input class="form-input" id="f-cost" type="number" min="1" value="50" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Icon (emoji)</label>
+      <input class="form-input" id="f-icon" value="🎁" maxlength="2" style="width:80px" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddReward()">Add pleasure</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function submitAddReward() {
+  const name = document.getElementById('f-name').value.trim();
+  const cost = parseInt(document.getElementById('f-cost').value);
+  const icon = document.getElementById('f-icon').value.trim();
+  if (!name || isNaN(cost) || cost < 1) { showToast('Fill in all fields'); return; }
+  state.rewards.push({ id: 'rw' + Date.now(), name, cost, icon: icon || '🎁' });
+  save(); renderRewards(); closeModal();
+  showToast('Pleasure added! 🌟');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ── CONFIRM ──
+let pendingConfirm = null;
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  if (pendingConfirm) { pendingConfirm(); pendingConfirm = null; }
+  document.getElementById('confirm-overlay').classList.remove('open');
+});
+function closeConfirm() {
+  pendingConfirm = null;
+  document.getElementById('confirm-overlay').classList.remove('open');
+}
+
+// ── TABS ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── UPDATE ALL ──
+function updateAll() {
+  renderDino();
+  renderTasks();
+  renderStats();
+  renderRewards();
+}
+
+// ── INIT ──
+function init() {
+  const d = new Date();
+  document.getElementById('header-date').textContent = formatDate(d);
+  const [greeting, sub] = getGreeting();
+  document.getElementById('hero-greeting').textContent = greeting;
+  document.getElementById('hero-sub').textContent = sub;
+  updateAll();
+}
+
+init();
+
+// register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
