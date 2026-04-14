@@ -428,11 +428,15 @@ function getDinoSVG(h){
     // Cheek opacity: 1.0 (healthy) → 0.2 (ill)
     const cop=(0.2+0.8*t).toFixed(2);
     cheek=`rgba(244,162,153,${cop})`;
-    // Build SVG: apply tokens then override the main body path with cream fill
+    // Stroke opacity matches outline opacity
+    const sop=(0.15+0.85*t).toFixed(2);
+    const strokeColor=`rgba(29,30,30,${sop})`;
+    // Build SVG: apply tokens then override the main body path with cream fill + stroke
     return DSVG
       .replace(/OUTLINE/g,outline)
       .replace(/CHEEK/g,cheek)
-      .replace('<path class="dc2" d="M304.23','<path class="dc2" style="fill:'+bodyFill+'" d="M304.23');
+      .replace('<path class="dc2" d="M304.23',`<path class="dc2" style="fill:${bodyFill};stroke:${strokeColor};stroke-width:4;stroke-linejoin:round;stroke-linecap:round;" d="M304.23`)
+      .replace('<path class="dc1"',`<path class="dc1" style="stroke:${strokeColor};stroke-width:2;"`);
   }
   return DSVG.replace(/OUTLINE/g,outline).replace(/CHEEK/g,cheek);
 }
