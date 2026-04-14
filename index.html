@@ -188,6 +188,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .confirm-box p{font-size:13px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:10px;}
 
+/* TASK MANAGER */
+.tm-tabs{display:flex;background:var(--linen);border-radius:12px;padding:3px;margin-bottom:16px;}
+.tm-tab{flex:1;padding:7px 4px;border-radius:9px;border:none;background:transparent;font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tm-tab.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px var(--shadow);}
+.tm-sec-header{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;padding:14px 0 6px;}
+.tm-section-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.tm-section-row:last-child{border-bottom:none;}
+.tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);}
+.tm-task-row.drag-over{border-color:var(--almond);background:var(--linen);}
+.tm-drag-handle{color:var(--ink-faint);font-size:20px;cursor:grab;flex-shrink:0;line-height:1;user-select:none;padding:0 2px;}
+.tm-drag-handle:active{cursor:grabbing;}
+.tm-checkbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--almond);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--white);transition:all .15s;}
+.tm-checkbox.checked{background:var(--almond);border-color:var(--almond);}
+.tm-checkbox.checked::after{content:'✓';color:white;font-size:10px;font-weight:700;}
+
 /* ACCOUNT MODAL */
 .modal-scroll{max-height:calc(80vh - 110px);overflow-y:auto;padding-right:2px;}
 .acc-section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);margin-bottom:12px;}
@@ -246,7 +261,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
-        <button class="icon-btn" onclick="showAddTaskModal()">✏️</button>
+        <button class="icon-btn" onclick="showTaskManagerModal()">✏️</button>
         <div class="user-avatar" id="user-avatar" onclick="showAccountModal()">?</div>
       </div>
     </div>
@@ -268,12 +283,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="progress-bar-wrap" style="margin-top:14px;">
         <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
       </div>
-      <div class="section-tabs">
-        <button class="section-tab active" onclick="filterSection('all',this)">All</button>
-        <button class="section-tab" onclick="filterSection('morning',this)">🌅 Morning</button>
-        <button class="section-tab" onclick="filterSection('general',this)">☀️ General</button>
-        <button class="section-tab" onclick="filterSection('night',this)">🌙 Night</button>
-      </div>
+      <div class="section-tabs" id="section-tabs-container"></div>
       <div id="tasks-container"></div>
       <div style="height:20px;"></div>
     </div>
@@ -367,6 +377,11 @@ const DEFAULT_TASKS=[
   {id:'n3',name:'Skin care night routine',section:'night',emoji:'💆'},
   {id:'n4',name:'Plan tomorrow',section:'night',emoji:'🗓️'},
 ];
+const DEFAULT_SECTIONS=[
+  {id:'morning',label:'Morning',emoji:'🌅'},
+  {id:'general',label:'General',emoji:'☀️'},
+  {id:'night',label:'Night',emoji:'🌙'},
+];
 const DEFAULT_REWARDS=[
   {id:'r1',name:'Takeout from my fave place',cost:50,icon:'🍜'},
   {id:'r2',name:'Movie night',cost:30,icon:'🎬'},
@@ -409,8 +424,8 @@ let cf='all',expandedTaskId=null;
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
-  const secs=cf==='all'?['morning','general','night']:[cf];
-  const lbls={morning:'🌅 Morning routine',general:'☀️ Daily tasks',night:'🌙 Night routine'};
+  const secs=cf==='all'?state.sections.map(s=>s.id):[cf];
+  const lbls=Object.fromEntries(state.sections.map(s=>[s.id,s.emoji+' '+s.label]));
   let td=0,ta=0;
   for(const sec of secs){
     const tasks=state.tasks.filter(t=>t.section===sec);if(!tasks.length)continue;
@@ -460,7 +475,15 @@ function renderRewards(){
   if(!state.history.length){hist.innerHTML='<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">No history yet</p>';return;}
   for(const h of state.history.slice(0,20)){const item=document.createElement('div');item.className='history-item';item.innerHTML=`<span>${h.reason}</span><span class="pts ${h.pos?'pos':'neg'}">${h.pos?'+':'-'}${h.amount}</span>`;hist.appendChild(item);}
 }
-function updateAll(){renderDino();renderTasks();renderStats();renderRewards();}
+function renderSectionTabs(){
+  const c=document.getElementById('section-tabs-container');if(!c||!state)return;
+  c.innerHTML='';
+  const allBtn=document.createElement('button');allBtn.className='section-tab'+(cf==='all'?' active':'');allBtn.onclick=function(){filterSection('all',this);};allBtn.textContent='All';c.appendChild(allBtn);
+  for(const s of state.sections){
+    const btn=document.createElement('button');btn.className='section-tab'+(cf===s.id?' active':'');btn.onclick=function(){filterSection(s.id,this);};btn.textContent=s.emoji+' '+s.label;c.appendChild(btn);
+  }
+}
+function updateAll(){renderDino();renderTasks();renderStats();renderRewards();renderSectionTabs();}
 
 // expose to window
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
@@ -472,6 +495,122 @@ function openModal(){document.getElementById('modal-overlay').classList.add('ope
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
 window.closeModalOverlay=(e)=>{if(e.target===document.getElementById('modal-overlay'))closeModal();};
 
+window.showTaskManagerModal=()=>{
+  document.getElementById('modal-title').textContent='Task Manager';
+  let tmTab='sections';
+  let secsCopy=state.sections.map(s=>({...s}));
+  let selected=new Set();
+  let dragSrc=null;
+
+  function renderTM(){
+    document.getElementById('modal-body').innerHTML=`<div class="tm-tabs"><button class="tm-tab${tmTab==='sections'?' active':''}" onclick="window._tmSwitch('sections')">Sections</button><button class="tm-tab${tmTab==='reorder'?' active':''}" onclick="window._tmSwitch('reorder')">Reorder</button><button class="tm-tab${tmTab==='bulk'?' active':''}" onclick="window._tmSwitch('bulk')">Bulk edit</button></div><div id="tm-content" class="modal-scroll"></div>`;
+    const c=document.getElementById('tm-content');
+    if(tmTab==='sections')renderTMSections(c);
+    else if(tmTab==='reorder')renderTMReorder(c);
+    else renderTMBulk(c);
+  }
+  window._tmSwitch=(tab)=>{tmTab=tab;renderTM();};
+
+  function renderTMSections(c){
+    secsCopy=state.sections.map(s=>({...s}));
+    function renderSec(){
+      c.innerHTML='<div class="tm-sec-header">Current sections</div>';
+      secsCopy.forEach((s,i)=>{
+        const row=document.createElement('div');row.className='tm-section-row';
+        row.innerHTML=`<input class="form-input" style="width:52px;text-align:center;padding:8px 4px;flex-shrink:0" id="se-${i}" value="${s.emoji}" maxlength="2"/><input class="form-input" style="flex:1" id="sl-${i}" value="${s.label}"/><button class="task-action-btn" onclick="window._delSec(${i})">🗑️</button>`;
+        c.appendChild(row);
+      });
+      const addRow=document.createElement('div');addRow.style.marginTop='12px';
+      addRow.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><input class="form-input" style="width:52px;text-align:center;padding:8px 4px;flex-shrink:0" id="ns-e" value="📌" maxlength="2"/><input class="form-input" style="flex:1" id="ns-l" placeholder="New section name…"/><button class="task-action-btn" style="background:var(--ink);color:white;flex-shrink:0" onclick="window._addSec()">+</button></div>`;
+      c.appendChild(addRow);
+      const acts=document.createElement('div');acts.innerHTML=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="window._saveSecs()">Save sections</button></div>`;c.appendChild(acts);
+    }
+    window._delSec=(i)=>{
+      if(secsCopy.length<=1){showToast('Need at least one section');return;}
+      const rem=secsCopy[i];const fallback=secsCopy.find((_,j)=>j!==i)||secsCopy[0];
+      PC=()=>{secsCopy.splice(i,1);state.tasks.forEach(t=>{if(t.section===rem.id)t.section=fallback.id;});renderSec();};
+      document.getElementById('confirm-title').textContent='Delete section?';document.getElementById('confirm-msg').textContent=`Tasks in "${rem.label}" will be moved to "${fallback.label}".`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
+    };
+    window._addSec=()=>{
+      const emoji=document.getElementById('ns-e').value.trim()||'📌';const label=document.getElementById('ns-l').value.trim();
+      if(!label){showToast('Enter a section name');return;}
+      secsCopy.push({id:'s'+Date.now(),label,emoji});renderSec();
+    };
+    window._saveSecs=()=>{
+      state.sections=secsCopy.map((s,i)=>({...s,emoji:document.getElementById('se-'+i)?.value.trim()||s.emoji,label:document.getElementById('sl-'+i)?.value.trim()||s.label}));
+      save();updateAll();closeModal();showToast('Sections saved');
+    };
+    renderSec();
+  }
+
+  function renderTMReorder(c){
+    c.innerHTML='<div class="tm-sec-header" style="margin-bottom:4px">Drag rows to reorder or move between sections</div>';
+    for(const sec of state.sections){
+      const tasks=state.tasks.filter(t=>t.section===sec.id);if(!tasks.length)continue;
+      const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.marginTop='16px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
+      for(const task of tasks){
+        const row=document.createElement('div');row.className='tm-task-row';row.draggable=true;row.dataset.id=task.id;row.dataset.section=task.section;
+        row.innerHTML=`<span class="tm-drag-handle">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;padding-left:4px">${sec.label}</span>`;
+        row.addEventListener('dragstart',e=>{dragSrc=row;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',task.id);setTimeout(()=>row.style.opacity='0.4',0);});
+        row.addEventListener('dragend',()=>{row.style.opacity='';dragSrc=null;});
+        row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drag-over');return false;});
+        row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+        row.addEventListener('drop',e=>{
+          e.preventDefault();row.classList.remove('drag-over');
+          if(!dragSrc||dragSrc===row)return;
+          const srcId=e.dataTransfer.getData('text/plain');
+          const srcIdx=state.tasks.findIndex(t=>t.id===srcId);const tgtIdx=state.tasks.findIndex(t=>t.id===task.id);
+          if(srcIdx===-1||tgtIdx===-1)return;
+          const[moved]=state.tasks.splice(srcIdx,1);moved.section=task.section;
+          state.tasks.splice(tgtIdx>srcIdx?tgtIdx-1:tgtIdx,0,moved);
+          save();updateAll();renderTMReorder(c);
+        });
+        c.appendChild(row);
+      }
+    }
+    const cl=document.createElement('div');cl.innerHTML=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>`;c.appendChild(cl);
+  }
+
+  function renderTMBulk(c){
+    const allIds=state.tasks.map(t=>t.id);const allSel=allIds.length>0&&allIds.every(id=>selected.has(id));
+    c.innerHTML='';
+    const hdr=document.createElement('div');
+    hdr.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;border-bottom:1px solid var(--border)"><div class="tm-checkbox${allSel?' checked':''}" onclick="window._tmToggleAll(${allSel})"></div><span style="font-size:13px;font-weight:500">Select all (${selected.size}/${allIds.length})</span></div>`;
+    c.appendChild(hdr);
+    for(const sec of state.sections){
+      const tasks=state.tasks.filter(t=>t.section===sec.id);if(!tasks.length)continue;
+      const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.paddingTop='12px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
+      for(const task of tasks){
+        const row=document.createElement('div');row.className='tm-task-row';row.style.cursor='pointer';
+        row.innerHTML=`<div class="tm-checkbox${selected.has(task.id)?' checked':''}" onclick="window._tmToggle('${task.id}')"></div><span style="flex:1;font-size:14px">${task.emoji?task.emoji+' ':''}${task.name}</span>`;
+        c.appendChild(row);
+      }
+    }
+    const acts=document.createElement('div');
+    acts.innerHTML=`<div style="margin-top:20px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:8px"><select class="form-select" id="bulk-target" style="flex:1">${state.sections.map(s=>`<option value="${s.id}">${s.emoji} ${s.label}</option>`).join('')}</select><button class="btn btn-secondary" style="flex-shrink:0;white-space:nowrap;padding:14px 12px" onclick="window._bulkMove()">Move</button></div><button class="btn btn-danger" onclick="window._bulkDel()">Delete selected (${selected.size})</button><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>`;
+    c.appendChild(acts);
+  }
+  window._tmToggleAll=(wasAll)=>{if(wasAll)selected.clear();else state.tasks.forEach(t=>selected.add(t.id));renderTMBulk(document.getElementById('tm-content'));};
+  window._tmToggle=(id)=>{if(selected.has(id))selected.delete(id);else selected.add(id);renderTMBulk(document.getElementById('tm-content'));};
+  window._bulkMove=()=>{
+    if(!selected.size){showToast('Select tasks first');return;}
+    const target=document.getElementById('bulk-target')?.value;if(!target)return;
+    state.tasks.forEach(t=>{if(selected.has(t.id))t.section=target;});
+    selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast('Tasks moved');
+  };
+  window._bulkDel=()=>{
+    if(!selected.size){showToast('Select tasks first');return;}
+    const count=selected.size;
+    PC=()=>{
+      state.tasks=state.tasks.filter(t=>!selected.has(t.id));
+      Object.values(state.completedDays).forEach(d=>{selected.forEach(id=>delete d[id]);});
+      selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast(`${count} task${count>1?'s':''} deleted`);
+    };
+    document.getElementById('confirm-title').textContent='Delete tasks?';document.getElementById('confirm-msg').textContent=`Delete ${count} selected task${count>1?'s':''}? This cannot be undone.`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
+  };
+
+  renderTM();openModal();
+};
 window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add task';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Task name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning">🌅 Morning</option><option value="general" selected>☀️ General</option><option value="night">🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add task</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
 window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim();if(!name){showToast('Please enter a task name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji});save();updateAll();closeModal();showToast('Task added! ✅');};
 window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit task';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Task name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning" ${task.section==='morning'?'selected':''}>🌅 Morning</option><option value="general" ${task.section==='general'?'selected':''}>☀️ General</option><option value="night" ${task.section==='night'?'selected':''}>🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
@@ -631,8 +770,9 @@ onAuthStateChanged(auth,async(user)=>{
       if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
       if(!state.history)state.history=[];
       if(!state.rewards)state.rewards=DEFAULT_REWARDS;
+      if(!state.sections)state.sections=DEFAULT_SECTIONS;
     }else{
-      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
+      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
       await setDoc(ref,state);
     }
     unsub=onSnapshot(ref,(snap)=>{
@@ -642,6 +782,7 @@ onAuthStateChanged(auth,async(user)=>{
           state=remote;
           if(!state.completedDays)state.completedDays={};
           if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
+          if(!state.sections)state.sections=DEFAULT_SECTIONS;
           updateAll();
         }
       }
