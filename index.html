@@ -195,9 +195,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .tm-sec-header{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;padding:14px 0 6px;}
 .tm-section-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
 .tm-section-row:last-child{border-bottom:none;}
-.tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);touch-action:none;-webkit-user-select:none;user-select:none;will-change:transform;}
-.tm-task-row.drag-over{border-color:var(--almond);background:var(--linen);}
-.tm-drag-handle{color:var(--ink-faint);font-size:20px;cursor:grab;flex-shrink:0;line-height:1;user-select:none;padding:0 2px;}
+.tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);transition:transform 0.15s ease;-webkit-user-select:none;user-select:none;}
+.tm-task-row.dragging{opacity:0.5;box-shadow:0 4px 16px rgba(0,0,0,0.12);cursor:grabbing;}
+.tm-task-row.drop-line-above{border-top:2px solid var(--almond);}
+.tm-task-row.drop-line-below{border-bottom:2px solid var(--almond);}
+.drag-placeholder{border:2px dashed var(--border);background:var(--linen);border-radius:12px;margin-bottom:6px;pointer-events:none;}
+.tm-drag-handle{cursor:grab;color:var(--ink-faint);font-size:16px;padding:0 8px;user-select:none;touch-action:none;flex-shrink:0;}
 .tm-drag-handle:active{cursor:grabbing;}
 .tm-checkbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--almond);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--white);transition:all .15s;}
 .tm-checkbox.checked{background:var(--almond);border-color:var(--almond);}
@@ -545,30 +548,89 @@ window.showTaskManagerModal=()=>{
 
   function renderTMReorder(c){
     c.innerHTML='<div class="tm-sec-header" style="margin-bottom:4px">Drag rows to reorder or move between sections</div>';
+
+    // Build flat ordered list of rows mirroring state.tasks order, grouped by section header
+    const rowEls=[];// {el, taskId, sectionId}
+
     for(const sec of state.sections){
-      const tasks=state.tasks.filter(t=>t.section===sec.id);if(!tasks.length)continue;
+      const secTasks=state.tasks.filter(t=>t.section===sec.id);
+      if(!secTasks.length)continue;
       const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.marginTop='16px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
-      for(const task of tasks){
-        const row=document.createElement('div');row.className='tm-task-row';row.draggable=true;row.dataset.id=task.id;row.dataset.section=task.section;
-        row.innerHTML=`<span class="tm-drag-handle" draggable="true">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;padding-left:4px">${sec.label}</span>`;
-        row.addEventListener('dragstart',e=>{dragSrc=row;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',task.id);row.style.opacity='0.4';});
-        row.addEventListener('dragend',()=>{row.style.opacity='';dragSrc=null;});
-        row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drag-over');return false;});
-        row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
-        row.addEventListener('drop',e=>{
-          e.preventDefault();row.classList.remove('drag-over');
-          if(!dragSrc||dragSrc===row)return;
-          const srcId=e.dataTransfer.getData('text/plain');
-          const srcIdx=state.tasks.findIndex(t=>t.id===srcId);const tgtIdx=state.tasks.findIndex(t=>t.id===task.id);
-          if(srcIdx===-1||tgtIdx===-1)return;
-          const[moved]=state.tasks.splice(srcIdx,1);moved.section=task.section;
-          state.tasks.splice(tgtIdx>srcIdx?tgtIdx-1:tgtIdx,0,moved);
-          save();updateAll();renderTMReorder(c);
-        });
+      for(const task of secTasks){
+        const row=document.createElement('div');
+        row.className='tm-task-row';
+        row.draggable=true;
+        row.dataset.id=task.id;
+        row.dataset.section=sec.id;
+        row.innerHTML=`<span class="tm-drag-handle">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0">${sec.label}</span>`;
         c.appendChild(row);
+        rowEls.push({el:row,taskId:task.id,sectionId:sec.id});
       }
     }
+
     const cl=document.createElement('div');cl.innerHTML=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>`;c.appendChild(cl);
+
+    let placeholder=null;
+
+    function clearDropLines(){rowEls.forEach(r=>r.el.classList.remove('drop-line-above','drop-line-below'));}
+
+    function getInsertPos(row,clientY){
+      const rect=row.el.getBoundingClientRect();
+      return clientY<rect.top+rect.height/2?'above':'below';
+    }
+
+    rowEls.forEach(({el,taskId,sectionId})=>{
+
+      el.addEventListener('dragstart',e=>{
+        dragSrc=el;
+        e.dataTransfer.effectAllowed='move';
+        e.dataTransfer.setData('text/plain',taskId);
+        el.classList.add('dragging');
+        // create placeholder matching row height
+        placeholder=document.createElement('div');
+        placeholder.className='drag-placeholder';
+        placeholder.style.height=el.offsetHeight+'px';
+        el.parentNode.insertBefore(placeholder,el.nextSibling);
+      });
+
+      el.addEventListener('dragend',()=>{
+        el.classList.remove('dragging');
+        clearDropLines();
+        if(placeholder&&placeholder.parentNode)placeholder.parentNode.removeChild(placeholder);
+        placeholder=null;
+        dragSrc=null;
+      });
+
+      el.addEventListener('dragover',e=>{
+        e.preventDefault();
+        if(!dragSrc||dragSrc===el)return;
+        clearDropLines();
+        const pos=getInsertPos({el},e.clientY);
+        el.classList.add(pos==='above'?'drop-line-above':'drop-line-below');
+      });
+
+      el.addEventListener('dragleave',e=>{
+        // only clear if leaving to outside the row
+        if(!el.contains(e.relatedTarget))el.classList.remove('drop-line-above','drop-line-below');
+      });
+
+      el.addEventListener('drop',e=>{
+        e.preventDefault();
+        clearDropLines();
+        if(!dragSrc||dragSrc===el)return;
+        const srcId=e.dataTransfer.getData('text/plain');
+        const srcIdx=state.tasks.findIndex(t=>t.id===srcId);
+        const tgtIdx=state.tasks.findIndex(t=>t.id===taskId);
+        if(srcIdx===-1||tgtIdx===-1)return;
+        const pos=getInsertPos({el},e.clientY);
+        const[moved]=state.tasks.splice(srcIdx,1);
+        moved.section=sectionId;
+        // recalculate tgtIdx after removal
+        const newTgt=state.tasks.findIndex(t=>t.id===taskId);
+        state.tasks.splice(pos==='above'?newTgt:newTgt+1,0,moved);
+        save();updateAll();renderTMReorder(c);
+      });
+    });
   }
 
   function renderTMBulk(c){
