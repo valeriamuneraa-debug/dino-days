@@ -321,6 +321,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <button class="add-reward-btn" onclick="showAddRewardModal()">+ Add a pleasure</button>
         <div class="rewards-section-title" style="margin-top:28px;">Purchase history</div>
         <div class="history-list" id="history-list"></div>
+        <div id="history-more-wrap" style="margin-top:10px;display:none;"></div>
       </div>
     </div>
 
@@ -393,7 +394,7 @@ const DEFAULT_REWARDS=[
   {id:'r5',name:'Spa day',cost:120,icon:'💆'},
 ];
 
-let state=null,currentUser=null,unsub=null,saveTimer=null;
+let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -467,16 +468,27 @@ function renderStats(){
     wd.appendChild(dot);
   }
 }
+function renderHistorySection(){
+  const hist=document.getElementById('history-list');
+  const wrap=document.getElementById('history-more-wrap');
+  if(!hist||!wrap)return;
+  hist.innerHTML='';
+  if(!state.history.length){hist.innerHTML='<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">No history yet</p>';wrap.style.display='none';return;}
+  for(const h of state.history.slice(0,historyVisible)){const item=document.createElement('div');item.className='history-item';item.innerHTML=`<span>${h.reason}</span><span class="pts ${h.pos?'pos':'neg'}">${h.pos?'+':'-'}${h.amount}</span>`;hist.appendChild(item);}
+  const remaining=state.history.length-historyVisible;
+  if(remaining>0){wrap.style.display='block';wrap.innerHTML=`<button class="btn btn-secondary" style="width:100%" onclick="loadMoreHistory()">View more (${remaining} remaining)</button>`;}
+  else{wrap.style.display='none';}
+}
+window.loadMoreHistory=()=>{historyVisible+=5;renderHistorySection();};
 function renderRewards(){
+  historyVisible=5;
   const list=document.getElementById('reward-list');list.innerHTML='';
   for(const r of state.rewards){
     const can=state.points>=r.cost;const item=document.createElement('div');item.className='reward-item';
     item.innerHTML=`<div class="reward-icon">${r.icon}</div><div class="reward-info"><div class="reward-name">${r.name}</div><div class="reward-cost">⭐ ${r.cost} points</div></div><div class="reward-actions"><button class="reward-del-btn" onclick="deleteReward('${r.id}')">🗑️</button><button class="reward-buy-btn" ${!can?'disabled':''} onclick="buyReward('${r.id}')">${can?'Redeem':`Need ${r.cost-state.points} more`}</button></div>`;
     list.appendChild(item);
   }
-  const hist=document.getElementById('history-list');hist.innerHTML='';
-  if(!state.history.length){hist.innerHTML='<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">No history yet</p>';return;}
-  for(const h of state.history.slice(0,20)){const item=document.createElement('div');item.className='history-item';item.innerHTML=`<span>${h.reason}</span><span class="pts ${h.pos?'pos':'neg'}">${h.pos?'+':'-'}${h.amount}</span>`;hist.appendChild(item);}
+  renderHistorySection();
 }
 function renderSectionTabs(){
   const c=document.getElementById('section-tabs-container');if(!c||!state)return;
