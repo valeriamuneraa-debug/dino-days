@@ -418,11 +418,21 @@ function getDinoSVG(h){
     outline=`rgb(${r},${g},${b})`;
     cheek=t>0.4?'#c97b6e':`rgba(201,123,110,${(t/0.4).toFixed(2)})`;
   } else {
-    // Light mode: dark fills fade with health, transparent body = page bg shows through
-    const op=(0.25+0.75*t).toFixed(2);
+    // Light mode: cream body + dark outlines, all fading with health
+    // Body fill: #f7efe8 (healthy) → #fbfefb (ill)
+    const br=Math.round(247+(251-247)*(1-t)),bg2=Math.round(239+(254-239)*(1-t)),bb=Math.round(232+(251-232)*(1-t));
+    const bodyFill=`rgb(${br},${bg2},${bb})`;
+    // Outline opacity: 1.0 (healthy) → 0.2 (ill)
+    const op=(0.2+0.8*t).toFixed(2);
     outline=`rgba(29,30,30,${op})`;
-    const cop=(0.3+0.7*t).toFixed(2);
+    // Cheek opacity: 1.0 (healthy) → 0.2 (ill)
+    const cop=(0.2+0.8*t).toFixed(2);
     cheek=`rgba(244,162,153,${cop})`;
+    // Build SVG: apply tokens then override the main body path with cream fill
+    return DSVG
+      .replace(/OUTLINE/g,outline)
+      .replace(/CHEEK/g,cheek)
+      .replace('<path class="dc2" d="M304.23','<path class="dc2" style="fill:'+bodyFill+'" d="M304.23');
   }
   return DSVG.replace(/OUTLINE/g,outline).replace(/CHEEK/g,cheek);
 }
