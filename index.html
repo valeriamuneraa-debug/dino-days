@@ -462,7 +462,7 @@ function renderRewards(){
 function updateAll(){renderDino();renderTasks();renderStats();renderRewards();}
 
 // expose to window
-window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;if(!was)awardPts(5,'Task completed');checkStreak();save();updateAll();};
+window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;if(!was){awardPts(5,'Task completed');}else{state.points=Math.max(0,state.points-5);state.history.unshift({reason:'Task uncompleted',amount:5,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();save();updateAll();showToast('-5 pts — Task uncompleted');}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
 window.switchTab=(name,btn)=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');};
 
