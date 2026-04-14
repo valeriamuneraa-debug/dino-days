@@ -114,6 +114,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .form-input,.form-select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink);outline:none;transition:border-color .2s;}
 .form-input:focus,.form-select:focus{border-color:var(--almond);}
 .form-actions{display:flex;gap:10px;margin-top:20px;}
+.day-picker{display:flex;gap:6px;flex-wrap:wrap;}
+.day-pill{width:36px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.day-pill.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
 .btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .btn-primary{background:var(--ink);color:white;}
 .btn-primary:hover{background:#333;}
@@ -403,18 +406,18 @@ function getDinoSVG(h){
 }
 
 const DEFAULT_TASKS=[
-  {id:'m1',name:'Wake up & stretch',section:'morning',emoji:'🧘',points:5},
-  {id:'m2',name:'Drink a full glass of water',section:'morning',emoji:'💧',points:5},
-  {id:'m3',name:'Skin care routine',section:'morning',emoji:'✨',points:5},
-  {id:'m4',name:'Eat breakfast',section:'morning',emoji:'🥣',points:5},
-  {id:'m5',name:"Review today's goals",section:'morning',emoji:'📝',points:5},
-  {id:'g1',name:'Exercise / Move my body',section:'general',emoji:'🏃',points:5},
-  {id:'g2',name:'Read for 20 minutes',section:'general',emoji:'📖',points:5},
-  {id:'g3',name:'Check emails & messages',section:'general',emoji:'📬',points:5},
-  {id:'n1',name:'Wind down — no screens',section:'night',emoji:'📵',points:5},
-  {id:'n2',name:'Journal or reflect',section:'night',emoji:'🌙',points:5},
-  {id:'n3',name:'Skin care night routine',section:'night',emoji:'💆',points:5},
-  {id:'n4',name:'Plan tomorrow',section:'night',emoji:'🗓️',points:5},
+  {id:'m1',name:'Wake up & stretch',section:'morning',emoji:'🧘',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'m2',name:'Drink a full glass of water',section:'morning',emoji:'💧',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'m3',name:'Skin care routine',section:'morning',emoji:'✨',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'m4',name:'Eat breakfast',section:'morning',emoji:'🥣',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'m5',name:"Review today's goals",section:'morning',emoji:'📝',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'g1',name:'Exercise / Move my body',section:'general',emoji:'🏃',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'g2',name:'Read for 20 minutes',section:'general',emoji:'📖',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'g3',name:'Check emails & messages',section:'general',emoji:'📬',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'n1',name:'Wind down — no screens',section:'night',emoji:'📵',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'n2',name:'Journal or reflect',section:'night',emoji:'🌙',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'n3',name:'Skin care night routine',section:'night',emoji:'💆',points:5,days:[0,1,2,3,4,5,6]},
+  {id:'n4',name:'Plan tomorrow',section:'night',emoji:'🗓️',points:5,days:[0,1,2,3,4,5,6]},
 ];
 const DEFAULT_SECTIONS=[
   {id:'morning',label:'Morning',emoji:'🌅'},
@@ -452,24 +455,27 @@ function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 function showToast(msg,dur=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
-function getHealth(){const done=Object.values(state.completedDays[TODAY]||{}).filter(Boolean).length,total=state.tasks.length;if(!total)return 100;return Math.min(100,Math.round((done/total)*80+Math.min(state.streak*2,20)));}
+function getHealth(){const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow)),done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;if(!total)return 100;return Math.min(100,Math.round((doneCount/total)*80+Math.min(state.streak*2,20)));}
 function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feeling good today';if(h>=45)return'Could use some love…';if(h>=25)return'Not feeling great';return'Please complete your habits! 🥺';}
 
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();showToast(`Enjoyed: ${reason} 🎉`);}
-function checkStreak(){const done=Object.values(state.completedDays[TODAY]||{}).filter(Boolean).length,total=state.tasks.length;if(total>0&&done===total&&state.lastFullDay!==TODAY){state.lastFullDay=TODAY;state.streak++;if(state.streak>state.bestStreak)state.bestStreak=state.streak;awardPts(10+state.streak*2,`Streak day ${state.streak}`);}}
+function checkStreak(){const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow)),done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;if(total>0&&doneCount===total&&state.lastFullDay!==TODAY){state.lastFullDay=TODAY;state.streak++;if(state.streak>state.bestStreak)state.bestStreak=state.streak;awardPts(10+state.streak*2,`Streak day ${state.streak}`);}}
 
 function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=svg;});}
 
+const ALL_DAYS=[0,1,2,3,4,5,6];
+const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
 let cf='all',expandedTaskId=null;
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
+  const todayDow=new Date().getDay();
   const secs=cf==='all'?state.sections.map(s=>s.id):[cf];
   const lbls=Object.fromEntries(state.sections.map(s=>[s.id,s.emoji+' '+s.label]));
   let td=0,ta=0;
   for(const sec of secs){
-    const tasks=state.tasks.filter(t=>t.section===sec);if(!tasks.length)continue;
+    const tasks=state.tasks.filter(t=>t.section===sec&&(t.days??ALL_DAYS).includes(todayDow));if(!tasks.length)continue;
     const ds=tasks.filter(t=>done[t.id]).length;
     const lbl=document.createElement('div');lbl.className='section-label';
     lbl.innerHTML=`<span>${lbls[sec]}</span><span class="section-badge">${ds}/${tasks.length}</span>`;c.appendChild(lbl);
@@ -478,7 +484,9 @@ function renderTasks(){
       ta++;const isDone=!!done[task.id];if(isDone)td++;
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
       item.onclick=(e)=>window.expandTask(task.id,e);
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:11px;color:var(--ink-faint)">⭐${task.points??5}</span></div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      const tDays=task.days??ALL_DAYS;
+      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:10px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:11px;color:var(--ink-faint)">⭐${task.points??5}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -724,10 +732,22 @@ window.showTaskManagerModal=()=>{
 
   renderTM();openModal();
 };
-window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map((s,i)=>`<option value="${s.id}"${i===0?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="5" style="width:100px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
-window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name){showToast('Please enter a habit name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji,points});save();updateAll();closeModal();showToast('Habit added! ✅');};
-window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="${task.points??5}" style="width:100px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
-window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;task.points=points;}save();updateAll();closeModal();showToast('Habit updated');};
+let fDays=[0,1,2,3,4,5,6];
+function dayPickerHTML(days){
+  fDays=[...days];
+  const btns=ALL_DAYS.map(d=>`<button type="button" id="dp-${d}" class="day-pill${fDays.includes(d)?' active':''}" onclick="_toggleDay(${d})">${DAY_ABBR[d]}</button>`).join('');
+  return `<div class="form-group"><label class="form-label">Active days</label><div class="day-picker">${btns}</div></div>`;
+}
+window._toggleDay=function(d){
+  const i=fDays.indexOf(d);
+  if(i>=0){if(fDays.length>1)fDays.splice(i,1);}
+  else{fDays.push(d);fDays.sort((a,b)=>a-b);}
+  ALL_DAYS.forEach(dd=>{const btn=document.getElementById('dp-'+dd);if(btn)btn.classList.toggle('active',fDays.includes(dd));});
+};
+window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map((s,i)=>`<option value="${s.id}"${i===0?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="5" style="width:100px"/></div>${dayPickerHTML([0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
+window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name){showToast('Please enter a habit name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji,points,days:[...fDays]});save();updateAll();closeModal();showToast('Habit added! ✅');};
+window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="${task.points??5}" style="width:100px"/></div>${dayPickerHTML(task.days??[0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
+window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;task.points=points;task.days=[...fDays];}save();updateAll();closeModal();showToast('Habit updated');};
 
 let PC=null;
 window.deleteTask=(id,e)=>{e.stopPropagation();PC=()=>{state.tasks=state.tasks.filter(t=>t.id!==id);Object.values(state.completedDays).forEach(d=>delete d[id]);save();updateAll();showToast('Habit removed');};document.getElementById('confirm-title').textContent='Delete this habit?';document.getElementById('confirm-msg').textContent='This habit will be removed from your daily routine.';document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
@@ -968,6 +988,7 @@ onAuthStateChanged(auth,async(user)=>{
       if(!state.rewards)state.rewards=DEFAULT_REWARDS;
       if(!state.sections)state.sections=DEFAULT_SECTIONS;
       state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
+      state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
     }else{
       state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
       await setDoc(ref,state);
