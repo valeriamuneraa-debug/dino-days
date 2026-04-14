@@ -137,7 +137,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
 .stat-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
-.week-dots{display:flex;gap:8px;justify-content:center;padding:16px 0;}
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:0 8px;margin-bottom:8px;}
+.week-nav-arrow{font-size:18px;color:var(--ink-faint);cursor:pointer;padding:4px 12px;user-select:none;transition:color .15s;}
+.week-nav-arrow:hover{color:var(--ink);}
+.week-nav-arrow.disabled{opacity:.2;cursor:default;pointer-events:none;}
+.week-dots{display:flex;gap:8px;justify-content:center;padding:16px 0;transition:opacity .2s;}
 .week-dot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:opacity .15s;}
 .week-dot:hover{opacity:.75;}
 .week-dot-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ink-faint);}
@@ -328,7 +332,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
           <div class="stat-card"><div class="stat-num" id="stat-best">0</div><div class="stat-lbl">Best streak</div></div>
           <div class="stat-card"><div class="stat-num" id="stat-spent">0</div><div class="stat-lbl">Pts spent</div></div>
         </div>
-        <p style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin-bottom:12px;">This week</p>
+        <div class="week-nav">
+          <span class="week-nav-arrow disabled" id="week-nav-prev" onclick="changeWeek(-1)">‹</span>
+          <span id="week-label" style="font-size:12px;color:var(--ink-faint);font-weight:400;"></span>
+          <span class="week-nav-arrow disabled" id="week-nav-next" onclick="changeWeek(1)">›</span>
+        </div>
         <div class="week-dots" id="week-dots"></div>
       </div>
     </div>
@@ -469,7 +477,7 @@ function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
-let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null;
+let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null,weekOffset=0;
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
@@ -510,11 +518,19 @@ function renderStats(){
   document.getElementById('health-bar').style.width=h+'%';
   const st=document.getElementById('dino-status-text');if(st)st.textContent=statusText(h);
   const wd=document.getElementById('week-dots');if(!wd)return;wd.innerHTML='';
+  const WMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dn=['S','M','T','W','T','F','S'],now=new Date(),dow=now.getDay();
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-dow+weekOffset*7);
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
+  const lbl=document.getElementById('week-label');
+  if(lbl)lbl.textContent=`${WMONTHS[weekStart.getMonth()]} ${weekStart.getDate()} – ${WMONTHS[weekEnd.getMonth()]} ${weekEnd.getDate()}`;
+  const pa=document.getElementById('week-nav-prev'),na=document.getElementById('week-nav-next');
+  if(pa)pa.classList.toggle('disabled',weekOffset<=-8);
+  if(na)na.classList.toggle('disabled',weekOffset>=0);
   for(let i=0;i<7;i++){
-    const d=new Date(now);d.setDate(now.getDate()-dow+i);
+    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const isT=k===TODAY,dotDow=d.getDay();
+    const isT=weekOffset===0&&k===TODAY,dotDow=d.getDay();
     const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dotDow));
     const dd=state.completedDays[k]||{},tot=scheduled.length,dn2=scheduled.filter(t=>dd[t.id]).length;
     let cls='week-dot-circle';if(isT)cls+=' today';else if(tot>0&&dn2===tot)cls+=' full';else if(dn2>0)cls+=' partial';
@@ -670,7 +686,15 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){awardPts(pts,'Habit completed');}else{state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`-${pts} pts — Habit uncompleted`);}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');};
+window.switchTab=(name,btn)=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='garden'){weekOffset=0;renderStats();}};
+window.changeWeek=(dir)=>{
+  const next=weekOffset+dir;
+  if(next>0||next<-8)return;
+  const wd=document.getElementById('week-dots');
+  if(wd)wd.style.opacity='0';
+  weekOffset=next;
+  setTimeout(()=>{renderStats();if(wd)wd.style.opacity='1';},160);
+};
 
 function openModal(){document.getElementById('modal-overlay').classList.add('open');}
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
