@@ -410,10 +410,25 @@ const DSVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 414.71 438.18">
 
 function getDinoSVG(h){
   const t=Math.max(0,Math.min(1,h/100));
-  const r1=[243,216,199],r2=[251,254,251];
-  const op=(0.3+0.7*t).toFixed(2);
-  const cheek=t>0.4?'#f4a299':`rgba(244,162,153,${(t/0.4).toFixed(2)})`;
-  return DSVG.replace(/OUTLINE/g,`rgba(29,30,30,${op})`).replace(/CHEEK/g,cheek);
+  const isDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let outline,cheek;
+  if(isDark){
+    // Dark mode: body from #3a3530 (healthy) to #1d1e1e (ill)
+    const r1=[58,53,48],r2=[29,30,30];
+    const r=Math.round(r1[0]+(r2[0]-r1[0])*(1-t));
+    const g=Math.round(r1[1]+(r2[1]-r1[1])*(1-t));
+    const b=Math.round(r1[2]+(r2[2]-r1[2])*(1-t));
+    // body fill is baked into dc2 via outline, but we use it for cheek bg; outline opacity 0.3–0.9
+    const op=(0.3+0.6*t).toFixed(2);
+    outline=`rgba(240,230,220,${op})`;
+    cheek=t>0.4?'#c97b6e':`rgba(201,123,110,${(t/0.4).toFixed(2)})`;
+  } else {
+    // Light mode: outline opacity 0.25–0.85
+    const op=(0.25+0.6*t).toFixed(2);
+    outline=`rgba(29,30,30,${op})`;
+    cheek=t>0.4?'#f4a299':`rgba(244,162,153,${(t/0.4).toFixed(2)})`;
+  }
+  return DSVG.replace(/OUTLINE/g,outline).replace(/CHEEK/g,cheek);
 }
 
 const DEFAULT_TASKS=[
@@ -1151,6 +1166,14 @@ window.endTour=endTour;
 document.getElementById('load-dino').innerHTML=getDinoSVG(80);
 document.getElementById('auth-dino').innerHTML=getDinoSVG(80);
 document.getElementById('welcome-dino').innerHTML=getDinoSVG(100);
+
+// re-render dino when system color scheme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{
+  document.getElementById('load-dino').innerHTML=getDinoSVG(80);
+  document.getElementById('auth-dino').innerHTML=getDinoSVG(80);
+  document.getElementById('welcome-dino').innerHTML=getDinoSVG(100);
+  if(state)renderDino();
+});
 
 onAuthStateChanged(auth,async(user)=>{
   if(user){
