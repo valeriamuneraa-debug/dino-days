@@ -260,6 +260,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <div id="auth-form-login">
       <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="your@email.com"/></div>
       <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="remember-me" checked/><label for="remember-me" style="font-size:13px;color:var(--ink-soft);cursor:pointer;">Remember me</label></div>
       <div class="form-actions"><button class="btn btn-primary" onclick="doLogin()" style="flex:1">Sign in</button></div>
       <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--ink-faint);cursor:pointer;" onclick="doForgot()">Forgot password?</p>
     </div>
@@ -385,7 +386,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
@@ -862,7 +863,7 @@ function clearMsg(){document.getElementById('auth-msg').className='auth-msg';}
 const errMsgs={'auth/user-not-found':'No account found with that email.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Invalid email.','auth/invalid-credential':'Invalid email or password.','auth/email-already-in-use':'An account with this email already exists.','auth/weak-password':'Password is too weak.'};
 
 window.showAuthTab=(tab)=>{['login','signup'].forEach(t=>{document.getElementById('tab-'+t).classList.toggle('active',t===tab);document.getElementById('auth-form-'+t).style.display=t===tab?'block':'none';});clearMsg();};
-window.doLogin=async()=>{const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign in failed. Please try again.','error');}};
+window.doLogin=async()=>{const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}try{const remember=document.getElementById('remember-me')?.checked!==false;await setPersistence(auth,remember?browserLocalPersistence:browserSessionPersistence);await signInWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign in failed. Please try again.','error');}};
 window.doSignup=async()=>{const email=document.getElementById('signup-email').value.trim(),pass=document.getElementById('signup-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}try{await createUserWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign up failed.','error');}};
 window.doForgot=async()=>{const email=document.getElementById('login-email').value.trim();if(!email){showMsg('Enter your email above first.','error');return;}try{await sendPasswordResetEmail(auth,email);showMsg('Reset email sent! Check your inbox.','success');}catch(e){showMsg('Could not send reset email.','error');}};
 window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}await signOut(auth);closeModal();};
