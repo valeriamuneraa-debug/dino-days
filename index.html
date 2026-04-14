@@ -417,6 +417,9 @@ function getDinoSVG(h){
     const r=Math.round(26+19*t),g=Math.round(24+17*t),b=Math.round(22+16*t);
     outline=`rgb(${r},${g},${b})`;
     cheek=t>0.4?'#c97b6e':`rgba(201,123,110,${(t/0.4).toFixed(2)})`;
+    // Eye dot: #d4c5b8 (healthy) → #8a7d74 (ill)
+    const er=Math.round(138+(212-138)*t),eg=Math.round(125+(197-125)*t),eb=Math.round(116+(184-116)*t);
+    const eyeFill=`rgb(${er},${eg},${eb})`;
   } else {
     // Light mode: cream body + dark outlines, all fading with health
     // Body fill: #f7efe8 (healthy) → #fbfefb (ill)
@@ -438,7 +441,11 @@ function getDinoSVG(h){
       .replace('<path class="dc2" d="M304.23',`<path class="dc2" style="fill:${bodyFill};stroke:${strokeColor};stroke-width:4;stroke-linejoin:round;stroke-linecap:round;" d="M304.23`)
       .replace('<path class="dc1"',`<path class="dc1" style="stroke:${strokeColor};stroke-width:2;"`);
   }
-  return DSVG.replace(/OUTLINE/g,outline).replace(/CHEEK/g,cheek);
+  // Dark mode path — apply eye override
+  return DSVG
+    .replace(/OUTLINE/g,outline)
+    .replace(/CHEEK/g,cheek)
+    .replace('<path class="dc2" d="M336.65',`<path class="dc2" style="fill:${eyeFill};" d="M336.65`);
 }
 
 const DEFAULT_TASKS=[
