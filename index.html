@@ -412,7 +412,7 @@ function showToast(msg,dur=2200){const t=document.getElementById('toast');t.text
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
 function getHealth(){const done=Object.values(state.completedDays[TODAY]||{}).filter(Boolean).length,total=state.tasks.length;if(!total)return 100;return Math.min(100,Math.round((done/total)*80+Math.min(state.streak*2,20)));}
-function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feeling good today';if(h>=45)return'Could use some love…';if(h>=25)return'Not feeling great';return'Please complete your tasks! 🥺';}
+function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feeling good today';if(h>=45)return'Could use some love…';if(h>=25)return'Not feeling great';return'Please complete your habits! 🥺';}
 
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();showToast(`Enjoyed: ${reason} 🎉`);}
@@ -487,7 +487,7 @@ function updateAll(){renderDino();renderTasks();renderStats();renderRewards();re
 
 // expose to window
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
-window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;if(!was){awardPts(5,'Task completed');}else{state.points=Math.max(0,state.points-5);state.history.unshift({reason:'Task uncompleted',amount:5,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();save();updateAll();showToast('-5 pts — Task uncompleted');}checkStreak();};
+window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;if(!was){awardPts(5,'Habit completed');}else{state.points=Math.max(0,state.points-5);state.history.unshift({reason:'Habit uncompleted',amount:5,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();save();updateAll();showToast('-5 pts — Habit uncompleted');}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
 window.switchTab=(name,btn)=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');};
 
@@ -496,7 +496,7 @@ function closeModal(){document.getElementById('modal-overlay').classList.remove(
 window.closeModalOverlay=(e)=>{if(e.target===document.getElementById('modal-overlay'))closeModal();};
 
 window.showTaskManagerModal=()=>{
-  document.getElementById('modal-title').textContent='Task Manager';
+  document.getElementById('modal-title').textContent='Habit Manager';
   let tmTab='sections';
   let secsCopy=state.sections.map(s=>({...s}));
   let selected=new Set();
@@ -529,7 +529,7 @@ window.showTaskManagerModal=()=>{
       if(secsCopy.length<=1){showToast('Need at least one section');return;}
       const rem=secsCopy[i];const fallback=secsCopy.find((_,j)=>j!==i)||secsCopy[0];
       PC=()=>{secsCopy.splice(i,1);state.tasks.forEach(t=>{if(t.section===rem.id)t.section=fallback.id;});renderSec();};
-      document.getElementById('confirm-title').textContent='Delete section?';document.getElementById('confirm-msg').textContent=`Tasks in "${rem.label}" will be moved to "${fallback.label}".`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
+      document.getElementById('confirm-title').textContent='Delete section?';document.getElementById('confirm-msg').textContent=`Habits in "${rem.label}" will be moved to "${fallback.label}".`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
     };
     window._addSec=()=>{
       const emoji=document.getElementById('ns-e').value.trim()||'📌';const label=document.getElementById('ns-l').value.trim();
@@ -593,31 +593,31 @@ window.showTaskManagerModal=()=>{
   window._tmToggleAll=(wasAll)=>{if(wasAll)selected.clear();else state.tasks.forEach(t=>selected.add(t.id));renderTMBulk(document.getElementById('tm-content'));};
   window._tmToggle=(id)=>{if(selected.has(id))selected.delete(id);else selected.add(id);renderTMBulk(document.getElementById('tm-content'));};
   window._bulkMove=()=>{
-    if(!selected.size){showToast('Select tasks first');return;}
+    if(!selected.size){showToast('Select habits first');return;}
     const target=document.getElementById('bulk-target')?.value;if(!target)return;
     state.tasks.forEach(t=>{if(selected.has(t.id))t.section=target;});
-    selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast('Tasks moved');
+    selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast('Habits moved');
   };
   window._bulkDel=()=>{
-    if(!selected.size){showToast('Select tasks first');return;}
+    if(!selected.size){showToast('Select habits first');return;}
     const count=selected.size;
     PC=()=>{
       state.tasks=state.tasks.filter(t=>!selected.has(t.id));
       Object.values(state.completedDays).forEach(d=>{selected.forEach(id=>delete d[id]);});
-      selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast(`${count} task${count>1?'s':''} deleted`);
+      selected.clear();save();updateAll();renderTMBulk(document.getElementById('tm-content'));showToast(`${count} habit${count>1?'s':''} deleted`);
     };
-    document.getElementById('confirm-title').textContent='Delete tasks?';document.getElementById('confirm-msg').textContent=`Delete ${count} selected task${count>1?'s':''}? This cannot be undone.`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
+    document.getElementById('confirm-title').textContent='Delete habits?';document.getElementById('confirm-msg').textContent=`Delete ${count} selected habit${count>1?'s':''}? This cannot be undone.`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
   };
 
   renderTM();openModal();
 };
-window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add task';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Task name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning">🌅 Morning</option><option value="general" selected>☀️ General</option><option value="night">🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add task</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
-window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim();if(!name){showToast('Please enter a task name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji});save();updateAll();closeModal();showToast('Task added! ✅');};
-window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit task';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Task name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning" ${task.section==='morning'?'selected':''}>🌅 Morning</option><option value="general" ${task.section==='general'?'selected':''}>☀️ General</option><option value="night" ${task.section==='night'?'selected':''}>🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
-window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim();if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;}save();updateAll();closeModal();showToast('Task updated');};
+window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning">🌅 Morning</option><option value="general" selected>☀️ General</option><option value="night">🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
+window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim();if(!name){showToast('Please enter a habit name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji});save();updateAll();closeModal();showToast('Habit added! ✅');};
+window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section"><option value="morning" ${task.section==='morning'?'selected':''}>🌅 Morning</option><option value="general" ${task.section==='general'?'selected':''}>☀️ General</option><option value="night" ${task.section==='night'?'selected':''}>🌙 Night</option></select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
+window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim();if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;}save();updateAll();closeModal();showToast('Habit updated');};
 
 let PC=null;
-window.deleteTask=(id,e)=>{e.stopPropagation();PC=()=>{state.tasks=state.tasks.filter(t=>t.id!==id);Object.values(state.completedDays).forEach(d=>delete d[id]);save();updateAll();showToast('Task removed');};document.getElementById('confirm-title').textContent='Delete this task?';document.getElementById('confirm-msg').textContent='This task will be removed from your daily routine.';document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
+window.deleteTask=(id,e)=>{e.stopPropagation();PC=()=>{state.tasks=state.tasks.filter(t=>t.id!==id);Object.values(state.completedDays).forEach(d=>delete d[id]);save();updateAll();showToast('Habit removed');};document.getElementById('confirm-title').textContent='Delete this habit?';document.getElementById('confirm-msg').textContent='This habit will be removed from your daily routine.';document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
 window.showAddRewardModal=()=>{document.getElementById('modal-title').textContent='Add a pleasure';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-name" placeholder="e.g. Sushi dinner"/></div><div class="form-group"><label class="form-label">Cost (points)</label><input class="form-input" id="f-cost" type="number" min="1" value="50"/></div><div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="f-icon" value="🎁" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddReward()">Add pleasure</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
 window.submitAddReward=()=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}state.rewards.push({id:'rw'+Date.now(),name,cost,icon:icon||'🎁'});save();renderRewards();closeModal();showToast('Pleasure added! 🌟');};
 window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
@@ -650,7 +650,7 @@ window.showAccountModal=()=>{
   <div class="acc-pref-row">
     <div>
       <div class="acc-pref-label">Daily reminders</div>
-      <div class="acc-pref-sub">Get notified to complete your tasks</div>
+      <div class="acc-pref-sub">Get notified to complete your habits</div>
     </div>
     <button class="acc-toggle${notifOn?' on':''}" id="notif-toggle" onclick="doToggleNotifications()" aria-label="Toggle daily reminders"><span></span></button>
   </div>
