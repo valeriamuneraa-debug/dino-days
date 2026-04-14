@@ -479,7 +479,7 @@ function renderHistorySection(){
   if(remaining>0){wrap.style.display='block';wrap.innerHTML=`<button class="btn btn-secondary" style="width:100%" onclick="loadMoreHistory()">View more (${remaining} remaining)</button>`;}
   else{wrap.style.display='none';}
 }
-window.loadMoreHistory=()=>{historyVisible+=5;renderHistorySection();};
+window.loadMoreHistory=()=>{historyVisible+=10;renderHistorySection();};
 function renderRewards(){
   historyVisible=5;
   const list=document.getElementById('reward-list');list.innerHTML='';
