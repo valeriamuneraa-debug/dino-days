@@ -89,10 +89,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .task-content{flex:1;min-width:0;}
 .task-name{font-size:14px;font-weight:400;color:var(--ink);line-height:1.4;}
 .task-meta{font-size:11px;color:var(--ink-faint);margin-top:2px;}
-.task-actions{display:flex;gap:4px;opacity:0;transition:opacity .2s;}
-.task-item:hover .task-actions{opacity:1;}
+.task-actions{display:flex;gap:4px;opacity:1;}
 .task-action-btn{width:28px;height:28px;border-radius:8px;border:none;background:var(--linen);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
 .task-action-btn:hover{background:var(--powder);}
+@media(hover:none){.task-actions{opacity:.5;}.task-action-btn:active{background:var(--powder);}}
 .progress-bar-wrap{margin:0 20px 16px;background:var(--linen);border-radius:100px;height:6px;overflow:hidden;}
 .progress-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--almond),var(--powder));transition:width .5s ease;}
 
@@ -421,7 +421,8 @@ function renderTasks(){
     for(const task of tasks){
       ta++;const isDone=!!done[task.id];if(isDone)td++;
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)}</div></div><div class="task-actions"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      item.addEventListener('click',(e)=>window.toggleTask(task.id,e));
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)}</div></div><div class="task-actions"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
