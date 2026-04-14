@@ -187,6 +187,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .confirm-box h4{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:8px;}
 .confirm-box p{font-size:13px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:10px;}
+
+/* ACCOUNT MODAL */
+.modal-scroll{max-height:calc(80vh - 110px);overflow-y:auto;padding-right:2px;}
+.acc-section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+.acc-subtitle{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;margin:18px 0 10px;}
+.acc-email-field{padding:12px 14px;background:var(--linen);border-radius:12px;font-size:14px;color:var(--ink-soft);}
+.acc-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.acc-pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0 4px;}
+.acc-pref-label{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.acc-pref-sub{font-size:11px;color:var(--ink-faint);line-height:1.4;}
+.acc-toggle{width:44px;height:26px;border-radius:13px;border:none;background:var(--border);cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;padding:0;}
+.acc-toggle span{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--white);transition:transform .25s;display:block;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.acc-toggle.on{background:var(--success);}
+.acc-toggle.on span{transform:translateX(18px);}
+.acc-danger-note{font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -322,8 +337,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
 const auth=getAuth(app),db=getFirestore(app);
@@ -470,7 +485,122 @@ window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').clas
 window.closeModal=closeModal;
 document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');});
 
-window.showAccountModal=()=>{document.getElementById('modal-title').textContent='Your account';document.getElementById('modal-body').innerHTML=`<p style="font-size:14px;color:var(--ink-soft);margin-bottom:20px;">Signed in as<br><strong style="color:var(--ink)">${currentUser?.email}</strong></p><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Close</button><button class="btn btn-danger" onclick="doSignOut()">Sign out</button></div>`;openModal();};
+window.showAccountModal=()=>{
+  const notifOn=state?.preferences?.notifications??false;
+  document.getElementById('modal-title').textContent='Account & settings';
+  document.getElementById('modal-body').innerHTML=`
+<div class="modal-scroll">
+
+  <div class="acc-section-title">Profile</div>
+  <div class="form-group">
+    <label class="form-label">Email</label>
+    <div class="acc-email-field">${currentUser?.email||''}</div>
+  </div>
+  <div class="acc-subtitle">Change password</div>
+  <div class="form-group"><label class="form-label">Current password</label><input class="form-input" id="acc-curr-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+  <div class="form-group"><label class="form-label">New password</label><input class="form-input" id="acc-new-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+  <div class="form-group"><label class="form-label">Confirm new password</label><input class="form-input" id="acc-conf-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+  <div class="auth-msg" id="acc-pw-msg"></div>
+  <button class="btn btn-primary" style="width:100%" id="acc-pw-btn" onclick="doChangePassword()">Save password</button>
+
+  <div class="acc-divider"></div>
+
+  <div class="acc-section-title">Preferences</div>
+  <div class="acc-pref-row">
+    <div>
+      <div class="acc-pref-label">Daily reminders</div>
+      <div class="acc-pref-sub">Get notified to complete your tasks</div>
+    </div>
+    <button class="acc-toggle${notifOn?' on':''}" id="notif-toggle" onclick="doToggleNotifications()" aria-label="Toggle daily reminders"><span></span></button>
+  </div>
+
+  <div class="acc-divider"></div>
+
+  <div class="acc-section-title" style="color:var(--danger)">Danger zone</div>
+  <p class="acc-danger-note">Deleting your account is permanent and removes all your data. This cannot be undone.</p>
+  <button class="btn btn-danger" style="width:100%" id="acc-delete-btn" onclick="doDeleteAccount()">Delete my account</button>
+  <div id="acc-delete-zone" style="display:none;margin-top:14px;">
+    <div class="form-group"><label class="form-label">Enter your password to confirm</label><input class="form-input" id="acc-delete-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="auth-msg" id="acc-delete-msg"></div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="cancelDeleteAccount()">Cancel</button>
+      <button class="btn btn-danger" id="acc-delete-confirm-btn" onclick="confirmDeleteAccount()">Confirm delete</button>
+    </div>
+  </div>
+
+  <div class="acc-divider"></div>
+
+  <div class="form-actions">
+    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    <button class="btn btn-secondary" onclick="doSignOut()">Sign out</button>
+  </div>
+
+</div>`;
+  openModal();
+};
+
+window.doChangePassword=async()=>{
+  const curr=document.getElementById('acc-curr-pw').value;
+  const nw=document.getElementById('acc-new-pw').value;
+  const conf=document.getElementById('acc-conf-pw').value;
+  const msgEl=document.getElementById('acc-pw-msg');
+  const showPwMsg=(msg,type)=>{if(!msgEl)return;msgEl.textContent=msg;msgEl.className=`auth-msg show ${type==='error'?'error':'success'}`;};
+  if(!curr||!nw||!conf){showPwMsg('Please fill in all three fields.','error');return;}
+  if(nw!==conf){showPwMsg('New passwords do not match.','error');return;}
+  if(nw.length<6){showPwMsg('New password must be at least 6 characters.','error');return;}
+  const btn=document.getElementById('acc-pw-btn');
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email,curr);
+    await reauthenticateWithCredential(currentUser,cred);
+    await updatePassword(currentUser,nw);
+    showPwMsg('Password updated successfully!','success');
+    ['acc-curr-pw','acc-new-pw','acc-conf-pw'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){
+    showPwMsg(errMsgs[e.code]||'Failed to update password. Try again.','error');
+  }
+  btn.disabled=false;btn.textContent='Save password';
+};
+
+window.doToggleNotifications=()=>{
+  if(!state.preferences)state.preferences={};
+  state.preferences.notifications=!state.preferences.notifications;
+  const btn=document.getElementById('notif-toggle');
+  if(btn)btn.className='acc-toggle'+(state.preferences.notifications?' on':'');
+  save();
+  showToast(state.preferences.notifications?'Reminders on 🔔':'Reminders off');
+};
+
+window.doDeleteAccount=()=>{
+  document.getElementById('acc-delete-zone').style.display='block';
+  document.getElementById('acc-delete-btn').style.display='none';
+  setTimeout(()=>{const el=document.getElementById('acc-delete-pw');if(el)el.focus();},80);
+};
+
+window.cancelDeleteAccount=()=>{
+  document.getElementById('acc-delete-zone').style.display='none';
+  document.getElementById('acc-delete-btn').style.display='';
+  const msg=document.getElementById('acc-delete-msg');if(msg)msg.className='auth-msg';
+};
+
+window.confirmDeleteAccount=async()=>{
+  const pass=document.getElementById('acc-delete-pw').value;
+  const msgEl=document.getElementById('acc-delete-msg');
+  const showDelMsg=(msg,type)=>{if(!msgEl)return;msgEl.textContent=msg;msgEl.className=`auth-msg show ${type==='error'?'error':'success'}`;};
+  if(!pass){showDelMsg('Please enter your password.','error');return;}
+  const btn=document.getElementById('acc-delete-confirm-btn');
+  btn.disabled=true;btn.textContent='Deleting…';
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email,pass);
+    await reauthenticateWithCredential(currentUser,cred);
+    await deleteDoc(doc(db,'users',currentUser.uid));
+    await deleteUser(currentUser);
+    // onAuthStateChanged will handle redirect to auth screen
+  }catch(e){
+    btn.disabled=false;btn.textContent='Confirm delete';
+    showDelMsg(errMsgs[e.code]||'Failed to delete account.','error');
+  }
+};
 
 // AUTH
 function showMsg(msg,type){const el=document.getElementById('auth-msg');el.textContent=msg;el.className='auth-msg show '+(type==='error'?'error':'success');}
