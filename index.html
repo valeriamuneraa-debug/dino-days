@@ -153,8 +153,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .points-coin{font-size:48px;}
 .rewards-section-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:12px;margin-top:20px;}
 .reward-list{display:flex;flex-direction:column;gap:10px;}
-.reward-item{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .2s;}
-.reward-item:hover{border-color:var(--almond);}
+.reward-item{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s;cursor:pointer;}
 .reward-icon{font-size:24px;width:44px;height:44px;background:var(--linen);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .reward-info{flex:1;}
 .reward-name{font-size:14px;font-weight:500;}
@@ -162,9 +161,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .reward-buy-btn{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--linen);font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
 .reward-buy-btn:hover{background:var(--ink);color:white;border-color:var(--ink);}
 .reward-buy-btn:disabled{opacity:.4;cursor:not-allowed;}
-.reward-actions{display:flex;gap:6px;align-items:center;}
-.reward-del-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
+.reward-actions{display:flex;gap:6px;align-items:center;opacity:0;transition:opacity .2s;}
+.reward-del-btn,.reward-edit-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
 .reward-del-btn:hover{background:var(--danger);color:white;border-color:var(--danger);}
+.reward-edit-btn:hover{background:var(--linen);border-color:var(--almond);}
+@media(hover:hover){.reward-item:hover .reward-actions{opacity:1;}.reward-item:hover{border-color:var(--almond);}}
+@media(hover:none){.reward-item.expanded .reward-actions{opacity:1;}.reward-item.expanded{border-color:var(--almond);}}
 .add-reward-btn{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:10px;transition:all .2s;}
 .add-reward-btn:hover{background:var(--linen);}
 .history-list{display:flex;flex-direction:column;gap:6px;}
@@ -466,7 +468,7 @@ function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
-let cf='all',expandedTaskId=null;
+let cf='all',expandedTaskId=null,expandedRewardId=null;
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
@@ -531,8 +533,11 @@ function renderRewards(){
   historyVisible=5;
   const list=document.getElementById('reward-list');list.innerHTML='';
   for(const r of state.rewards){
-    const can=state.points>=r.cost;const item=document.createElement('div');item.className='reward-item';
-    item.innerHTML=`<div class="reward-icon">${r.icon}</div><div class="reward-info"><div class="reward-name">${r.name}</div><div class="reward-cost">⭐ ${r.cost} points</div></div><div class="reward-actions"><button class="reward-del-btn" onclick="deleteReward('${r.id}')">🗑️</button><button class="reward-buy-btn" ${!can?'disabled':''} onclick="buyReward('${r.id}')">${can?'Redeem':`Need ${r.cost-state.points} more`}</button></div>`;
+    const can=state.points>=r.cost;
+    const item=document.createElement('div');
+    item.className='reward-item'+(r.id===expandedRewardId?' expanded':'');
+    item.onclick=(e)=>{expandedRewardId=expandedRewardId===r.id?null:r.id;renderRewards();};
+    item.innerHTML=`<div class="reward-icon">${r.icon}</div><div class="reward-info"><div class="reward-name">${r.name}</div><div class="reward-cost">⭐ ${r.cost} points</div></div><div class="reward-actions"><button class="reward-edit-btn" onclick="event.stopPropagation();editReward('${r.id}')">✏️</button><button class="reward-del-btn" onclick="event.stopPropagation();deleteReward('${r.id}')">🗑️</button></div><button class="reward-buy-btn" ${!can?'disabled':''} onclick="event.stopPropagation();buyReward('${r.id}')">${can?'Redeem':`Need ${r.cost-state.points} more`}</button>`;
     list.appendChild(item);
   }
   renderHistorySection();
@@ -753,6 +758,8 @@ let PC=null;
 window.deleteTask=(id,e)=>{e.stopPropagation();PC=()=>{state.tasks=state.tasks.filter(t=>t.id!==id);Object.values(state.completedDays).forEach(d=>delete d[id]);save();updateAll();showToast('Habit removed');};document.getElementById('confirm-title').textContent='Delete this habit?';document.getElementById('confirm-msg').textContent='This habit will be removed from your daily routine.';document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
 window.showAddRewardModal=()=>{document.getElementById('modal-title').textContent='Add a pleasure';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-name" placeholder="e.g. Sushi dinner"/></div><div class="form-group"><label class="form-label">Cost (points)</label><input class="form-input" id="f-cost" type="number" min="1" value="50"/></div><div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="f-icon" value="🎁" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddReward()">Add pleasure</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
 window.submitAddReward=()=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}state.rewards.push({id:'rw'+Date.now(),name,cost,icon:icon||'🎁'});save();renderRewards();closeModal();showToast('Pleasure added! 🌟');};
+window.editReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r)return;document.getElementById('modal-title').textContent='Edit pleasure';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-name" value="${r.name}"/></div><div class="form-group"><label class="form-label">Cost (points)</label><input class="form-input" id="f-cost" type="number" min="1" value="${r.cost}"/></div><div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="f-icon" value="${r.icon||'🎁'}" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditReward('${id}')">Save</button></div>`;openModal();};
+window.submitEditReward=(id)=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}const r=state.rewards.find(x=>x.id===id);if(r){r.name=name;r.cost=cost;r.icon=icon||'🎁';}save();renderRewards();closeModal();showToast('Pleasure updated');};
 window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
 window.deleteReward=(id)=>{PC=()=>{state.rewards=state.rewards.filter(r=>r.id!==id);save();renderRewards();showToast('Reward removed');};document.getElementById('confirm-title').textContent='Remove reward?';document.getElementById('confirm-msg').textContent='This will be removed from your pleasures list.';document.getElementById('confirm-ok').textContent='Remove';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
 window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');};
