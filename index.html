@@ -138,7 +138,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
 .stat-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
 .week-dots{display:flex;gap:8px;justify-content:center;padding:16px 0;}
-.week-dot{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.week-dot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:opacity .15s;}
+.week-dot:hover{opacity:.75;}
 .week-dot-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ink-faint);}
 .week-dot-circle.full{background:var(--success);border-color:var(--success);color:white;}
 .week-dot-circle.partial{background:var(--powder);border-color:var(--almond);color:var(--ink-soft);}
@@ -468,7 +469,7 @@ function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
-let cf='all',expandedTaskId=null,expandedRewardId=null;
+let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null;
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
@@ -508,10 +509,13 @@ function renderStats(){
   for(let i=0;i<7;i++){
     const d=new Date(now);d.setDate(now.getDate()-dow+i);
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const isT=k===TODAY,dd=state.completedDays[k]||{},tot=state.tasks.length,dn2=Object.values(dd).filter(Boolean).length;
+    const isT=k===TODAY,dotDow=d.getDay();
+    const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dotDow));
+    const dd=state.completedDays[k]||{},tot=scheduled.length,dn2=scheduled.filter(t=>dd[t.id]).length;
     let cls='week-dot-circle';if(isT)cls+=' today';else if(tot>0&&dn2===tot)cls+=' full';else if(dn2>0)cls+=' partial';
     const dot=document.createElement('div');dot.className='week-dot';
     dot.innerHTML=`<div class="${cls}">${dn2===tot&&tot>0?'✓':dn[i]}</div><div class="week-dot-day">${d.getDate()}</div>`;
+    dot.onclick=()=>openDayModal(k);
     wd.appendChild(dot);
   }
 }
@@ -551,6 +555,111 @@ function renderSectionTabs(){
   }
 }
 function updateAll(){renderDino();renderTasks();renderStats();renderRewards();renderSectionTabs();}
+
+function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
+function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
+
+function recalculateStreak(){
+  const now=new Date(TODAY);
+  let streak=0,lastFull=null;
+  for(let offset=0;offset<365;offset++){
+    const dt=new Date(now);dt.setDate(now.getDate()-offset);
+    const k=dateKey(dt);
+    const dow=dt.getDay();
+    const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+    const done=state.completedDays[k]||{};
+    const full=scheduled.length===0||scheduled.every(t=>done[t.id]);
+    if(full){
+      if(offset===0||streak>0){streak++;if(!lastFull)lastFull=k;}
+      else break;
+    } else {
+      if(offset===0)continue; // today not done yet, check yesterday
+      else break;
+    }
+  }
+  state.streak=streak;
+  if(streak>(state.bestStreak||0))state.bestStreak=streak;
+  state.lastFullDay=lastFull;
+}
+
+function openDayModal(k){
+  const[y,m,d]=k.split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  const dow=dt.getDay();
+  const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const isFuture=k>TODAY,isToday=k===TODAY;
+  if(!state.completedDays[k])state.completedDays[k]={};
+  dayEditState={k,completions:{...state.completedDays[k]}};
+  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  const doneCount=()=>habits.filter(t=>dayEditState.completions[t.id]).length;
+  document.getElementById('modal-title').textContent=`${DAY_NAMES[dow]}, ${MONTH_NAMES[m-1]} ${d}`;
+  function buildBody(){
+    const dc=doneCount();
+    let html=`<div class="modal-scroll"><p id="day-modal-summary" style="font-size:13px;color:var(--ink-faint);margin-bottom:12px;">${dc} of ${habits.length} habit${habits.length!==1?'s':''} completed</p>`;
+    if(isToday)html+=`<p style="font-size:12px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">You can also edit today's habits directly from the Today tab</p>`;
+    if(isFuture)html+=`<p style="font-size:12px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">This day hasn't arrived yet</p>`;
+    html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">`;
+    for(const t of habits){
+      const done=!!dayEditState.completions[t.id];
+      const later=isHabitAddedAfter(t,k);
+      html+=`<div class="task-item${done?' done':''}" style="cursor:${isFuture?'default':'pointer'};margin:0;" id="dme-${t.id}" ${isFuture?'':` onclick="toggleDayHabit('${k}','${t.id}')"`}>`;
+      html+=`<div class="task-check${done?' checked':''}" id="dmc-${t.id}"></div>`;
+      html+=`<div class="task-content"><div class="task-name">${t.emoji?t.emoji+' ':''}${t.name}${later?` <span style="font-size:10px;color:var(--ink-faint)">(added later)</span>`:''}</div>`;
+      html+=`<div class="task-meta">⭐${t.points??5}</div></div></div>`;
+    }
+    if(!habits.length)html+=`<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:12px 0;">No habits scheduled for this day</p>`;
+    html+=`</div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveDayModal()">Save &amp; close</button></div></div>`;
+    return html;
+  }
+  document.getElementById('modal-body').innerHTML=buildBody();
+  openModal();
+}
+window.openDayModal=openDayModal;
+
+window.toggleDayHabit=function(k,habitId){
+  if(!dayEditState||dayEditState.k!==k)return;
+  dayEditState.completions[habitId]=!dayEditState.completions[habitId];
+  const done=!!dayEditState.completions[habitId];
+  const item=document.getElementById('dme-'+habitId);
+  const check=document.getElementById('dmc-'+habitId);
+  if(item)item.className='task-item'+(done?' done':'');
+  if(check)check.className='task-check'+(done?' checked':'');
+  const[y,m,d]=k.split('-').map(Number);
+  const dow=new Date(y,m-1,d).getDay();
+  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  const dc=habits.filter(t=>dayEditState.completions[t.id]).length;
+  const s=document.getElementById('day-modal-summary');
+  if(s)s.textContent=`${dc} of ${habits.length} habit${habits.length!==1?'s':''} completed`;
+};
+
+window.saveDayModal=function(){
+  if(!dayEditState)return;
+  const{k,completions}=dayEditState;
+  const orig=state.completedDays[k]||{};
+  const[y,m,d]=k.split('-').map(Number);
+  const dow=new Date(y,m-1,d).getDay();
+  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  let diff=0;
+  for(const t of habits){
+    const was=!!orig[t.id],now2=!!completions[t.id];
+    if(now2&&!was)diff+=(t.points??5);
+    else if(!now2&&was)diff-=(t.points??5);
+  }
+  state.completedDays[k]={...completions};
+  if(diff!==0){
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    state.points=Math.max(0,state.points+diff);
+    state.history.unshift({reason:`Retroactive edit — ${MONTHS[m-1]} ${d}`,amount:Math.abs(diff),date:TODAY,pos:diff>0});
+    if(state.history.length>50)state.history.pop();
+  }
+  recalculateStreak();
+  save();
+  updateAll();
+  closeModal();
+  dayEditState=null;
+  showToast('Updated! Streak recalculated 🦕');
+};
 
 // expose to window
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
