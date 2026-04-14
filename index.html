@@ -230,7 +230,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .welcome-cta:hover{transform:scale(1.03);}
 .welcome-skip{margin-top:14px;font-size:13px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 #tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
-#tour-tooltip{position:fixed;z-index:1000;background:var(--white);border-radius:16px;padding:16px;width:260px;max-width:calc(100vw - 16px);box-shadow:0 8px 32px rgba(29,30,30,0.18);}
+#tour-tooltip{position:fixed;z-index:1000;background:var(--white);border-radius:16px;padding:16px;width:260px;max-width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(29,30,30,0.18);}
 .tour-step-ind{font-size:11px;color:var(--ink-faint);margin-bottom:8px;}
 .tour-tip-text{font-size:14px;color:var(--ink);line-height:1.5;margin-bottom:14px;}
 .tour-actions{display:flex;align-items:center;justify-content:space-between;}
@@ -444,6 +444,7 @@ async function saveFS(){
   try{await setDoc(doc(db,'users',currentUser.uid),state);}catch(e){console.error(e);}
   setSyncing(false);
 }
+window.saveFS=saveFS;
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 
 function showToast(msg,dur=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
@@ -785,7 +786,7 @@ window.showAccountModal=()=>{
     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
     <button class="btn btn-secondary" onclick="doSignOut()">Sign out</button>
   </div>
-  <a onclick="state.onboardingComplete=false;save();closeModal();location.reload();" style="font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
+  <a onclick="(async()=>{state.onboardingComplete=false;await saveFS();closeModal();location.reload();})()" style="font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
 
 </div>`;
   openModal();
@@ -914,12 +915,18 @@ function showTourStep(step){
   // Position tooltip near element
   requestAnimationFrame(()=>{
     const rect=el.getBoundingClientRect();
-    const tw=tooltip.offsetWidth||260,th=tooltip.offsetHeight||120;
+    const tw=Math.min(260,window.innerWidth-32);
+    tooltip.style.width=tw+'px';
+    const th=tooltip.offsetHeight||120;
     const vw=window.innerWidth,vh=window.innerHeight,gap=16;
-    let top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;
-    top=Math.max(8,Math.min(top,vh-th-8));
+    // Force direction for elements in fixed bars
+    let top;
+    if(cfg.lift==='.header'){top=rect.bottom+gap;}       // header → always below
+    else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;} // tab bar → always above
+    else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
+    top=Math.max(80,Math.min(top,vh-th-16));
     let left=rect.left+rect.width/2-tw/2;
-    left=Math.max(8,Math.min(left,vw-tw-8));
+    left=Math.max(16,Math.min(left,vw-tw-16));
     tooltip.style.top=top+'px';tooltip.style.left=left+'px';
   });
 }
