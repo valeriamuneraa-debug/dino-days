@@ -493,6 +493,11 @@ function renderTasks(){
       list.appendChild(item);
     }c.appendChild(list);
   }
+  const viewAllLink=document.createElement('a');
+  viewAllLink.textContent='View all my habits →';
+  viewAllLink.style.cssText='font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;padding:12px 0 4px;';
+  viewAllLink.onclick=()=>window.showTaskManagerModal('allhabits');
+  c.appendChild(viewAllLink);
   document.getElementById('done-count').textContent=`${td}/${ta}`;
   document.getElementById('progress-bar').style.width=(ta?(td/ta*100):0)+'%';
 }
@@ -671,19 +676,20 @@ function openModal(){document.getElementById('modal-overlay').classList.add('ope
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
 window.closeModalOverlay=(e)=>{if(e.target===document.getElementById('modal-overlay'))closeModal();};
 
-window.showTaskManagerModal=()=>{
+window.showTaskManagerModal=(defaultTab)=>{
   document.getElementById('modal-title').textContent='Habit Manager';
-  let tmTab='sections';
+  let tmTab=defaultTab||'sections';
   let secsCopy=state.sections.map(s=>({...s}));
   let selected=new Set();
   let dragSrc=null;
 
   function renderTM(){
-    document.getElementById('modal-body').innerHTML=`<div class="tm-tabs"><button class="tm-tab${tmTab==='sections'?' active':''}" onclick="window._tmSwitch('sections')">Sections</button><button class="tm-tab${tmTab==='reorder'?' active':''}" onclick="window._tmSwitch('reorder')">Reorder</button><button class="tm-tab${tmTab==='bulk'?' active':''}" onclick="window._tmSwitch('bulk')">Bulk edit</button></div><div id="tm-content" class="modal-scroll"></div>`;
+    document.getElementById('modal-body').innerHTML=`<div class="tm-tabs"><button class="tm-tab${tmTab==='sections'?' active':''}" onclick="window._tmSwitch('sections')">Sections</button><button class="tm-tab${tmTab==='reorder'?' active':''}" onclick="window._tmSwitch('reorder')">Reorder</button><button class="tm-tab${tmTab==='bulk'?' active':''}" onclick="window._tmSwitch('bulk')">Bulk edit</button><button class="tm-tab${tmTab==='allhabits'?' active':''}" onclick="window._tmSwitch('allhabits')">All habits</button></div><div id="tm-content" class="modal-scroll"></div>`;
     const c=document.getElementById('tm-content');
     if(tmTab==='sections')renderTMSections(c);
     else if(tmTab==='reorder')renderTMReorder(c);
-    else renderTMBulk(c);
+    else if(tmTab==='bulk')renderTMBulk(c);
+    else renderTMAllHabits(c);
   }
   window._tmSwitch=(tab)=>{tmTab=tab;renderTM();};
 
@@ -844,6 +850,22 @@ window.showTaskManagerModal=()=>{
     document.getElementById('confirm-title').textContent='Delete habits?';document.getElementById('confirm-msg').textContent=`Delete ${count} selected habit${count>1?'s':''}? This cannot be undone.`;document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');
   };
 
+  function renderTMAllHabits(c){
+    c.innerHTML='<div class="tm-sec-header" style="margin-bottom:4px">Every habit, regardless of scheduled days</div>';
+    for(const sec of state.sections){
+      const tasks=state.tasks.filter(t=>t.section===sec.id);if(!tasks.length)continue;
+      const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.marginTop='16px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
+      for(const task of tasks){
+        const tDays=task.days??ALL_DAYS;
+        const daysLabel=tDays.length===7?'All days':tDays.map(d=>DAY_ABBR[d]).join(' ');
+        const row=document.createElement('div');row.className='tm-task-row';
+        row.innerHTML=`<span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:10px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}')">✏️</button>`;
+        c.appendChild(row);
+      }
+    }
+    const cl=document.createElement('div');cl.innerHTML=`<div class="form-actions" style="margin-top:20px"><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>`;c.appendChild(cl);
+  }
+
   renderTM();openModal();
 };
 let fDays=[0,1,2,3,4,5,6];
@@ -860,7 +882,7 @@ window._toggleDay=function(d){
 };
 window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map((s,i)=>`<option value="${s.id}"${i===0?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="5" style="width:100px"/></div>${dayPickerHTML([0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
 window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name){showToast('Please enter a habit name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji,points,days:[...fDays]});save();updateAll();closeModal();showToast('Habit added! ✅');};
-window.editTask=(id,e)=>{e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="${task.points??5}" style="width:100px"/></div>${dayPickerHTML(task.days??[0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
+window.editTask=(id,e)=>{if(e)e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="1" max="100" value="${task.points??5}" style="width:100px"/></div>${dayPickerHTML(task.days??[0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
 window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(1,parseInt(document.getElementById('f-points').value)||5));if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;task.points=points;task.days=[...fDays];}save();updateAll();closeModal();showToast('Habit updated');};
 
 let PC=null;
