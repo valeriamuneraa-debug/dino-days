@@ -471,7 +471,17 @@ function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feel
 
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();showToast(`Enjoyed: ${reason} 🎉`);}
-function checkStreak(){const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow)),done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;if(total>0&&doneCount===total&&state.lastFullDay!==TODAY){state.lastFullDay=TODAY;state.streak++;if(state.streak>state.bestStreak)state.bestStreak=state.streak;awardPts(10+state.streak*2,`Streak day ${state.streak}`);}}
+function checkStreak(){
+  const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
+  const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
+  if(total>0&&doneCount===total&&state.lastFullDay!==TODAY){
+    // Confirm the full day first, then and only then update bestStreak
+    state.lastFullDay=TODAY;
+    state.streak++;
+    if(state.lastFullDay===TODAY&&state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
+    awardPts(10+state.streak*2,`Streak day ${state.streak}`);
+  }
+}
 
 function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=svg;});}
 
@@ -582,7 +592,8 @@ function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;co
 
 function recalculateStreak(){
   const now=new Date(TODAY);
-  let streak=0,lastFull=null;
+  let streak=0,maxStreak=0,lastFull=null;
+  let inCurrentStreak=true,localStreak=0;
   for(let offset=0;offset<365;offset++){
     const dt=new Date(now);dt.setDate(now.getDate()-offset);
     const k=dateKey(dt);
@@ -591,15 +602,20 @@ function recalculateStreak(){
     const done=state.completedDays[k]||{};
     const full=scheduled.length===0||scheduled.every(t=>done[t.id]);
     if(full){
-      if(offset===0||streak>0){streak++;if(!lastFull)lastFull=k;}
-      else break;
+      localStreak++;
+      maxStreak=Math.max(maxStreak,localStreak);
+      if(!lastFull)lastFull=k;
+      if(inCurrentStreak)streak=localStreak;
+    } else if(offset===0){
+      // Today not yet complete — don't break current streak, check yesterday
     } else {
-      if(offset===0)continue; // today not done yet, check yesterday
-      else break;
+      // Gap: end current streak window, keep scanning for historical max
+      inCurrentStreak=false;
+      localStreak=0;
     }
   }
   state.streak=streak;
-  if(streak>(state.bestStreak||0))state.bestStreak=streak;
+  state.bestStreak=Math.max(maxStreak,state.bestStreak||0);
   state.lastFullDay=lastFull;
 }
 
