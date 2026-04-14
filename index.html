@@ -220,6 +220,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .acc-toggle.on{background:var(--success);}
 .acc-toggle.on span{transform:translateX(18px);}
 .acc-danger-note{font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5;}
+
+/* ONBOARDING */
+#onboarding-welcome{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 24px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
+.welcome-dino{width:120px;margin-bottom:24px;}.welcome-dino svg{width:100%;height:auto;}
+.welcome-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:12px;color:var(--ink);}
+.welcome-sub{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-bottom:32px;max-width:300px;}
+.welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:16px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
+.welcome-cta:hover{transform:scale(1.03);}
+.welcome-skip{margin-top:14px;font-size:13px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+#tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
+#tour-tooltip{position:fixed;z-index:1000;background:var(--white);border-radius:16px;padding:16px;width:260px;max-width:calc(100vw - 16px);box-shadow:0 8px 32px rgba(29,30,30,0.18);}
+.tour-step-ind{font-size:11px;color:var(--ink-faint);margin-bottom:8px;}
+.tour-tip-text{font-size:14px;color:var(--ink);line-height:1.5;margin-bottom:14px;}
+.tour-actions{display:flex;align-items:center;justify-content:space-between;}
+.tour-next-btn{padding:10px 20px;border-radius:10px;background:var(--ink);color:white;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.tour-skip-link{font-size:12px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -264,7 +280,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
-        <button class="icon-btn" onclick="showTaskManagerModal()">✏️</button>
+        <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()">✏️</button>
         <div class="user-avatar" id="user-avatar" onclick="showAccountModal()">?</div>
       </div>
     </div>
@@ -278,7 +294,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="dino-wrap" id="dino-small"></div>
       </div>
       <div class="streak-row">
-        <div class="streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
+        <div class="streak-chip" id="tour-streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
         <div class="streak-chip">⭐ <span class="num" id="points-count">0</span> pts</div>
         <div class="streak-chip">✅ <span class="num" id="done-count">0/0</span> done</div>
         <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
@@ -327,10 +343,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
     <div class="tab-bar">
       <div class="tab active" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
-      <div class="tab" onclick="switchTab('garden',this)"><div class="tab-icon">🦕</div><div class="tab-label">Dino</div></div>
-      <div class="tab" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
+      <div class="tab" id="tour-tab-garden" onclick="switchTab('garden',this)"><div class="tab-icon">🦕</div><div class="tab-label">Dino</div></div>
+      <div class="tab" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
     </div>
-    <button class="fab" onclick="showAddTaskModal()">+</button>
+    <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding-welcome" style="display:none;">
+  <div class="welcome-dino" id="welcome-dino"></div>
+  <div class="welcome-title">Welcome to Dino Days</div>
+  <div class="welcome-sub">Your personal habit tracker that grows with you. Everything you see here is fully customizable.</div>
+  <button class="welcome-cta" onclick="startTour()">Show me around →</button>
+  <button class="welcome-skip" onclick="skipTour()">Skip tour</button>
+</div>
+<div id="tour-overlay" style="display:none;"></div>
+<div id="tour-tooltip" style="display:none;">
+  <div class="tour-step-ind" id="tour-step-ind"></div>
+  <div class="tour-tip-text" id="tour-tip-text"></div>
+  <div class="tour-actions">
+    <button class="tour-next-btn" id="tour-next-btn" onclick="tourNext()">Next →</button>
+    <button class="tour-skip-link" onclick="endTour()">Skip</button>
   </div>
 </div>
 
@@ -830,9 +864,85 @@ window.doSignup=async()=>{const email=document.getElementById('signup-email').va
 window.doForgot=async()=>{const email=document.getElementById('login-email').value.trim();if(!email){showMsg('Enter your email above first.','error');return;}try{await sendPasswordResetEmail(auth,email);showMsg('Reset email sent! Check your inbox.','success');}catch(e){showMsg('Could not send reset email.','error');}};
 window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}await signOut(auth);closeModal();};
 
+// ONBOARDING TOUR
+let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
+const TOUR_STEPS=[
+  {id:'tour-pencil-btn',  tip:'Tap here to manage your categories, reorder habits, and do bulk edits.',                                                                         lift:'.header',  setPos:false},
+  {id:'tour-fab-btn',     tip:'Tap here to add a new habit. You can set its name, category, emoji, and how many points it gives you.',                                           lift:null,       setPos:false},
+  {id:'tour-tab-rewards', tip:'Earn points by completing habits and spend them here on things you enjoy — you set the rewards and their prices.',                                 lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-garden',  tip:"Your dino's health reflects your consistency. Complete all your habits every day to keep them happy and glowing!",                                lift:'.tab-bar', setPos:false},
+  {id:'tour-streak-chip', tip:'Build a streak by completing all your habits every day. The longer your streak, the more bonus points you earn.',                                  lift:null,       setPos:true},
+];
+
+function showWelcome(){document.getElementById('onboarding-welcome').style.display='flex';}
+
+function clearTourHighlight(){
+  if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
+  if(tourGlowEl){
+    tourGlowEl.style.boxShadow=tourGlowOrigProps.boxShadow??'';
+    if(tourGlowOrigProps.hasOwnProperty('position'))tourGlowEl.style.position=tourGlowOrigProps.position??'';
+    tourGlowEl=null;tourGlowOrigProps={};
+  }
+}
+
+function showTourStep(step){
+  clearTourHighlight();
+  const cfg=TOUR_STEPS[step];
+  const el=document.getElementById(cfg.id);if(!el)return;
+
+  // Save + apply glow ring
+  tourGlowEl=el;
+  tourGlowOrigProps={boxShadow:el.style.boxShadow};
+  if(cfg.setPos){tourGlowOrigProps.position=el.style.position;el.style.position='relative';}
+  el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
+
+  // Lift stacking ancestor (or element itself) above overlay
+  const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
+  tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;
+  liftTarget.style.zIndex='999';
+
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+
+  // Update tooltip
+  document.getElementById('tour-step-ind').textContent=`${step+1} of ${TOUR_STEPS.length}`;
+  document.getElementById('tour-tip-text').textContent=cfg.tip;
+  document.getElementById('tour-next-btn').textContent=step===TOUR_STEPS.length-1?"Let's go! 🦕":'Next →';
+  const tooltip=document.getElementById('tour-tooltip');
+  tooltip.style.display='block';
+
+  // Position tooltip near element
+  requestAnimationFrame(()=>{
+    const rect=el.getBoundingClientRect();
+    const tw=tooltip.offsetWidth||260,th=tooltip.offsetHeight||120;
+    const vw=window.innerWidth,vh=window.innerHeight,gap=16;
+    let top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;
+    top=Math.max(8,Math.min(top,vh-th-8));
+    let left=rect.left+rect.width/2-tw/2;
+    left=Math.max(8,Math.min(left,vw-tw-8));
+    tooltip.style.top=top+'px';tooltip.style.left=left+'px';
+  });
+}
+
+window.startTour=()=>{
+  document.getElementById('onboarding-welcome').style.display='none';
+  document.getElementById('tour-overlay').style.display='block';
+  tourStep=0;showTourStep(0);
+};
+window.tourNext=()=>{if(tourStep>=TOUR_STEPS.length-1){endTour();return;}tourStep++;showTourStep(tourStep);};
+window.skipTour=()=>endTour();
+function endTour(){
+  clearTourHighlight();
+  document.getElementById('onboarding-welcome').style.display='none';
+  document.getElementById('tour-overlay').style.display='none';
+  document.getElementById('tour-tooltip').style.display='none';
+  if(state&&!state.onboardingComplete){state.onboardingComplete=true;save();}
+}
+window.endTour=endTour;
+
 // init dinos in loading/auth screens
 document.getElementById('load-dino').innerHTML=getDinoSVG(80);
 document.getElementById('auth-dino').innerHTML=getDinoSVG(80);
+document.getElementById('welcome-dino').innerHTML=getDinoSVG(100);
 
 onAuthStateChanged(auth,async(user)=>{
   if(user){
@@ -872,6 +982,7 @@ onAuthStateChanged(auth,async(user)=>{
     document.getElementById('hero-greeting').textContent=g;
     document.getElementById('hero-sub').textContent=s;
     updateAll();
+    if(!state.onboardingComplete)showWelcome();
   }else{
     currentUser=null;state=null;
     if(unsub){unsub();unsub=null;}
