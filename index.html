@@ -195,7 +195,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .tm-sec-header{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;padding:14px 0 6px;}
 .tm-section-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
 .tm-section-row:last-child{border-bottom:none;}
-.tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);}
+.tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);touch-action:none;-webkit-user-select:none;user-select:none;will-change:transform;}
 .tm-task-row.drag-over{border-color:var(--almond);background:var(--linen);}
 .tm-drag-handle{color:var(--ink-faint);font-size:20px;cursor:grab;flex-shrink:0;line-height:1;user-select:none;padding:0 2px;}
 .tm-drag-handle:active{cursor:grabbing;}
@@ -550,8 +550,8 @@ window.showTaskManagerModal=()=>{
       const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.marginTop='16px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
       for(const task of tasks){
         const row=document.createElement('div');row.className='tm-task-row';row.draggable=true;row.dataset.id=task.id;row.dataset.section=task.section;
-        row.innerHTML=`<span class="tm-drag-handle">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;padding-left:4px">${sec.label}</span>`;
-        row.addEventListener('dragstart',e=>{dragSrc=row;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',task.id);setTimeout(()=>row.style.opacity='0.4',0);});
+        row.innerHTML=`<span class="tm-drag-handle" draggable="true">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;padding-left:4px">${sec.label}</span>`;
+        row.addEventListener('dragstart',e=>{dragSrc=row;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',task.id);row.style.opacity='0.4';});
         row.addEventListener('dragend',()=>{row.style.opacity='';dragSrc=null;});
         row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drag-over');return false;});
         row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
