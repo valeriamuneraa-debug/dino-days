@@ -477,9 +477,11 @@ function renderHistorySection(){
   for(const h of state.history.slice(0,historyVisible)){const item=document.createElement('div');item.className='history-item';item.innerHTML=`<span>${h.reason}</span><span class="pts ${h.pos?'pos':'neg'}">${h.pos?'+':'-'}${h.amount}</span>`;hist.appendChild(item);}
   const remaining=state.history.length-historyVisible;
   if(remaining>0){wrap.style.display='block';wrap.innerHTML=`<button class="btn btn-secondary" style="width:100%" onclick="loadMoreHistory()">View more (${remaining} remaining)</button>`;}
+  else if(state.history.length>5){wrap.style.display='block';wrap.innerHTML=`<button class="btn btn-secondary" style="width:100%" onclick="collapseHistory()">Collapse history ↑</button>`;}
   else{wrap.style.display='none';}
 }
 window.loadMoreHistory=()=>{historyVisible+=10;renderHistorySection();};
+window.collapseHistory=()=>{historyVisible=5;renderHistorySection();};
 function renderRewards(){
   historyVisible=5;
   const list=document.getElementById('reward-list');list.innerHTML='';
