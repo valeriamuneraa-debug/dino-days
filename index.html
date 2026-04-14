@@ -418,10 +418,11 @@ function getDinoSVG(h){
     outline=`rgb(${r},${g},${b})`;
     cheek=t>0.4?'#c97b6e':`rgba(201,123,110,${(t/0.4).toFixed(2)})`;
   } else {
-    // Light mode: line-art — dark ink fading to ghost outline at low health
-    const op=(0.15+0.85*t).toFixed(2);
+    // Light mode: dark fills fade with health, transparent body = page bg shows through
+    const op=(0.25+0.75*t).toFixed(2);
     outline=`rgba(29,30,30,${op})`;
-    cheek=t>0.4?'#f4a299':`rgba(244,162,153,${(t/0.4).toFixed(2)})`;
+    const cop=(0.3+0.7*t).toFixed(2);
+    cheek=`rgba(244,162,153,${cop})`;
   }
   return DSVG.replace(/OUTLINE/g,outline).replace(/CHEEK/g,cheek);
 }
