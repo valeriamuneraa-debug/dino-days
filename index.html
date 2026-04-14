@@ -785,6 +785,7 @@ window.showAccountModal=()=>{
     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
     <button class="btn btn-secondary" onclick="doSignOut()">Sign out</button>
   </div>
+  <a onclick="state.onboardingComplete=false;save();closeModal();location.reload();" style="font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
 
 </div>`;
   openModal();
