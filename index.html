@@ -196,12 +196,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .toast.show{opacity:1;}
 
 /* UNDO SNACKBAR */
-.undo-snackbar{position:fixed;bottom:calc(var(--tab-height) + 12px);left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);border-radius:100px;padding:12px 8px 12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:490;transition:transform .3s ease;white-space:nowrap;overflow:hidden;}
-.undo-snackbar.show{transform:translateX(-50%) translateY(0);}
-.undo-snackbar-text{font-size:13px;color:white;}
-.undo-snackbar-btn{background:var(--almond);color:var(--ink);border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;}
-.undo-snackbar-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--almond);border-radius:0 0 0 100px;width:100%;transition:width linear;}
-@keyframes undoCountdown{from{width:100%}to{width:0%}}
+.undo-snackbar{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-100%);width:auto;max-width:320px;background:var(--ink);border-radius:16px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:auto;}
+.undo-snackbar.show{transform:translateX(-50%) translateY(16px);}
+.undo-snackbar-text{font-size:13px;color:white;flex:1;overflow:hidden;text-overflow:ellipsis;}
+.undo-snackbar-countdown{font-size:12px;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.undo-snackbar-btn{background:var(--almond);color:var(--ink);border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;flex-shrink:0;}
 
 /* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(29,30,30,.5);backdrop-filter:blur(4px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -413,7 +412,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <div class="undo-snackbar" id="undo-snackbar" aria-live="polite">
   <span class="undo-snackbar-text" id="undo-snackbar-text"></span>
   <button class="undo-snackbar-btn" id="undo-snackbar-btn" onclick="undoRedemption()">Undo</button>
-  <div class="undo-snackbar-progress" id="undo-snackbar-progress"></div>
+  <span class="undo-snackbar-countdown" id="undo-snackbar-countdown">10s</span>
 </div>
 
 <script type="module">
@@ -521,27 +520,19 @@ function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feel
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason,allowUndo=false){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();if(allowUndo){showUndoSnackbar(amt,reason);}else{showToast(`Enjoyed: ${reason} 🎉`);}}
 function showUndoSnackbar(amt,reason){
-  // Dismiss any existing snackbar (making prior redemption permanent)
   dismissUndoSnackbar(false);
   undoPending={amount:amt,reason,historyReason:reason,date:TODAY};
-  const sb=document.getElementById('undo-snackbar');
-  const bar=document.getElementById('undo-snackbar-progress');
   document.getElementById('undo-snackbar-text').textContent=`Enjoyed: ${reason}`;
-  // Reset progress bar
-  bar.style.transition='none';bar.style.width='100%';
-  sb.classList.add('show');
-  // Start countdown animation after a tick so the reset lands first
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    bar.style.transition='width 10s linear';bar.style.width='0%';
-  }));
-  undoTimeout=setTimeout(()=>dismissUndoSnackbar(false),10000);
+  const cd=document.getElementById('undo-snackbar-countdown');
+  let secs=10;cd.textContent=secs+'s';
+  document.getElementById('undo-snackbar').classList.add('show');
+  const ticker=setInterval(()=>{secs--;cd.textContent=secs+'s';if(secs<=0)clearInterval(ticker);},1000);
+  undoTimeout=setTimeout(()=>{clearInterval(ticker);dismissUndoSnackbar(false);},10000);
 }
 function dismissUndoSnackbar(wasUndo){
   if(undoTimeout){clearTimeout(undoTimeout);undoTimeout=null;}
   undoPending=null;
-  const sb=document.getElementById('undo-snackbar');
-  sb.classList.remove('show');
-  if(!wasUndo){const bar=document.getElementById('undo-snackbar-progress');bar.style.transition='none';bar.style.width='100%';}
+  document.getElementById('undo-snackbar').classList.remove('show');
 }
 window.undoRedemption=()=>{
   if(!undoPending)return;
