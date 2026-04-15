@@ -479,7 +479,7 @@ const DEFAULT_REWARDS=[
   {id:'r5',name:'Spa day',cost:120,icon:'💆'},
 ];
 
-let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5;
+let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1265,6 +1265,7 @@ function initModalDrag(){
 initModalDrag();
 
 onAuthStateChanged(auth,async(user)=>{
+  isNewUser=false;
   if(user){
     currentUser=user;
     document.getElementById('user-avatar').textContent=(user.email||'?')[0].toUpperCase();
@@ -1282,6 +1283,7 @@ onAuthStateChanged(auth,async(user)=>{
     }else{
       state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
       await setDoc(ref,state);
+      isNewUser=true;
     }
     unsub=onSnapshot(ref,(snap)=>{
       if(snap.exists()){
@@ -1304,7 +1306,8 @@ onAuthStateChanged(auth,async(user)=>{
     document.getElementById('hero-greeting').textContent=g;
     document.getElementById('hero-sub').textContent=s;
     updateAll();
-    if(!state.onboardingComplete)showWelcome();
+    if(isNewUser){setTimeout(()=>showWelcome(),500);}
+    else if(!state.onboardingComplete){showWelcome();}
   }else{
     currentUser=null;state=null;
     if(unsub){unsub();unsub=null;}
