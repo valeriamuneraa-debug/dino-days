@@ -944,7 +944,7 @@ window.showTaskManagerModal=(defaultTab)=>{
         const tDays=task.days??ALL_DAYS;
         const daysLabel=tDays.length===7?'All days':tDays.map(d=>DAY_ABBR[d]).join(' ');
         const row=document.createElement('div');row.className='tm-task-row';
-        row.innerHTML=`<span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:10px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}')">✏️</button>`;
+        row.innerHTML=`<span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:10px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button>`;
         c.appendChild(row);
       }
     }
