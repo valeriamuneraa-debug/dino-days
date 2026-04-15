@@ -361,9 +361,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="tab-bar">
-      <div class="tab active" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
-      <div class="tab" id="tour-tab-garden" onclick="switchTab('garden',this)"><div class="tab-icon">🦕</div><div class="tab-label">Dino</div></div>
-      <div class="tab" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
+      <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
+      <div class="tab" data-tab="garden" id="tour-tab-garden" onclick="switchTab('garden',this)"><div class="tab-icon">🦕</div><div class="tab-label">Dino</div></div>
+      <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
   </div>
@@ -521,7 +521,7 @@ function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
-let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null,weekOffset=0;
+let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null,weekOffset=0,currentTab='today';
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
   const done=state.completedDays[TODAY]||{};
@@ -736,7 +736,9 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){awardPts(pts,'Habit completed');}else{state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`-${pts} pts — Habit uncompleted`);}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='garden'){weekOffset=0;renderStats();}};
+window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='garden'){weekOffset=0;renderStats();}};
+function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
+window.restoreActiveTab=restoreActiveTab;
 window.changeWeek=(dir)=>{
   const next=weekOffset+dir;
   if(next>0||next<-8)return;
@@ -747,7 +749,7 @@ window.changeWeek=(dir)=>{
 };
 
 function openModal(){document.getElementById('modal-overlay').classList.add('open');}
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');restoreActiveTab();}
 window.closeModalOverlay=(e)=>{if(e.target===document.getElementById('modal-overlay'))closeModal();};
 
 window.showTaskManagerModal=(defaultTab)=>{
@@ -967,9 +969,9 @@ window.editReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r)return;d
 window.submitEditReward=(id)=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}const r=state.rewards.find(x=>x.id===id);if(r){r.name=name;r.cost=cost;r.icon=icon||'🎁';}save();renderRewards();closeModal();showToast('Pleasure updated');};
 window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
 window.deleteReward=(id)=>{PC=()=>{state.rewards=state.rewards.filter(r=>r.id!==id);save();renderRewards();showToast('Reward removed');};document.getElementById('confirm-title').textContent='Remove reward?';document.getElementById('confirm-msg').textContent='This will be removed from your pleasures list.';document.getElementById('confirm-ok').textContent='Remove';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
-window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');};
+window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();};
 window.closeModal=closeModal;
-document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');});
+document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();});
 
 window.showAccountModal=()=>{
   const notifOn=state?.preferences?.notifications??false;
@@ -1230,6 +1232,7 @@ onAuthStateChanged(auth,async(user)=>{
     document.getElementById('loading-screen').style.display='none';
     document.getElementById('auth-screen').style.display='none';
     document.getElementById('app-screen').style.display='block';
+    currentTab='today';restoreActiveTab();
     document.getElementById('header-date').textContent=formatDate(new Date());
     const[g,s]=getGreeting();
     document.getElementById('hero-greeting').textContent=g;
