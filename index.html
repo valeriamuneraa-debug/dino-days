@@ -195,6 +195,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:10px 20px;border-radius:100px;font-size:13px;z-index:500;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;}
 
+/* UNDO SNACKBAR */
+.undo-snackbar{position:fixed;bottom:calc(var(--tab-height) + 12px);left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);border-radius:100px;padding:12px 8px 12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:490;transition:transform .3s ease;white-space:nowrap;overflow:hidden;}
+.undo-snackbar.show{transform:translateX(-50%) translateY(0);}
+.undo-snackbar-text{font-size:13px;color:white;}
+.undo-snackbar-btn{background:var(--almond);color:var(--ink);border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;}
+.undo-snackbar-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--almond);border-radius:0 0 0 100px;width:100%;transition:width linear;}
+@keyframes undoCountdown{from{width:100%}to{width:0%}}
+
 /* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(29,30,30,.5);backdrop-filter:blur(4px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
 .confirm-overlay.open{display:flex;}
@@ -402,6 +410,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="undo-snackbar" id="undo-snackbar" aria-live="polite">
+  <span class="undo-snackbar-text" id="undo-snackbar-text"></span>
+  <button class="undo-snackbar-btn" id="undo-snackbar-btn" onclick="undoRedemption()">Undo</button>
+  <div class="undo-snackbar-progress" id="undo-snackbar-progress"></div>
+</div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -479,7 +492,7 @@ const DEFAULT_REWARDS=[
   {id:'r5',name:'Spa day',cost:120,icon:'💆'},
 ];
 
-let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false;
+let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false,undoPending=null,undoTimeout=null;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -506,7 +519,46 @@ function getHealth(){const todayDow=new Date().getDay(),todayTasks=state.tasks.f
 function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feeling good today';if(h>=45)return'Could use some love…';if(h>=25)return'Not feeling great';return'Please complete your habits! 🥺';}
 
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
-function spendPts(amt,reason){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();showToast(`Enjoyed: ${reason} 🎉`);}
+function spendPts(amt,reason,allowUndo=false){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();if(allowUndo){showUndoSnackbar(amt,reason);}else{showToast(`Enjoyed: ${reason} 🎉`);}}
+function showUndoSnackbar(amt,reason){
+  // Dismiss any existing snackbar (making prior redemption permanent)
+  dismissUndoSnackbar(false);
+  undoPending={amount:amt,reason,historyReason:reason,date:TODAY};
+  const sb=document.getElementById('undo-snackbar');
+  const bar=document.getElementById('undo-snackbar-progress');
+  document.getElementById('undo-snackbar-text').textContent=`Enjoyed: ${reason}`;
+  // Reset progress bar
+  bar.style.transition='none';bar.style.width='100%';
+  sb.classList.add('show');
+  // Start countdown animation after a tick so the reset lands first
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    bar.style.transition='width 10s linear';bar.style.width='0%';
+  }));
+  undoTimeout=setTimeout(()=>dismissUndoSnackbar(false),10000);
+}
+function dismissUndoSnackbar(wasUndo){
+  if(undoTimeout){clearTimeout(undoTimeout);undoTimeout=null;}
+  undoPending=null;
+  const sb=document.getElementById('undo-snackbar');
+  sb.classList.remove('show');
+  if(!wasUndo){const bar=document.getElementById('undo-snackbar-progress');bar.style.transition='none';bar.style.width='100%';}
+}
+window.undoRedemption=()=>{
+  if(!undoPending)return;
+  const{amount,reason,date}=undoPending;
+  // Restore points
+  state.points+=amount;
+  state.totalSpent=Math.max(0,(state.totalSpent||0)-amount);
+  // Remove the matching redemption history entry (most recent, at index 0)
+  const idx=state.history.findIndex(h=>!h.pos&&h.reason===reason&&h.date===date);
+  if(idx!==-1)state.history.splice(idx,1);
+  // Add undo entry
+  state.history.unshift({reason:`Undo: ${reason}`,amount,date:TODAY,pos:true});
+  if(state.history.length>50)state.history.pop();
+  save();updateAll();
+  dismissUndoSnackbar(true);
+  showToast('Redemption undone ↩️');
+};
 function checkStreak(){
   const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
   const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
@@ -976,7 +1028,7 @@ window.showAddRewardModal=()=>{document.getElementById('modal-title').textConten
 window.submitAddReward=()=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}state.rewards.push({id:'rw'+Date.now(),name,cost,icon:icon||'🎁'});save();renderRewards();closeModal();showToast('Pleasure added! 🌟');};
 window.editReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r)return;document.getElementById('modal-title').textContent='Edit pleasure';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-name" value="${r.name}"/></div><div class="form-group"><label class="form-label">Cost (points)</label><input class="form-input" id="f-cost" type="number" min="1" value="${r.cost}"/></div><div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="f-icon" value="${r.icon||'🎁'}" maxlength="2" style="width:80px"/></div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditReward('${id}')">Save</button></div>`;openModal();};
 window.submitEditReward=(id)=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}const r=state.rewards.find(x=>x.id===id);if(r){r.name=name;r.cost=cost;r.icon=icon||'🎁';}save();renderRewards();closeModal();showToast('Pleasure updated');};
-window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
+window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name,true);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
 window.deleteReward=(id)=>{PC=()=>{state.rewards=state.rewards.filter(r=>r.id!==id);save();renderRewards();showToast('Reward removed');};document.getElementById('confirm-title').textContent='Remove reward?';document.getElementById('confirm-msg').textContent='This will be removed from your pleasures list.';document.getElementById('confirm-ok').textContent='Remove';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
 window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();};
 window.closeModal=closeModal;
