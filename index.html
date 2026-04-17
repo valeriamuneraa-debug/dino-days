@@ -134,10 +134,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .dino-card{background:linear-gradient(160deg,var(--linen),var(--powder));border-radius:24px;padding:28px;text-align:center;margin-bottom:20px;}
 .dino-big{width:140px;margin:0 auto 16px;}
 .dino-big svg{width:100%;height:auto;}
-.health-label{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.health-bar-wrap{background:rgba(255,255,255,.5);border-radius:100px;height:8px;overflow:hidden;margin:0 20px 12px;}
-.health-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--almond),var(--powder));transition:width .6s ease;}
 .dino-status{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink-soft);}
+.dino-status.fainted{color:var(--danger);}
+/* DINO HEARTS */
+.dino-hearts{display:flex;gap:10px;justify-content:center;align-items:center;margin:0 0 10px;}
+.heart-icon{font-size:22px;line-height:1;display:inline-block;}
+.heart-full{color:var(--almond);}
+.heart-full.happy{animation:heartbeat 2s ease-in-out infinite;}
+.heart-full.warn{color:var(--danger);animation:heartpulse 1.5s ease-in-out infinite;}
+.heart-empty{color:var(--border);}
+@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes heartpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
+/* DINO BIG ANIMATIONS */
+.dino-big-wrap{display:flex;justify-content:center;}
+.dino-big-wrap.idle{animation:dinoIdle 3s ease-in-out infinite;}
+.dino-big-wrap.weak{animation:dinoWeak 4s ease-in-out infinite;}
+.dino-big-wrap.fainted{transform:rotate(-15deg);filter:grayscale(0.8);}
+@keyframes dinoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes dinoWeak{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+/* REWARDS FAINTED OVERLAY */
+.rewards-store-wrap{position:relative;border-radius:20px;overflow:hidden;}
+.rewards-fainted-overlay{position:absolute;inset:0;background:rgba(251,254,251,0.92);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:10;}
+.rewards-fainted-dino{width:80px;margin:0 auto 14px;transform:rotate(-15deg);filter:grayscale(0.8);opacity:.9;}
+.rewards-fainted-dino svg{width:100%;height:auto;}
+.rewards-fainted-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--danger);margin-bottom:8px;}
+.rewards-fainted-sub{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;max-width:260px;}
+.rewards-fainted-progress{font-size:13px;font-weight:600;color:var(--ink);}
+/* HEART CHIP */
+.heart-chip-text{font-size:13px;letter-spacing:1px;}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
@@ -340,6 +364,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="streak-chip" id="tour-streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
         <div class="streak-chip">⭐ <span class="num" id="points-count">0</span> pts</div>
         <div class="streak-chip">✅ <span class="num" id="done-count">0/0</span> done</div>
+        <div class="streak-chip" id="heart-chip"><span class="heart-chip-text" id="heart-chip-text">❤️❤️❤️</span></div>
         <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
       </div>
       <div class="progress-bar-wrap" style="margin-top:14px;">
@@ -353,9 +378,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <div class="page" id="page-garden">
       <div class="garden-page">
         <div class="dino-card">
-          <div class="dino-big" id="dino-big"></div>
-          <div class="health-label">Dino health</div>
-          <div class="health-bar-wrap"><div class="health-bar-fill" id="health-bar" style="width:80%"></div></div>
+          <div class="dino-big-wrap" id="dino-big-wrap"><div class="dino-big" id="dino-big"></div></div>
+          <div class="dino-hearts" id="dino-hearts"></div>
           <div class="dino-status" id="dino-status-text">Feeling great!</div>
         </div>
         <div class="stats-grid">
@@ -379,9 +403,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
           <div><div class="points-num" id="reward-points">0</div><div class="points-label">points available</div></div>
           <div class="points-coin">🌟</div>
         </div>
-        <div class="rewards-section-title">Your pleasures</div>
-        <div class="reward-list" id="reward-list"></div>
-        <button class="add-reward-btn" onclick="showAddRewardModal()">+ Add a pleasure</button>
+        <div class="rewards-store-wrap" id="rewards-store-wrap">
+          <div class="rewards-section-title">Your pleasures</div>
+          <div class="reward-list" id="reward-list"></div>
+          <button class="add-reward-btn" id="add-reward-btn" onclick="showAddRewardModal()">+ Add a pleasure</button>
+        </div>
         <div class="rewards-section-title" style="margin-top:28px;">Purchase history</div>
         <div class="history-list" id="history-list"></div>
         <div id="history-more-wrap" style="margin-top:10px;display:none;"></div>
@@ -585,8 +611,8 @@ function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 function showToast(msg,dur=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
-function getHealth(){const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow)),done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;if(!total)return 100;return Math.min(100,Math.round((doneCount/total)*80+Math.min(state.streak*2,20)));}
-function statusText(h){if(h>=85)return'Thriving and happy!';if(h>=65)return'Feeling good today';if(h>=45)return'Could use some love…';if(h>=25)return'Not feeling great';return'Please complete your habits! 🥺';}
+function getHealth(){return(state?.dinoHearts??3)*33;}
+function heartStatusText(hearts,fainted){if(fainted||hearts===0)return'Your dino has fainted… 💔';if(hearts>=3)return'Thriving and happy! 🌟';if(hearts===2)return'Feeling good today';if(hearts===1)return'Not feeling great… 💛';return'Hanging by a thread… 🥺';}
 
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason,allowUndo=false){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();if(allowUndo){showUndoSnackbar(amt,reason);}else{showToast(`Enjoyed: ${reason} 🎉`);}}
@@ -624,16 +650,80 @@ window.undoRedemption=()=>{
 function checkStreak(){
   const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
   const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
-  if(total>0&&doneCount===total&&state.lastFullDay!==TODAY){
-    // Confirm the full day first, then and only then update bestStreak
-    state.lastFullDay=TODAY;
-    state.streak++;
-    if(state.lastFullDay===TODAY&&state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
-    awardPts(10+state.streak*2,`Streak day ${state.streak}`);
+  if(total>0&&doneCount===total){
+    // Revival mechanic — fainted dino revives on full day completion
+    if(state.dinoFainted){
+      state.dinoFainted=false;state.dinoHearts=1;
+      setTimeout(()=>showToast('Your dino is back! 🦕💖 Keep going!'),50);
+    }
+    if(state.lastFullDay!==TODAY){
+      // Confirm the full day first, then and only then update bestStreak
+      state.lastFullDay=TODAY;
+      state.streak++;
+      if(state.lastFullDay===TODAY&&state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
+      awardPts(10+state.streak*2,`Streak day ${state.streak}`);
+    }
   }
 }
 
-function renderDino(){const svg=getDinoSVG(getHealth());['dino-small','dino-big'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=svg;});}
+function renderDino(){
+  if(!state)return;
+  const hearts=state.dinoHearts??3;
+  const fainted=state.dinoFainted??false;
+  const svg=getDinoSVG(hearts*33);
+  // Today page small dino
+  const small=document.getElementById('dino-small');if(small)small.innerHTML=svg;
+  // Dino tab big dino
+  const big=document.getElementById('dino-big');if(big)big.innerHTML=svg;
+  const wrap=document.getElementById('dino-big-wrap');
+  if(wrap){
+    wrap.className='dino-big-wrap';
+    if(fainted)wrap.classList.add('fainted');
+    else if(hearts>=3)wrap.classList.add('idle');
+    else if(hearts<=1)wrap.classList.add('weak');
+  }
+  // Hearts row
+  const heartsEl=document.getElementById('dino-hearts');
+  if(heartsEl){
+    let h='';
+    for(let i=0;i<3;i++){
+      if(i<hearts){
+        const cls=hearts>=3?'heart-icon heart-full happy':(hearts===1?'heart-icon heart-full warn':'heart-icon heart-full');
+        h+=`<span class="${cls}">♥</span>`;
+      }else{h+=`<span class="heart-icon heart-empty">♡</span>`;}
+    }
+    heartsEl.innerHTML=h;
+  }
+}
+
+let _lastEvalDate=null;
+function evaluateHearts(){
+  if(!state)return;
+  if(state.lastHeartCheck===TODAY)return;
+  _lastEvalDate=TODAY;
+  // Look at yesterday's completions
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  const yk=dateKey(yest);const ydow=yest.getDay();
+  const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(ydow));
+  const done=state.completedDays[yk]||{};
+  const doneCount=scheduled.filter(t=>done[t.id]).length;
+  const total=scheduled.length;
+  let changed=false;
+  if(total>0){
+    const rate=doneCount/total;
+    if(rate<0.5){state.dinoHearts=Math.max(0,(state.dinoHearts??3)-1);changed=true;}
+    else if(rate===1){state.dinoHearts=Math.min(3,(state.dinoHearts??3)+1);changed=true;}
+  }
+  // Handle faint/revival transitions
+  if((state.dinoHearts??3)===0&&!state.dinoFainted){
+    state.dinoFainted=true;changed=true;
+    setTimeout(()=>showToast('Your dino has fainted 💔 Complete all habits today to revive them',4000),50);
+  } else if((state.dinoHearts??3)===1&&!state.dinoFainted&&changed){
+    setTimeout(()=>showToast('Your dino only has 1 heart left! Complete your habits 🥺'),50);
+  }
+  state.lastHeartCheck=TODAY;
+  save();
+}
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
@@ -670,13 +760,16 @@ function renderTasks(){
   document.getElementById('progress-bar').style.width=(ta?(td/ta*100):0)+'%';
 }
 function renderStats(){
-  const h=getHealth();
+  const hearts=state?.dinoHearts??3;const fainted=state?.dinoFainted??false;
   ['streak-count','stat-streak'].forEach(id=>document.getElementById(id).textContent=state.streak);
   ['points-count','stat-points','reward-points'].forEach(id=>document.getElementById(id).textContent=state.points);
   document.getElementById('stat-best').textContent=state.bestStreak;
   document.getElementById('stat-spent').textContent=state.totalSpent;
-  document.getElementById('health-bar').style.width=h+'%';
-  const st=document.getElementById('dino-status-text');if(st)st.textContent=statusText(h);
+  const st=document.getElementById('dino-status-text');
+  if(st){st.textContent=heartStatusText(hearts,fainted);st.className='dino-status'+(fainted?' fainted':'');}
+  // Heart chip on today page
+  const hct=document.getElementById('heart-chip-text');
+  if(hct){if(fainted){hct.textContent='💔';}else{hct.textContent='❤️'.repeat(hearts)+'♡'.repeat(3-hearts);}}
   const wd=document.getElementById('week-dots');if(!wd)return;wd.innerHTML='';
   const WMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dn=['S','M','T','W','T','F','S'],now=new Date(),dow=now.getDay();
@@ -716,6 +809,23 @@ window.loadMoreHistory=()=>{historyVisible+=10;renderHistorySection();};
 window.collapseHistory=()=>{historyVisible=5;renderHistorySection();};
 function renderRewards(){
   historyVisible=5;
+  // Fainted overlay
+  const storeWrap=document.getElementById('rewards-store-wrap');
+  if(storeWrap){
+    const existing=storeWrap.querySelector('.rewards-fainted-overlay');
+    if(existing)existing.remove();
+    if(state?.dinoFainted){
+      const todayDow=new Date().getDay();
+      const todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
+      const done=state.completedDays[TODAY]||{};
+      const doneCount=todayTasks.filter(t=>done[t.id]).length;
+      const total=todayTasks.length;
+      const pct=total>0?Math.round((doneCount/total)*100):0;
+      const ov=document.createElement('div');ov.className='rewards-fainted-overlay';
+      ov.innerHTML=`<div class="rewards-fainted-dino">${getDinoSVG(0)}</div><div class="rewards-fainted-title">Your dino has fainted 💔</div><div class="rewards-fainted-sub">Complete all your habits today to revive them and unlock your rewards.</div><div class="rewards-fainted-progress">${pct}% of today's habits done</div>`;
+      storeWrap.appendChild(ov);
+    }
+  }
   const list=document.getElementById('reward-list');list.innerHTML='';
   for(const r of state.rewards){
     const can=state.points>=r.cost;
@@ -735,7 +845,7 @@ function renderSectionTabs(){
     const btn=document.createElement('button');btn.className='section-tab'+(cf===s.id?' active':'');btn.onclick=function(){filterSection(s.id,this);};btn.textContent=s.emoji+' '+s.label;c.appendChild(btn);
   }
 }
-function updateAll(){renderDino();renderTasks();renderStats();renderRewards();renderSectionTabs();}
+function updateAll(){evaluateHearts();renderDino();renderTasks();renderStats();renderRewards();renderSectionTabs();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1399,9 +1509,12 @@ onAuthStateChanged(auth,async(user)=>{
       if(!state.sections)state.sections=DEFAULT_SECTIONS;
       state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
       state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
+      if(state.dinoHearts==null)state.dinoHearts=3;
+      if(state.dinoFainted==null)state.dinoFainted=false;
+      if(state.lastHeartCheck==null)state.lastHeartCheck=null;
       applyTheme(state.theme||'blush');
     }else{
-      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
+      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null};
       await setDoc(ref,state);
       isNewUser=true;
       applyTheme('blush');
