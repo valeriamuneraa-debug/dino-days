@@ -302,6 +302,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* ACCOUNT APPEARANCE SWATCHES */
 .theme-swatches{display:flex;gap:12px;align-items:center;padding:4px;margin:-4px;margin-bottom:2px;overflow:visible;}
 .theme-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;padding:0;transition:box-shadow .2s;flex-shrink:0;}
+
+/* DINO NAME SCREEN */
+#onboarding-dino-name{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+.dino-name-dino-wrap{width:160px;margin:0 auto 16px;animation:dinoIdle 3s ease-in-out infinite;}
+.dino-name-dino-wrap svg{width:100%;height:auto;}
+.dino-name-preview{font-size:14px;color:var(--ink-faint);margin:10px 0 20px;font-style:italic;}
+.dino-rules-card{background:rgba(255,255,255,0.7);border-radius:20px;padding:20px;margin:0 0 20px;text-align:left;width:100%;}
+.dino-rules-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);margin-bottom:16px;}
+.dino-rule-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.dino-rule-row:last-child{margin-bottom:0;}
+.dino-rule-icon{width:36px;height:36px;background:var(--linen);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.dino-rule-text{flex:1;}
+.dino-rule-label{font-size:13px;font-weight:500;color:var(--ink);}
+.dino-rule-desc{font-size:12px;color:var(--ink-faint);margin-top:2px;}
+/* DINO NAME IN DINO TAB */
+.dino-tab-name{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);text-align:center;margin-bottom:4px;}
+/* TODAY HERO DINO LINE */
+.hero-dino-line{font-size:12px;color:var(--ink-faint);margin-top:3px;}
+/* ACCOUNT DINO ROW */
+.acc-dino-row{display:flex;align-items:center;gap:12px;padding:6px 0;}
+.acc-dino-mini{width:40px;height:40px;flex-shrink:0;overflow:hidden;display:flex;align-items:center;}
+.acc-dino-mini svg{width:60px;height:auto;margin-top:-6px;}
+.acc-dino-name-val{flex:1;font-size:14px;font-weight:500;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -357,6 +380,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="today-hero-left">
           <h2 id="hero-greeting">Good morning</h2>
           <div class="sub" id="hero-sub">Let's make today count</div>
+          <div class="hero-dino-line" id="hero-dino-line" style="display:none;"></div>
         </div>
         <div class="dino-wrap" id="dino-small"></div>
       </div>
@@ -379,6 +403,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="garden-page">
         <div class="dino-card">
           <div class="dino-big-wrap" id="dino-big-wrap"><div class="dino-big" id="dino-big"></div></div>
+          <div class="dino-tab-name" id="dino-tab-name">Dino</div>
           <div class="dino-hearts" id="dino-hearts"></div>
           <div class="dino-status" id="dino-status-text">Feeling great!</div>
         </div>
@@ -429,6 +454,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div class="theme-pick-sub">Choose a color palette for your app. You can always change this later.</div>
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
+</div>
+<div id="onboarding-dino-name" style="display:none;">
+  <div class="dino-name-dino-wrap" id="name-screen-dino"></div>
+  <div class="welcome-title" style="margin-bottom:10px;">Meet your new companion!</div>
+  <div class="welcome-sub" style="margin-bottom:20px;">This little dino will grow with you. Keep up with your habits to keep them happy and healthy.</div>
+  <input class="form-input dino-name-input-field" id="dino-name-input" placeholder="Give them a name…" maxlength="20" oninput="updateDinoNamePreview()" style="text-align:center;max-width:280px;"/>
+  <div class="dino-name-preview" id="dino-name-preview">Hello, I'm Dino!</div>
+  <div class="dino-rules-card">
+    <div class="dino-rules-title">How it works</div>
+    <div class="dino-rule-row"><div class="dino-rule-icon">❤️</div><div class="dino-rule-text"><div class="dino-rule-label">Complete habits, earn hearts</div><div class="dino-rule-desc">Finish all your habits in a day to gain a heart (max 3)</div></div></div>
+    <div class="dino-rule-row"><div class="dino-rule-icon">💔</div><div class="dino-rule-text"><div class="dino-rule-label">Miss habits, lose hearts</div><div class="dino-rule-desc">Complete less than 50% in a day and lose a heart</div></div></div>
+    <div class="dino-rule-row"><div class="dino-rule-icon">🏪</div><div class="dino-rule-text"><div class="dino-rule-label">Fainted dino = locked rewards</div><div class="dino-rule-desc">Revive them by completing a full day of habits</div></div></div>
+  </div>
+  <button class="btn btn-primary" style="width:100%;max-width:280px;padding:16px;" onclick="confirmDinoName()">Continue →</button>
+  <button class="welcome-skip" onclick="skipDinoNaming()">Skip</button>
 </div>
 <div id="onboarding-welcome" style="display:none;">
   <div class="welcome-dino" id="welcome-dino"></div>
@@ -511,6 +551,29 @@ window.pickTheme=(name)=>{
 window.confirmThemePick=()=>{
   state.theme=_selectedTheme;save();
   document.getElementById('onboarding-theme').style.display='none';
+  showDinoNameScreen();
+};
+function showDinoNameScreen(){
+  const inp=document.getElementById('dino-name-input');
+  if(inp)inp.value=state.dinoName&&state.dinoName!=='Dino'?state.dinoName:'';
+  window.updateDinoNamePreview();
+  document.getElementById('name-screen-dino').innerHTML=getDinoSVG(100);
+  document.getElementById('onboarding-dino-name').style.display='flex';
+}
+window.updateDinoNamePreview=()=>{
+  const val=(document.getElementById('dino-name-input')?.value||'').trim();
+  const pr=document.getElementById('dino-name-preview');
+  if(pr)pr.textContent=`Hello, I'm ${val||'Dino'}!`;
+};
+window.confirmDinoName=()=>{
+  const val=(document.getElementById('dino-name-input')?.value||'').trim();
+  state.dinoName=val||'Dino';save();
+  document.getElementById('onboarding-dino-name').style.display='none';
+  showWelcome();
+};
+window.skipDinoNaming=()=>{
+  if(!state.dinoName)state.dinoName='Dino';
+  document.getElementById('onboarding-dino-name').style.display='none';
   showWelcome();
 };
 window.applyAccountTheme=(name)=>{
@@ -654,7 +717,7 @@ function checkStreak(){
     // Revival mechanic — fainted dino revives on full day completion
     if(state.dinoFainted){
       state.dinoFainted=false;state.dinoHearts=1;
-      setTimeout(()=>showToast('Your dino is back! 🦕💖 Keep going!'),50);
+      setTimeout(()=>showToast(`${state.dinoName||'Dino'} is back! 🦕💖 Keep going!`),50);
     }
     if(state.lastFullDay!==TODAY){
       // Confirm the full day first, then and only then update bestStreak
@@ -682,6 +745,9 @@ function renderDino(){
     else if(hearts>=3)wrap.classList.add('idle');
     else if(hearts<=1)wrap.classList.add('weak');
   }
+  // Dino name
+  const nameEl=document.getElementById('dino-tab-name');
+  if(nameEl)nameEl.textContent=state.dinoName||'Dino';
   // Hearts row
   const heartsEl=document.getElementById('dino-hearts');
   if(heartsEl){
@@ -715,11 +781,12 @@ function evaluateHearts(){
     else if(rate===1){state.dinoHearts=Math.min(3,(state.dinoHearts??3)+1);changed=true;}
   }
   // Handle faint/revival transitions
+  const dn=state.dinoName||'Dino';
   if((state.dinoHearts??3)===0&&!state.dinoFainted){
     state.dinoFainted=true;changed=true;
-    setTimeout(()=>showToast('Your dino has fainted 💔 Complete all habits today to revive them',4000),50);
+    setTimeout(()=>showToast(`${dn} has fainted 💔 Complete all habits today to revive them`,4000),50);
   } else if((state.dinoHearts??3)===1&&!state.dinoFainted&&changed){
-    setTimeout(()=>showToast('Your dino only has 1 heart left! Complete your habits 🥺'),50);
+    setTimeout(()=>showToast(`${dn} only has 1 heart left! Complete your habits 🥺`),50);
   }
   state.lastHeartCheck=TODAY;
   save();
@@ -770,6 +837,9 @@ function renderStats(){
   // Heart chip on today page
   const hct=document.getElementById('heart-chip-text');
   if(hct){if(fainted){hct.textContent='💔';}else{hct.textContent='❤️'.repeat(hearts)+'♡'.repeat(3-hearts);}}
+  // Hero dino line (thriving message)
+  const hdl=document.getElementById('hero-dino-line');
+  if(hdl){if(hearts>=3&&!fainted){hdl.textContent=`${state.dinoName||'Dino'} is thriving today! 🌟`;hdl.style.display='block';}else{hdl.style.display='none';}}
   const wd=document.getElementById('week-dots');if(!wd)return;wd.innerHTML='';
   const WMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dn=['S','M','T','W','T','F','S'],now=new Date(),dow=now.getDay();
@@ -821,8 +891,9 @@ function renderRewards(){
       const doneCount=todayTasks.filter(t=>done[t.id]).length;
       const total=todayTasks.length;
       const pct=total>0?Math.round((doneCount/total)*100):0;
+      const rdn=state.dinoName||'Dino';
       const ov=document.createElement('div');ov.className='rewards-fainted-overlay';
-      ov.innerHTML=`<div class="rewards-fainted-dino">${getDinoSVG(0)}</div><div class="rewards-fainted-title">Your dino has fainted 💔</div><div class="rewards-fainted-sub">Complete all your habits today to revive them and unlock your rewards.</div><div class="rewards-fainted-progress">${pct}% of today's habits done</div>`;
+      ov.innerHTML=`<div class="rewards-fainted-dino">${getDinoSVG(0)}</div><div class="rewards-fainted-title">${rdn} has fainted 💔</div><div class="rewards-fainted-sub">Complete all your habits today to revive them and unlock your rewards.</div><div class="rewards-fainted-progress">${pct}% of today's habits done</div>`;
       storeWrap.appendChild(ov);
     }
   }
@@ -1231,6 +1302,11 @@ window.showAccountModal=()=>{
 
   <div class="acc-divider"></div>
 
+  <div class="acc-section-title">Your dino</div>
+  <div id="acc-dino-section"><div class="acc-dino-row"><div class="acc-dino-mini">${getDinoSVG((state?.dinoHearts??3)*33)}</div><div class="acc-dino-name-val">${state?.dinoName||'Dino'}</div><button class="task-action-btn" onclick="startEditDinoName()">✏️</button></div></div>
+
+  <div class="acc-divider"></div>
+
   <div class="acc-section-title">Preferences</div>
   <div class="acc-pref-row">
     <div>
@@ -1266,6 +1342,19 @@ window.showAccountModal=()=>{
   openModal();
 };
 
+window.startEditDinoName=()=>{
+  const sec=document.getElementById('acc-dino-section');if(!sec)return;
+  const name=state.dinoName||'Dino';
+  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;"><input class="form-input" id="acc-dino-input" value="${name}" maxlength="20" style="flex:1;font-size:14px;padding:8px 12px;text-align:center;" onkeydown="if(event.key==='Enter')saveDinoName()"/><button class="btn btn-primary" style="padding:8px 14px;font-size:13px;flex-shrink:0;" onclick="saveDinoName()">Save</button></div>`;
+  setTimeout(()=>document.getElementById('acc-dino-input')?.focus(),50);
+};
+window.saveDinoName=()=>{
+  const val=(document.getElementById('acc-dino-input')?.value||'').trim();
+  state.dinoName=val||'Dino';save();updateAll();
+  const sec=document.getElementById('acc-dino-section');
+  if(sec)sec.innerHTML=`<div class="acc-dino-row"><div class="acc-dino-mini">${getDinoSVG((state.dinoHearts??3)*33)}</div><div class="acc-dino-name-val">${state.dinoName}</div><button class="task-action-btn" onclick="startEditDinoName()">✏️</button></div>`;
+  showToast(`Say hi to ${state.dinoName}! 🦕`);
+};
 window.doChangePassword=async()=>{
   const curr=document.getElementById('acc-curr-pw').value;
   const nw=document.getElementById('acc-new-pw').value;
@@ -1512,9 +1601,10 @@ onAuthStateChanged(auth,async(user)=>{
       if(state.dinoHearts==null)state.dinoHearts=3;
       if(state.dinoFainted==null)state.dinoFainted=false;
       if(state.lastHeartCheck==null)state.lastHeartCheck=null;
+      if(state.dinoName==null)state.dinoName='Dino';
       applyTheme(state.theme||'blush');
     }else{
-      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null};
+      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
       await setDoc(ref,state);
       isNewUser=true;
       applyTheme('blush');
