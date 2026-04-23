@@ -597,12 +597,6 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
-const auth=getAuth(app),db=getFirestore(app);
-// Apply cached theme instantly so loading screen matches user's saved theme
-{const cachedTheme=localStorage.getItem('dino-theme')||'blush';applyTheme(cachedTheme);}
-setPersistence(auth,browserLocalPersistence).catch(console.error);
-
 const THEMES={
   blush:   {almond:'#D0B8AC',powder:'#F3D8C7',linen:'#EFE5DC',porcelain:'#FBFEFB',pageBg:'#FBFEFB',border:'#EFE5DC'},
   lavender:{almond:'#B3AAC4',powder:'#D2C6DF',linen:'#DEDAE5',porcelain:'#F2F2F2',pageBg:'#F2F2F2',border:'#DEDAE5'},
@@ -618,6 +612,13 @@ function applyTheme(name){
   r.setProperty('--porcelain',t.porcelain);r.setProperty('--page-bg',t.pageBg);r.setProperty('--border',t.border);
   localStorage.setItem('dino-theme',name);
 }
+
+// Apply cached theme instantly so loading screen matches user's saved theme
+try{const cachedTheme=localStorage.getItem('dino-theme')||'blush';applyTheme(cachedTheme);}catch(e){console.warn('Could not apply cached theme:',e);}
+
+const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
+const auth=getAuth(app),db=getFirestore(app);
+setPersistence(auth,browserLocalPersistence).catch(console.error);
 
 let _selectedTheme='blush';
 let _selectedGoals=new Set(),_selectedSuggestions={},_customHabits=[];
@@ -1901,65 +1902,80 @@ function initModalDrag(){
 initModalDrag();
 
 onAuthStateChanged(auth,async(user)=>{
-  isNewUser=false;
-  if(user){
-    currentUser=user;
-    document.getElementById('user-avatar').textContent=(user.email||'?')[0].toUpperCase();
-    const ref=doc(db,'users',user.uid);
-    const snap=await getDoc(ref);
-    if(snap.exists()){
-      state=snap.data();
-      if(!state.completedDays)state.completedDays={};
-      if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
-      if(!state.history)state.history=[];
-      if(!state.rewards)state.rewards=DEFAULT_REWARDS;
-      if(!state.sections)state.sections=DEFAULT_SECTIONS;
-      if(!state.tasks)state.tasks=[];
-      state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
-      state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
-      if(state.dinoHearts==null)state.dinoHearts=3;
-      if(state.dinoFainted==null)state.dinoFainted=false;
-      if(state.lastHeartCheck==null)state.lastHeartCheck=null;
-      if(state.dinoName==null)state.dinoName='Dino';
-      applyTheme(state.theme||'blush');
-    }else{
-      state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
-      await setDoc(ref,state);
-      isNewUser=true;
-      applyTheme('blush');
-    }
-    unsub=onSnapshot(ref,(snap)=>{
+  try{
+    isNewUser=false;
+    if(user){
+      currentUser=user;
+      document.getElementById('user-avatar').textContent=(user.email||'?')[0].toUpperCase();
+      const ref=doc(db,'users',user.uid);
+      const snap=await getDoc(ref);
       if(snap.exists()){
-        const remote=snap.data();
-        if(JSON.stringify(remote)!==JSON.stringify(state)){
-          state=remote;
-          if(!state.completedDays)state.completedDays={};
-          if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
-          if(!state.sections)state.sections=[];
-          if(!state.tasks)state.tasks=[];
-          updateAll();
-        }
+        state=snap.data();
+        if(!state.completedDays)state.completedDays={};
+        if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
+        if(!state.history)state.history=[];
+        if(!state.rewards)state.rewards=DEFAULT_REWARDS;
+        if(!state.sections)state.sections=DEFAULT_SECTIONS;
+        if(!state.tasks)state.tasks=[];
+        state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
+        state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
+        if(state.dinoHearts==null)state.dinoHearts=3;
+        if(state.dinoFainted==null)state.dinoFainted=false;
+        if(state.lastHeartCheck==null)state.lastHeartCheck=null;
+        if(state.dinoName==null)state.dinoName='Dino';
+        applyTheme(state.theme||'blush');
+      }else{
+        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
+        await setDoc(ref,state);
+        isNewUser=true;
+        applyTheme('blush');
       }
-    });
+      unsub=onSnapshot(ref,(snap)=>{
+        if(snap.exists()){
+          const remote=snap.data();
+          if(JSON.stringify(remote)!==JSON.stringify(state)){
+            state=remote;
+            if(!state.completedDays)state.completedDays={};
+            if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
+            if(!state.sections)state.sections=[];
+            if(!state.tasks)state.tasks=[];
+            updateAll();
+          }
+        }
+      });
+      document.getElementById('loading-screen').style.display='none';
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app-screen').style.display='block';
+      currentTab='today';restoreActiveTab();
+      document.getElementById('header-date').textContent=formatDate(new Date());
+      const[g,s]=getGreeting();
+      document.getElementById('hero-greeting').textContent=g;
+      document.getElementById('hero-sub').textContent=s;
+      updateAll();
+      if(isNewUser){setTimeout(()=>showThemePicker(),500);}
+      else if(!state.onboardingComplete){showWelcome();}
+    }else{
+      currentUser=null;state=null;
+      if(unsub){unsub();unsub=null;}
+      document.getElementById('loading-screen').style.display='none';
+      document.getElementById('app-screen').style.display='none';
+      document.getElementById('auth-screen').style.display='flex';
+    }
+  }catch(e){
+    console.error('Auth state error:',e);
     document.getElementById('loading-screen').style.display='none';
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    currentTab='today';restoreActiveTab();
-    document.getElementById('header-date').textContent=formatDate(new Date());
-    const[g,s]=getGreeting();
-    document.getElementById('hero-greeting').textContent=g;
-    document.getElementById('hero-sub').textContent=s;
-    updateAll();
-    if(isNewUser){setTimeout(()=>showThemePicker(),500);}
-    else if(!state.onboardingComplete){showWelcome();}
-  }else{
-    currentUser=null;state=null;
-    if(unsub){unsub();unsub=null;}
-    document.getElementById('loading-screen').style.display='none';
-    document.getElementById('app-screen').style.display='none';
     document.getElementById('auth-screen').style.display='flex';
   }
 });
+
+setTimeout(()=>{
+  const ls=document.getElementById('loading-screen');
+  if(ls&&ls.style.display!=='none'){
+    console.warn('Loading timeout — forcing auth screen');
+    ls.style.display='none';
+    document.getElementById('auth-screen').style.display='flex';
+  }
+},8000);
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
