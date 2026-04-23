@@ -599,6 +599,8 @@ import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot}from'https://www.gsta
 
 const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
 const auth=getAuth(app),db=getFirestore(app);
+// Apply cached theme instantly so loading screen matches user's saved theme
+{const cachedTheme=localStorage.getItem('dino-theme')||'blush';applyTheme(cachedTheme);}
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 
 const THEMES={
@@ -614,6 +616,7 @@ function applyTheme(name){
   const r=document.documentElement.style;
   r.setProperty('--almond',t.almond);r.setProperty('--powder',t.powder);r.setProperty('--linen',t.linen);
   r.setProperty('--porcelain',t.porcelain);r.setProperty('--page-bg',t.pageBg);r.setProperty('--border',t.border);
+  localStorage.setItem('dino-theme',name);
 }
 
 let _selectedTheme='blush';
@@ -1712,6 +1715,7 @@ window.confirmDeleteAccount=async()=>{
     // Reset local state
     state=null;
     currentUser=null;
+    localStorage.removeItem('dino-theme');
 
     // Navigate directly to auth screen — don't rely on onAuthStateChanged
     document.getElementById('loading-screen').style.display='none';
@@ -1740,7 +1744,7 @@ window.showAuthTab=(tab)=>{['login','signup'].forEach(t=>{document.getElementByI
 window.doLogin=async()=>{const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}try{const rememberMe=document.getElementById('remember-me').checked;await setPersistence(auth,rememberMe?browserLocalPersistence:browserSessionPersistence);await signInWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign in failed. Please try again.','error');}};
 window.doSignup=async()=>{const email=document.getElementById('signup-email').value.trim(),pass=document.getElementById('signup-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}try{await setPersistence(auth,browserLocalPersistence);await createUserWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign up failed.','error');}};
 window.doForgot=async()=>{const email=document.getElementById('login-email').value.trim();if(!email){showMsg('Enter your email above first.','error');return;}try{await sendPasswordResetEmail(auth,email);showMsg('Reset email sent! Check your inbox.','success');}catch(e){showMsg('Could not send reset email.','error');}};
-window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}await signOut(auth);closeModal();};
+window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}localStorage.removeItem('dino-theme');await signOut(auth);closeModal();};
 
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
