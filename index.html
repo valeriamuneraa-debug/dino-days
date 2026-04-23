@@ -656,7 +656,10 @@ window.confirmHabits=()=>{
     for(const idx of sels){const s=suggs[idx];if(s)state.tasks.push({id:'h'+(ts+ ++tc),name:s.n,emoji:s.e,section:g.id,points:5,days:[0,1,2,3,4,5,6]});}
   }
   for(const ch of _customHabits){state.tasks.push({id:'h'+(ts+ ++tc),name:ch.name,emoji:ch.emoji,section:ch.sectionId,points:5,days:[0,1,2,3,4,5,6]});}
+  if(!state.completedDays)state.completedDays={};
+  if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
   save();
+  updateAll();
   document.getElementById('onboarding-habits').style.display='none';
   showDinoNameScreen();
 };
@@ -972,6 +975,24 @@ function renderTasks(){
       const tDays=task.days??ALL_DAYS;
       const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:10px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
       item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:11px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      list.appendChild(item);
+    }c.appendChild(list);
+  }
+  // Fallback: show tasks whose section id doesn't match any known section
+  const knownSecs=new Set(state.sections.map(s=>s.id));
+  const orphanTasks=state.tasks.filter(t=>!knownSecs.has(t.section)&&(t.days??ALL_DAYS).includes(todayDow));
+  if(orphanTasks.length){
+    const lbl=document.createElement('div');lbl.className='section-label';
+    const ds=orphanTasks.filter(t=>done[t.id]).length;
+    lbl.innerHTML=`<span>Other</span><span class="section-badge">${ds}/${orphanTasks.length}</span>`;c.appendChild(lbl);
+    const list=document.createElement('div');list.className='task-list';
+    for(const task of orphanTasks){
+      ta++;const isDone=!!done[task.id];if(isDone)td++;
+      const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
+      item.onclick=(e)=>window.expandTask(task.id,e);
+      const tDays=task.days??ALL_DAYS;
+      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:10px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:11px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -1664,6 +1685,7 @@ function endTour(){
   document.getElementById('tour-overlay').style.display='none';
   document.getElementById('tour-tooltip').style.display='none';
   if(state&&!state.onboardingComplete){state.onboardingComplete=true;save();}
+  updateAll();
 }
 window.endTour=endTour;
 
@@ -1753,6 +1775,7 @@ onAuthStateChanged(auth,async(user)=>{
       if(!state.history)state.history=[];
       if(!state.rewards)state.rewards=DEFAULT_REWARDS;
       if(!state.sections)state.sections=DEFAULT_SECTIONS;
+      if(!state.tasks)state.tasks=[];
       state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
       state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
       if(state.dinoHearts==null)state.dinoHearts=3;
@@ -1774,6 +1797,7 @@ onAuthStateChanged(auth,async(user)=>{
           if(!state.completedDays)state.completedDays={};
           if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
           if(!state.sections)state.sections=[];
+          if(!state.tasks)state.tasks=[];
           updateAll();
         }
       }
