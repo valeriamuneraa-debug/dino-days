@@ -490,10 +490,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <div id="onboarding-habits" style="display:none;">
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
-    <div class="welcome-sub" style="margin-bottom:0;">Tap to add the ones that feel right. You can always change these later.</div>
+    <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add the ones that feel right. You can always change these later.</div>
   </div>
   <div id="habits-suggestions-content" style="width:100%;"></div>
-  <button class="btn btn-primary" id="habits-continue-btn" style="width:100%;padding:16px;margin-top:4px;" onclick="confirmHabits()">Continue →</button>
+  <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
+    <button class="btn btn-primary" id="habits-continue-btn" style="width:100%;flex:none;" onclick="confirmHabits()">Continue →</button>
+  </div>
 </div>
 <div id="onboarding-dino-name" style="display:none;">
   <div class="dino-name-dino-wrap" id="name-screen-dino"></div>
