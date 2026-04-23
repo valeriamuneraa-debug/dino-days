@@ -325,6 +325,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .acc-dino-mini{width:40px;height:40px;flex-shrink:0;overflow:hidden;display:flex;align-items:center;}
 .acc-dino-mini svg{width:60px;height:auto;margin-top:-6px;}
 .acc-dino-name-val{flex:1;font-size:14px;font-weight:500;color:var(--ink);}
+
+/* GOAL PICKER */
+#onboarding-goals{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:14px;}
+.goal-card{border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:white;border:1px solid var(--border);position:relative;}
+.goal-card.selected{background:var(--powder);border:1.5px solid var(--almond);}
+.goal-card-check{position:absolute;top:8px;right:10px;font-size:12px;color:var(--almond);display:none;font-weight:700;}
+.goal-card.selected .goal-card-check{display:block;}
+.goal-card-emoji{font-size:28px;margin-bottom:8px;}
+.goal-card-name{font-size:13px;font-weight:500;color:var(--ink);}
+.goal-card-desc{font-size:11px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
+.goal-error{font-size:13px;color:var(--danger);margin-bottom:10px;min-height:18px;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease;}
+/* HABIT SUGGESTIONS */
+#onboarding-habits{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+.habit-group{margin-bottom:18px;width:100%;}
+.habit-group-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);font-weight:500;margin-bottom:8px;}
+.habit-chips{display:flex;flex-wrap:wrap;}
+.habit-chip{background:var(--linen);border-radius:100px;padding:8px 16px;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:4px;border:1px solid var(--border);transition:all .2s;user-select:none;}
+.habit-chip.selected{background:var(--powder);border-color:var(--almond);font-weight:500;}
+.custom-habit-chip{background:var(--linen);border-radius:100px;padding:6px 10px 6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin:4px;border:1px solid var(--border);}
+.custom-habit-remove{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:0;line-height:1;font-family:'DM Sans',sans-serif;}
 </style>
 </head>
 <body>
@@ -455,6 +478,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
+<div id="onboarding-goals" style="display:none;">
+  <div style="text-align:center;width:100%;margin-bottom:20px;">
+    <div class="welcome-title" style="margin-bottom:8px;">What do you want to work on?</div>
+    <div class="welcome-sub" style="margin-bottom:0;">Select everything that resonates. We'll create your habit categories from these.</div>
+  </div>
+  <div id="goal-grid" class="goal-grid"></div>
+  <div class="goal-error" id="goal-error"></div>
+  <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
+</div>
+<div id="onboarding-habits" style="display:none;">
+  <div style="text-align:center;width:100%;margin-bottom:20px;">
+    <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
+    <div class="welcome-sub" style="margin-bottom:0;">Tap to add the ones that feel right. You can always change these later.</div>
+  </div>
+  <div id="habits-suggestions-content" style="width:100%;"></div>
+  <button class="btn btn-primary" id="habits-continue-btn" style="width:100%;padding:16px;margin-top:4px;" onclick="confirmHabits()">Continue →</button>
+</div>
 <div id="onboarding-dino-name" style="display:none;">
   <div class="dino-name-dino-wrap" id="name-screen-dino"></div>
   <div class="welcome-title" style="margin-bottom:10px;">Meet your new companion!</div>
@@ -532,6 +572,95 @@ function applyTheme(name){
 }
 
 let _selectedTheme='blush';
+let _selectedGoals=new Set(),_selectedSuggestions={},_customHabits=[];
+
+function showGoalPicker(){
+  _selectedGoals=new Set();_selectedSuggestions={};_customHabits=[];
+  const grid=document.getElementById('goal-grid');
+  if(grid)grid.innerHTML=GOAL_OPTIONS.map(g=>`<div class="goal-card" id="gcard-${g.id}" onclick="toggleGoal('${g.id}')"><div class="goal-card-check">✓</div><div class="goal-card-emoji">${g.emoji}</div><div class="goal-card-name">${g.name}</div><div class="goal-card-desc">${g.desc}</div></div>`).join('');
+  const err=document.getElementById('goal-error');if(err)err.textContent='';
+  document.getElementById('onboarding-goals').style.display='flex';
+}
+window.toggleGoal=(id)=>{
+  if(_selectedGoals.has(id))_selectedGoals.delete(id);else _selectedGoals.add(id);
+  const card=document.getElementById('gcard-'+id);if(card)card.classList.toggle('selected',_selectedGoals.has(id));
+};
+window.confirmGoals=()=>{
+  if(_selectedGoals.size===0){
+    const err=document.getElementById('goal-error');if(err)err.textContent='Pick at least one goal to continue';
+    const btn=document.getElementById('goals-continue-btn');
+    if(btn){btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');setTimeout(()=>btn.classList.remove('shake'),400);}
+    return;
+  }
+  for(const id of _selectedGoals){if(!_selectedSuggestions[id])_selectedSuggestions[id]=new Set();}
+  document.getElementById('onboarding-goals').style.display='none';
+  showHabitSuggestions();
+};
+function showHabitSuggestions(){
+  renderHabitContent();
+  document.getElementById('onboarding-habits').style.display='flex';
+}
+function renderHabitContent(){
+  const container=document.getElementById('habits-suggestions-content');if(!container)return;
+  let html='';
+  for(const g of GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id))){
+    const sels=_selectedSuggestions[g.id]||new Set();
+    const suggs=HABIT_SUGGESTIONS_DATA[g.id]||[];
+    html+=`<div class="habit-group"><div class="habit-group-label">${g.emoji} ${g.secLabel}</div><div class="habit-chips">`;
+    suggs.forEach((s,idx)=>{html+=`<span class="habit-chip${sels.has(idx)?' selected':''}" id="chip-${g.id}-${idx}" onclick="toggleSuggestion('${g.id}',${idx})">${s.e} ${s.n}</span>`;});
+    html+=`</div></div>`;
+  }
+  if(_customHabits.length>0){
+    html+=`<div class="habit-group"><div class="habit-group-label">✨ My habits</div><div class="habit-chips">`;
+    _customHabits.forEach((ch,idx)=>{html+=`<span class="custom-habit-chip">${ch.emoji} ${ch.name}<button class="custom-habit-remove" onclick="removeCustomHabit(${idx})">×</button></span>`;});
+    html+=`</div></div>`;
+  }
+  const secOpts=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map((g,i)=>`<option value="${g.id}"${i===0?' selected':''}>${g.emoji} ${g.secLabel}</option>`).join('');
+  html+=`<div id="custom-habit-form-area"><button class="btn btn-secondary" style="font-size:13px;padding:8px 16px;margin-bottom:16px;" onclick="showCustomHabitForm()">+ Add your own</button></div>`;
+  container.innerHTML=html;
+  updateHabitsContinueBtn();
+}
+window.toggleSuggestion=(goalId,idx)=>{
+  if(!_selectedSuggestions[goalId])_selectedSuggestions[goalId]=new Set();
+  const s=_selectedSuggestions[goalId];
+  if(s.has(idx))s.delete(idx);else s.add(idx);
+  const chip=document.getElementById(`chip-${goalId}-${idx}`);
+  if(chip)chip.classList.toggle('selected',s.has(idx));
+  updateHabitsContinueBtn();
+};
+window.showCustomHabitForm=()=>{
+  const area=document.getElementById('custom-habit-form-area');if(!area)return;
+  const secOpts=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map((g,i)=>`<option value="${g.id}"${i===0?' selected':''}>${g.emoji} ${g.secLabel}</option>`).join('');
+  area.innerHTML=`<div style="background:rgba(255,255,255,0.7);border-radius:16px;padding:14px;margin-bottom:16px;"><div style="display:flex;gap:8px;margin-bottom:8px;"><input class="form-input" id="ch-emoji" placeholder="✨" maxlength="2" style="width:58px;text-align:center;flex-shrink:0;padding:10px 6px;"/><input class="form-input" id="ch-name" placeholder="Habit name" style="flex:1;" onkeydown="if(event.key==='Enter')addCustomHabit()"/></div><div style="display:flex;gap:8px;"><select class="form-select" id="ch-section" style="flex:1;">${secOpts}</select><button class="btn btn-primary" style="padding:8px 14px;font-size:13px;flex-shrink:0;" onclick="addCustomHabit()">Add</button></div></div>`;
+  setTimeout(()=>document.getElementById('ch-name')?.focus(),50);
+};
+window.addCustomHabit=()=>{
+  const name=(document.getElementById('ch-name')?.value||'').trim();if(!name)return;
+  const emoji=(document.getElementById('ch-emoji')?.value||'').trim()||'✨';
+  const sectionId=document.getElementById('ch-section')?.value||GOAL_OPTIONS.find(g=>_selectedGoals.has(g.id))?.id||'';
+  _customHabits.push({emoji,name,sectionId});renderHabitContent();
+};
+window.removeCustomHabit=(idx)=>{_customHabits.splice(idx,1);renderHabitContent();};
+function updateHabitsContinueBtn(){
+  const btn=document.getElementById('habits-continue-btn');if(!btn)return;
+  const hasAny=Object.values(_selectedSuggestions).some(s=>s.size>0)||_customHabits.length>0;
+  btn.textContent=hasAny?'Continue →':'Skip for now →';
+}
+window.confirmHabits=()=>{
+  state.sections=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map(g=>({id:g.id,label:g.secLabel,emoji:g.emoji}));
+  state.tasks=[];
+  const ts=Date.now();let tc=0;
+  for(const g of GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id))){
+    const sels=_selectedSuggestions[g.id]||new Set();
+    const suggs=HABIT_SUGGESTIONS_DATA[g.id]||[];
+    for(const idx of sels){const s=suggs[idx];if(s)state.tasks.push({id:'h'+(ts+ ++tc),name:s.n,emoji:s.e,section:g.id,points:5,days:[0,1,2,3,4,5,6]});}
+  }
+  for(const ch of _customHabits){state.tasks.push({id:'h'+(ts+ ++tc),name:ch.name,emoji:ch.emoji,section:ch.sectionId,points:5,days:[0,1,2,3,4,5,6]});}
+  save();
+  document.getElementById('onboarding-habits').style.display='none';
+  showDinoNameScreen();
+};
+
 function showThemePicker(){
   _selectedTheme=state?.theme||'blush';
   const dinoSvg=getDinoSVG(80);
@@ -551,7 +680,7 @@ window.pickTheme=(name)=>{
 window.confirmThemePick=()=>{
   state.theme=_selectedTheme;save();
   document.getElementById('onboarding-theme').style.display='none';
-  showDinoNameScreen();
+  showGoalPicker();
 };
 function showDinoNameScreen(){
   const inp=document.getElementById('dino-name-input');
@@ -650,6 +779,34 @@ const DEFAULT_REWARDS=[
   {id:'r4',name:'Treat from the bakery',cost:20,icon:'🥐'},
   {id:'r5',name:'Spa day',cost:120,icon:'💆'},
 ];
+const GOAL_OPTIONS=[
+  {id:'morning',  emoji:'🌅',name:'Morning routine',desc:'Start every day with intention',    secLabel:'Morning'},
+  {id:'night',    emoji:'🌙',name:'Wind down',       desc:'End your day with calm',            secLabel:'Night'},
+  {id:'fitness',  emoji:'💪',name:'Fitness',         desc:'Move your body every day',          secLabel:'Fitness'},
+  {id:'learning', emoji:'📚',name:'Learning',        desc:'Grow your mind daily',              secLabel:'Learning'},
+  {id:'mindful',  emoji:'🧘',name:'Mindfulness',     desc:'Find peace and presence',           secLabel:'Mindfulness'},
+  {id:'finance',  emoji:'💰',name:'Finance',         desc:'Build healthy money habits',        secLabel:'Finance'},
+  {id:'nutrition',emoji:'🥗',name:'Nutrition',       desc:'Fuel your body well',               secLabel:'Nutrition'},
+  {id:'creative', emoji:'🎨',name:'Creativity',      desc:'Make something every day',          secLabel:'Creativity'},
+  {id:'work',     emoji:'💼',name:'Work & career',   desc:'Build your professional life',      secLabel:'Work'},
+  {id:'social',   emoji:'🤝',name:'Relationships',   desc:'Nurture the people you love',       secLabel:'Social'},
+  {id:'growth',   emoji:'🌱',name:'Personal growth', desc:'Become a better version of yourself',secLabel:'Growth'},
+  {id:'selfcare', emoji:'✨',name:'Self care',        desc:'Take care of yourself first',       secLabel:'Self care'},
+];
+const HABIT_SUGGESTIONS_DATA={
+  morning:   [{e:'🌤️',n:'Wake up early'},{e:'💧',n:'Drink water'},{e:'🧴',n:'Skin care'},{e:'🥣',n:'Eat breakfast'},{e:'📝',n:'Review goals'},{e:'🚿',n:'Cold shower'}],
+  night:     [{e:'📵',n:'No screens'},{e:'🌙',n:'Journal'},{e:'💆',n:'Night skin care'},{e:'🗓️',n:'Plan tomorrow'},{e:'📖',n:'Read before bed'},{e:'🧘',n:'Meditate'}],
+  fitness:   [{e:'🏃',n:'Exercise'},{e:'🚶',n:'Walk 10k steps'},{e:'🧘',n:'Stretch'},{e:'🏋️',n:'Strength training'},{e:'🚴',n:'Cardio'},{e:'💪',n:'Workout'}],
+  learning:  [{e:'📚',n:'Read 20 min'},{e:'🎓',n:'Study'},{e:'🌐',n:'Learn a language'},{e:'📝',n:'Take notes'},{e:'🎧',n:'Educational podcast'}],
+  mindful:   [{e:'🧘',n:'Meditate'},{e:'🙏',n:'Gratitude practice'},{e:'🌬️',n:'Breathing exercise'},{e:'📔',n:'Reflect'},{e:'🌿',n:'Time in nature'}],
+  finance:   [{e:'💳',n:'Track spending'},{e:'📊',n:'Review budget'},{e:'💰',n:'Save money'},{e:'📈',n:'Check investments'},{e:'🧾',n:'Log expenses'}],
+  nutrition: [{e:'🥗',n:'Eat vegetables'},{e:'💧',n:'Drink 2L water'},{e:'🍎',n:'Eat fruit'},{e:'🚫',n:'No junk food'},{e:'🥘',n:'Cook at home'}],
+  creative:  [{e:'🎨',n:'Create something'},{e:'✍️',n:'Write'},{e:'📸',n:'Take photos'},{e:'🎵',n:'Practice instrument'},{e:'🖊️',n:'Sketch'}],
+  work:      [{e:'📋',n:'Deep work session'},{e:'📧',n:'Clear inbox'},{e:'🎯',n:'Review priorities'},{e:'📞',n:'Follow up on tasks'},{e:'✅',n:'Daily planning'}],
+  social:    [{e:'📱',n:'Text a loved one'},{e:'👥',n:'Quality time'},{e:'💌',n:'Write a kind message'},{e:'🤝',n:'Network'},{e:'☎️',n:'Call family'}],
+  growth:    [{e:'📖',n:'Read'},{e:'🎯',n:'Work on a goal'},{e:'💭',n:'Self reflection'},{e:'🌱',n:'Learn something new'},{e:'🏆',n:'Track progress'}],
+  selfcare:  [{e:'🛁',n:'Self care routine'},{e:'😴',n:'Sleep 8 hours'},{e:'🎵',n:'Listen to music'},{e:'🌸',n:'Do something joyful'},{e:'🧹',n:'Tidy space'}],
+};
 
 let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false,undoPending=null,undoTimeout=null;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -1604,7 +1761,7 @@ onAuthStateChanged(auth,async(user)=>{
       if(state.dinoName==null)state.dinoName='Dino';
       applyTheme(state.theme||'blush');
     }else{
-      state={tasks:DEFAULT_TASKS,rewards:DEFAULT_REWARDS,sections:DEFAULT_SECTIONS,points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
+      state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
       await setDoc(ref,state);
       isNewUser=true;
       applyTheme('blush');
@@ -1616,7 +1773,7 @@ onAuthStateChanged(auth,async(user)=>{
           state=remote;
           if(!state.completedDays)state.completedDays={};
           if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
-          if(!state.sections)state.sections=DEFAULT_SECTIONS;
+          if(!state.sections)state.sections=[];
           updateAll();
         }
       }
