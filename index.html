@@ -341,6 +341,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .shake{animation:shake .4s ease;}
 /* HABIT SUGGESTIONS */
 #onboarding-habits{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+#onboarding-rewards{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+.onb-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px;width:100%;}
+.onb-step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s;}
+.onb-step-dot.active{background:var(--ink);}
+.reward-flow-row{display:flex;gap:8px;margin:16px 0;}
+.reward-flow-card{background:rgba(255,255,255,0.6);border-radius:14px;padding:12px 8px;text-align:center;flex:1;}
+.reward-suggestion-chip{background:rgba(255,255,255,0.7);border:1px solid var(--border);border-radius:100px;padding:8px 14px;font-size:13px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin:4px;transition:all .2s;user-select:none;}
+.reward-suggestion-chip.selected{background:var(--powder);border-color:var(--almond);font-weight:500;}
+.custom-reward-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .habit-group{margin-bottom:18px;width:100%;}
 .habit-group-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);font-weight:500;margin-bottom:8px;}
 .habit-chips{display:flex;flex-wrap:wrap;}
@@ -473,12 +482,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <!-- ONBOARDING -->
 <div id="onboarding-theme" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="theme-pick-heading">Make it yours</div>
   <div class="theme-pick-sub">Choose a color palette for your app. You can always change this later.</div>
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
 <div id="onboarding-goals" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">What do you want to work on?</div>
     <div class="welcome-sub" style="margin-bottom:0;">Select everything that resonates. We'll create your habit categories from these.</div>
@@ -488,6 +499,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
 </div>
 <div id="onboarding-habits" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
     <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add the ones that feel right. You can always change these later.</div>
@@ -497,7 +509,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <button class="btn btn-primary" id="habits-continue-btn" style="width:100%;flex:none;" onclick="confirmHabits()">Continue →</button>
   </div>
 </div>
+<div id="onboarding-rewards" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
+  <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
+  <div class="welcome-sub" style="margin-bottom:0;text-align:left;max-width:100%;">Earn points by completing your habits and spend them on things that bring you joy. You control what's in your store and what each reward costs.</div>
+  <div class="reward-flow-row">
+    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">✅</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Complete habits</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">Earn points</span></div>
+    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">⭐</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Collect points</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">They add up daily</span></div>
+    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">🛍️</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Buy rewards</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">Treat yourself</span></div>
+  </div>
+  <div style="background:rgba(255,255,255,0.5);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--ink-soft);margin-bottom:4px;">⚠️ If your dino faints, your reward store will be locked until you revive them by completing a full day of habits.</div>
+
+  <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Popular rewards</div>
+  <div id="reward-suggestions-chips" style="display:flex;flex-wrap:wrap;width:100%;"></div>
+
+  <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Add your own</div>
+  <div style="display:flex;gap:8px;width:100%;margin-bottom:8px;">
+    <input class="form-input" id="cr-emoji" placeholder="🎁" maxlength="2" style="width:60px;flex-shrink:0;text-align:center;padding:10px 6px;"/>
+    <input class="form-input" id="cr-name" placeholder="Reward name" style="flex:1;padding:10px 12px;" onkeydown="if(event.key==='Enter')addCustomReward()"/>
+    <input class="form-input" id="cr-cost" type="number" min="1" placeholder="pts" value="30" style="width:72px;flex-shrink:0;padding:10px 8px;"/>
+    <button class="btn btn-secondary" style="flex:none;padding:10px 14px;font-size:13px;" onclick="addCustomReward()">Add +</button>
+  </div>
+  <div id="custom-rewards-list" style="width:100%;margin-bottom:8px;"></div>
+
+  <div style="font-size:12px;color:var(--ink-faint);text-align:center;padding:8px 0;width:100%;">💡 Each habit gives you 5 points by default. You can customize this later.</div>
+
+  <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
+    <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmRewards()">Continue →</button>
+    <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipRewardsSetup()">Skip for now →</button>
+  </div>
+</div>
 <div id="onboarding-dino-name" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
   <div class="dino-name-dino-wrap" id="name-screen-dino"></div>
   <div class="welcome-title" style="margin-bottom:10px;">Meet your new companion!</div>
   <div class="welcome-sub" style="margin-bottom:20px;">This little dino will grow with you. Keep up with your habits to keep them happy and healthy.</div>
@@ -663,7 +706,7 @@ window.confirmHabits=()=>{
   save();
   updateAll();
   document.getElementById('onboarding-habits').style.display='none';
-  showDinoNameScreen();
+  showRewardsSetup();
 };
 
 function showThemePicker(){
@@ -686,6 +729,64 @@ window.confirmThemePick=()=>{
   state.theme=_selectedTheme;save();
   document.getElementById('onboarding-theme').style.display='none';
   showGoalPicker();
+};
+const REWARD_SUGGESTIONS_DATA=[
+  {icon:'🍜',name:'Takeout',cost:50},
+  {icon:'🎬',name:'Movie night',cost:30},
+  {icon:'✨',name:'Night out',cost:80},
+  {icon:'🥐',name:'Bakery treat',cost:20},
+  {icon:'💆',name:'Spa day',cost:120},
+  {icon:'🛍️',name:'Shopping trip',cost:100},
+  {icon:'🍕',name:'Pizza night',cost:40},
+  {icon:'☕',name:'Fancy coffee',cost:15},
+];
+let _selectedRewardSuggestions=new Set();
+let _customRewards=[];
+function showRewardsSetup(){
+  _selectedRewardSuggestions=new Set();
+  _customRewards=[];
+  renderRewardsSetup();
+  document.getElementById('onboarding-rewards').style.display='flex';
+}
+function renderRewardsSetup(){
+  const chips=document.getElementById('reward-suggestions-chips');
+  if(chips)chips.innerHTML=REWARD_SUGGESTIONS_DATA.map((r,i)=>{
+    const sel=_selectedRewardSuggestions.has(i);
+    return `<span class="reward-suggestion-chip${sel?' selected':''}" onclick="toggleRewardSuggestion(${i})">${sel?'✓ ':''}${r.icon} ${r.name} · ${r.cost} pts</span>`;
+  }).join('');
+  const list=document.getElementById('custom-rewards-list');
+  if(list)list.innerHTML=_customRewards.map((r,i)=>`<div class="custom-reward-row"><span style="font-size:18px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="color:var(--ink-faint);font-size:12px;">⭐${r.cost} pts</span><button onclick="removeCustomReward(${i})" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;line-height:1;padding:0 2px;">×</button></div>`).join('');
+}
+window.toggleRewardSuggestion=(idx)=>{
+  if(_selectedRewardSuggestions.has(idx))_selectedRewardSuggestions.delete(idx);else _selectedRewardSuggestions.add(idx);
+  renderRewardsSetup();
+};
+window.addCustomReward=()=>{
+  const icon=(document.getElementById('cr-emoji')?.value||'').trim()||'🎁';
+  const name=(document.getElementById('cr-name')?.value||'').trim();
+  if(!name)return;
+  const cost=Math.max(1,parseInt(document.getElementById('cr-cost')?.value)||30);
+  _customRewards.push({icon,name,cost});
+  const ne=document.getElementById('cr-emoji');if(ne)ne.value='';
+  const nn=document.getElementById('cr-name');if(nn)nn.value='';
+  const nc=document.getElementById('cr-cost');if(nc)nc.value='30';
+  renderRewardsSetup();
+};
+window.removeCustomReward=(idx)=>{_customRewards.splice(idx,1);renderRewardsSetup();};
+window.confirmRewards=()=>{
+  const ts=Date.now();
+  const fromSugg=[..._selectedRewardSuggestions].map(i=>{const r=REWARD_SUGGESTIONS_DATA[i];return{id:'r'+ts+Math.random().toString(36).slice(2),name:r.name,cost:r.cost,icon:r.icon};});
+  const fromCustom=_customRewards.map(r=>({id:'r'+Date.now()+Math.random().toString(36).slice(2),name:r.name,cost:r.cost,icon:r.icon}));
+  state.rewards=[...fromSugg,...fromCustom];
+  save();
+  document.getElementById('onboarding-rewards').style.display='none';
+  showDinoNameScreen();
+};
+window.skipRewardsSetup=()=>{
+  state.rewards=[];
+  save();
+  document.getElementById('onboarding-rewards').style.display='none';
+  showDinoNameScreen();
 };
 function showDinoNameScreen(){
   const inp=document.getElementById('dino-name-input');
