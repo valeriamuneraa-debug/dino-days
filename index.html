@@ -363,6 +363,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .habit-chip.selected{background:var(--powder);border-color:var(--almond);font-weight:500;}
 .custom-habit-chip{background:var(--linen);border-radius:100px;padding:6px 10px 6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin:4px;border:1px solid var(--border);}
 .custom-habit-remove{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:0;line-height:1;font-family:'DM Sans',sans-serif;}
+
+/* Profile & Friends */
+.acc-code-pill{background:var(--linen);border-radius:8px;padding:6px 14px;font-size:18px;font-weight:600;letter-spacing:3px;font-family:monospace;color:var(--ink);}
+.acc-code-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.acc-icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:14px;cursor:pointer;color:var(--ink-soft);}
+.friend-request-card{background:var(--linen);border-radius:14px;padding:14px;margin-bottom:10px;}
+.friend-request-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.friend-request-code{font-size:11px;color:var(--ink-faint);margin-bottom:10px;}
+.friend-request-actions{display:flex;gap:8px;}
+.friend-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.friend-row:last-child{border-bottom:none;}
+.friend-name{flex:1;font-size:14px;color:var(--ink);}
+.friend-code-small{font-size:11px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
+.code-input-big{text-transform:uppercase;letter-spacing:4px;font-size:24px;text-align:center;font-weight:600;}
+#onboarding-displayname{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
 </style>
 </head>
 <body>
@@ -408,7 +423,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       </div>
       <div class="header-right">
         <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()">✏️</button>
-        <div class="user-avatar" id="user-avatar" onclick="showAccountModal()">?</div>
+        <div style="position:relative;display:inline-block;cursor:pointer;" onclick="showAccountModal()">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div id="friend-notif-dot" style="display:none;width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:0;right:0;"></div>
+        </div>
       </div>
     </div>
 
@@ -520,14 +538,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <!-- ONBOARDING -->
 <div id="onboarding-theme" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="theme-pick-heading">Make it yours</div>
   <div class="theme-pick-sub">Choose a color palette for your app. You can always change this later.</div>
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
+<div id="onboarding-displayname" style="display:none;">
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="welcome-title" style="margin-bottom:8px;">What should we call you?</div>
+  <div class="welcome-sub" style="margin-bottom:20px;text-align:center;margin-left:auto;margin-right:auto;">This is what your friends will see</div>
+  <input class="form-input" id="onb-displayname-input" placeholder="Your name or nickname" maxlength="30" style="text-align:center;max-width:280px;font-size:18px;"/>
+  <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
+    <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmDisplayName()">Continue →</button>
+    <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipDisplayName()">Skip</button>
+  </div>
+</div>
 <div id="onboarding-goals" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">What do you want to work on?</div>
     <div class="welcome-sub" style="margin-bottom:0;">Select everything that resonates. We'll create your habit categories from these.</div>
@@ -537,7 +565,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
 </div>
 <div id="onboarding-habits" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
     <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add the ones that feel right. You can always change these later.</div>
@@ -548,7 +576,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div id="onboarding-rewards" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
   <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
   <div class="welcome-sub" style="margin-bottom:0;text-align:left;max-width:100%;">Earn points by completing your habits and spend them on things that bring you joy. You control what's in your store and what each reward costs.</div>
   <div class="reward-flow-row">
@@ -614,7 +642,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot,collection,query,where,getDocs,writeBatch,updateDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// IMPORTANT: Firestore security rules needed for social features:
+// collection 'profiles': allow read if authenticated, allow write if request.auth.uid == resource.id
+// collection 'friendRequests': allow read/write if authenticated user is sender or recipient
+// collection 'users': allow read/write if request.auth.uid == resource.id (existing rule)
 
 const THEMES={
   blush:   {almond:'#D0B8AC',powder:'#F3D8C7',linen:'#EFE5DC',porcelain:'#FBFEFB',pageBg:'#FBFEFB',border:'#EFE5DC'},
@@ -630,6 +663,13 @@ function applyTheme(name){
   r.setProperty('--almond',t.almond);r.setProperty('--powder',t.powder);r.setProperty('--linen',t.linen);
   r.setProperty('--porcelain',t.porcelain);r.setProperty('--page-bg',t.pageBg);r.setProperty('--border',t.border);
   localStorage.setItem('streaks-theme',name);
+}
+
+function generateUserCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code='';
+  for(let i=0;i<6;i++)code+=chars[Math.floor(Math.random()*chars.length)];
+  return code;
 }
 
 // Apply cached theme instantly so loading screen matches user's saved theme
@@ -750,8 +790,31 @@ window.pickTheme=(name)=>{
 window.confirmThemePick=()=>{
   state.theme=_selectedTheme;save();
   document.getElementById('onboarding-theme').style.display='none';
+  showDisplayNameScreen();
+};
+
+function showDisplayNameScreen(){
+  const inp=document.getElementById('onb-displayname-input');
+  if(inp&&state.displayName)inp.value=state.displayName;
+  document.getElementById('onboarding-displayname').style.display='flex';
+}
+window.confirmDisplayName=async()=>{
+  const val=(document.getElementById('onb-displayname-input')?.value||'').trim();
+  if(val){
+    state.displayName=val;
+    save();
+    // Update public profile
+    if(currentUser)setDoc(doc(db,'profiles',currentUser.uid),{displayName:val},{merge:true}).catch(console.warn);
+    updateAvatarDisplay();
+  }
+  document.getElementById('onboarding-displayname').style.display='none';
   showGoalPicker();
 };
+window.skipDisplayName=()=>{
+  document.getElementById('onboarding-displayname').style.display='none';
+  showGoalPicker();
+};
+
 const REWARD_SUGGESTIONS_DATA=[
   {icon:'🍜',name:'Takeout',cost:50},
   {icon:'🎬',name:'Movie night',cost:30},
@@ -875,6 +938,8 @@ const HABIT_SUGGESTIONS_DATA={
 };
 
 let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false,undoPending=null,undoTimeout=null;
+let friendRequestsUnsub=null;
+let _pendingIncomingRequests=[];
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1436,7 +1501,16 @@ function showModal(title,body){
 }
 window.showModal=showModal;
 
-function updateAll(){evaluateChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();}
+function updateAvatarDisplay(){
+  const av=document.getElementById('user-avatar');
+  if(!av||!state)return;
+  av.textContent=(state.displayName||currentUser?.email||'?')[0].toUpperCase();
+}
+function updateFriendNotificationBadge(){
+  const dot=document.getElementById('friend-notif-dot');
+  if(dot)dot.style.display=_pendingIncomingRequests.length>0?'block':'none';
+}
+function updateAll(){evaluateChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1797,8 +1871,166 @@ window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').clas
 window.closeModal=closeModal;
 document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();});
 
+// ─── PROFILE & FRIENDS ─────────────────────────────────────────
+
+async function sendFriendRequest(code){
+  const cleanCode=code.trim().toUpperCase();
+  if(cleanCode.length!==6){showToast('Code must be 6 characters');return;}
+  if(cleanCode===state.userCode){showToast("That's your own code!");return;}
+  // Look up profile by code
+  const q=query(collection(db,'profiles'),where('userCode','==',cleanCode));
+  let targetProfile=null;
+  try{
+    const snap=await getDocs(q);
+    if(snap.empty){
+      const errEl=document.getElementById('friend-req-error');
+      if(errEl){errEl.textContent='No user found with that code.';errEl.className='auth-msg show error';}
+      return;
+    }
+    targetProfile=snap.docs[0].data();
+  }catch(e){showToast('Error looking up code. Try again.');return;}
+  if(state.friendIds&&state.friendIds.includes(targetProfile.uid)){showToast('Already friends!');return;}
+  if(state.sentFriendRequests&&state.sentFriendRequests.includes(targetProfile.uid)){showToast('Request already sent!');return;}
+  // Create friendRequest document
+  const reqId='fr'+Date.now()+Math.random().toString(36).slice(2,6);
+  await setDoc(doc(db,'friendRequests',reqId),{
+    id:reqId,fromUid:currentUser.uid,fromDisplayName:state.displayName,
+    fromCode:state.userCode,toUid:targetProfile.uid,toCode:cleanCode,
+    status:'pending',sentAt:new Date().toISOString(),respondedAt:null
+  });
+  if(!state.sentFriendRequests)state.sentFriendRequests=[];
+  state.sentFriendRequests.push(targetProfile.uid);
+  save();
+  closeModal();
+  showToast('Friend request sent! 🎉');
+}
+
+async function acceptFriendRequest(reqDocId,fromUid){
+  try{
+    // Update request status
+    await updateDoc(doc(db,'friendRequests',reqDocId),{status:'accepted',respondedAt:new Date().toISOString()});
+    // Add to both users' friendIds
+    if(!state.friendIds)state.friendIds=[];
+    if(!state.friendIds.includes(fromUid))state.friendIds.push(fromUid);
+    save();
+    // Note: Firestore rules must allow authenticated users to update another user's friendIds array
+    // Update the sender's users document to add current user to their friendIds
+    const senderRef=doc(db,'users',fromUid);
+    const senderSnap=await getDoc(senderRef);
+    if(senderSnap.exists()){
+      const senderData=senderSnap.data();
+      const senderFriends=senderData.friendIds||[];
+      if(!senderFriends.includes(currentUser.uid))senderFriends.push(currentUser.uid);
+      await updateDoc(senderRef,{friendIds:senderFriends});
+    }
+    // Remove from pending display
+    _pendingIncomingRequests=_pendingIncomingRequests.filter(r=>r.docId!==reqDocId);
+    updateFriendNotificationBadge();
+    showToast('Friend added! 🎉');
+    showAccountModal(); // refresh modal
+  }catch(e){console.error(e);showToast('Error accepting request. Try again.');}
+}
+
+async function declineFriendRequest(reqDocId){
+  try{
+    await updateDoc(doc(db,'friendRequests',reqDocId),{status:'declined',respondedAt:new Date().toISOString()});
+    _pendingIncomingRequests=_pendingIncomingRequests.filter(r=>r.docId!==reqDocId);
+    updateFriendNotificationBadge();
+    showAccountModal();
+  }catch(e){console.error(e);showToast('Error declining request.');}
+}
+
+async function removeFriend(uid){
+  PC=async()=>{
+    state.friendIds=(state.friendIds||[]).filter(id=>id!==uid);
+    save();
+    // Also remove from their list
+    try{
+      const theirRef=doc(db,'users',uid);
+      const theirSnap=await getDoc(theirRef);
+      if(theirSnap.exists()){
+        const theirData=theirSnap.data();
+        const theirFriends=(theirData.friendIds||[]).filter(id=>id!==currentUser.uid);
+        await updateDoc(theirRef,{friendIds:theirFriends});
+      }
+    }catch(e){console.warn('Could not update their friendIds:',e);}
+    showToast('Friend removed');
+    showAccountModal();
+  };
+  document.getElementById('confirm-title').textContent='Remove friend?';
+  document.getElementById('confirm-msg').textContent='You will no longer be connected.';
+  document.getElementById('confirm-ok').textContent='Remove';
+  document.getElementById('confirm-ok').className='btn btn-danger';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+async function updateDisplayName(newName){
+  if(!newName.trim())return;
+  state.displayName=newName.trim();
+  save();
+  updateAvatarDisplay();
+  // Update public profile
+  setDoc(doc(db,'profiles',currentUser.uid),{displayName:state.displayName},{merge:true}).catch(console.warn);
+}
+
+function showAddFriendModal(){
+  const body=`<div class="modal-scroll">
+    <p style="font-size:13px;color:var(--ink-faint);margin-bottom:20px;">Enter your friend's 6-character invite code to send them a request.</p>
+    <input class="form-input code-input-big" id="friend-code-input" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
+    <div class="auth-msg" id="friend-req-error"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="sendFriendRequest(document.getElementById('friend-code-input').value)">Send request</button>
+  </div>`;
+  showModal('Add a friend',body);
+}
+window.showAddFriendModal=showAddFriendModal;
+window.sendFriendRequest=sendFriendRequest;
+window.acceptFriendRequest=acceptFriendRequest;
+window.declineFriendRequest=declineFriendRequest;
+window.removeFriend=removeFriend;
+window.updateDisplayName=updateDisplayName;
+
 window.showAccountModal=()=>{
   const notifOn=state?.preferences?.notifications??false;
+  const friendCount=(state.friendIds||[]).length;
+  const incomingHTML=_pendingIncomingRequests.map(r=>`
+  <div class="friend-request-card">
+    <div class="friend-request-name">${r.fromDisplayName||'Someone'} wants to be your friend</div>
+    <div class="friend-request-code">Code: ${r.fromCode||''}</div>
+    <div class="friend-request-actions">
+      <button class="btn btn-primary" style="flex:1;padding:8px;" onclick="acceptFriendRequest('${r.docId}','${r.fromUid}')">Accept ✓</button>
+      <button class="btn btn-secondary" style="flex:1;padding:8px;" onclick="declineFriendRequest('${r.docId}')">Decline ✗</button>
+    </div>
+  </div>`).join('');
+  // TODO: cache friend display names in state.friendCache in a future session
+  const friendsListHTML=(state.friendIds||[]).length>0
+    ? (state.friendIds).map(uid=>`<div class="friend-row"><span class="friend-name" style="font-family:monospace;font-size:12px;">${uid.slice(0,8)}…</span><button class="acc-icon-btn" onclick="removeFriend('${uid}')">🗑️</button></div>`).join('')
+    : '<p style="font-size:13px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
+  const profileSection=`
+  <div class="acc-subtitle">Profile</div>
+  <div style="margin-bottom:12px;">
+    <div class="form-label" style="margin-bottom:4px;">Display name</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="acc-dname-display" style="font-size:14px;color:var(--ink);flex:1;">${state.displayName||''}</span>
+      <button class="acc-icon-btn" onclick="document.getElementById('acc-dname-display').style.display='none';document.getElementById('acc-dname-edit-wrap').style.display='flex';">✏️</button>
+    </div>
+    <div id="acc-dname-edit-wrap" style="display:none;gap:8px;align-items:center;margin-top:6px;">
+      <input class="form-input" id="acc-dname-input" value="${state.displayName||''}" style="flex:1;" maxlength="30"/>
+      <button class="btn btn-primary" style="padding:8px 14px;font-size:13px;" onclick="updateDisplayName(document.getElementById('acc-dname-input').value);document.getElementById('acc-dname-display').textContent=document.getElementById('acc-dname-input').value;document.getElementById('acc-dname-display').style.display='';document.getElementById('acc-dname-edit-wrap').style.display='none';">Save</button>
+    </div>
+  </div>
+  <div style="margin-bottom:4px;"><div class="form-label" style="margin-bottom:6px;">Your invite code</div>
+    <div class="acc-code-row">
+      <span class="acc-code-pill">${state.userCode||'------'}</span>
+      <button class="acc-icon-btn" onclick="navigator.clipboard.writeText('${state.userCode||''}').then(()=>showToast('Code copied! 📋')).catch(()=>showToast('${state.userCode||''}'))">📋</button>
+      <button class="acc-icon-btn" onclick="if(navigator.share){navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>{})}else{navigator.clipboard.writeText('${state.userCode||''}').then(()=>showToast('Code copied!'))}">🔗</button>
+    </div>
+    <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
+  </div>`;
+  const friendsSection=`
+  <div class="acc-subtitle">Friends <span style="font-weight:400;color:var(--ink-faint);">(${friendCount})</span></div>
+  ${incomingHTML}
+  <div style="margin-bottom:12px;">${friendsListHTML}</div>
+  <button class="btn btn-secondary" style="width:100%;margin-bottom:4px;" onclick="showAddFriendModal()">+ Add a friend</button>`;
   document.getElementById('modal-title').textContent='Account & settings';
   document.getElementById('modal-body').innerHTML=`
 <div class="modal-scroll">
@@ -1808,6 +2040,11 @@ window.showAccountModal=()=>{
     <label class="form-label">Email</label>
     <div class="acc-email-field">${currentUser?.email||''}</div>
   </div>
+  ${profileSection}
+  ${friendsSection}
+
+  <div class="acc-divider"></div>
+
   <div class="acc-subtitle">Change password</div>
   <div class="form-group"><label class="form-label">Current password</label><input class="form-input" id="acc-curr-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
   <div class="form-group"><label class="form-label">New password</label><input class="form-input" id="acc-new-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
@@ -1925,6 +2162,8 @@ window.confirmDeleteAccount=async()=>{
 
     // Unsubscribe listener before deleting auth user
     if(unsub){unsub();unsub=null;}
+    if(friendRequestsUnsub){friendRequestsUnsub();friendRequestsUnsub=null;}
+    _pendingIncomingRequests=[];
 
     // Delete Firebase Auth user
     const userToDelete=currentUser;
@@ -1962,7 +2201,13 @@ window.showAuthTab=(tab)=>{['login','signup'].forEach(t=>{document.getElementByI
 window.doLogin=async()=>{const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}try{const rememberMe=document.getElementById('remember-me').checked;await setPersistence(auth,rememberMe?browserLocalPersistence:browserSessionPersistence);await signInWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign in failed. Please try again.','error');}};
 window.doSignup=async()=>{const email=document.getElementById('signup-email').value.trim(),pass=document.getElementById('signup-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}try{await setPersistence(auth,browserLocalPersistence);await createUserWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign up failed.','error');}};
 window.doForgot=async()=>{const email=document.getElementById('login-email').value.trim();if(!email){showMsg('Enter your email above first.','error');return;}try{await sendPasswordResetEmail(auth,email);showMsg('Reset email sent! Check your inbox.','success');}catch(e){showMsg('Could not send reset email.','error');}};
-window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}localStorage.removeItem('streaks-theme');await signOut(auth);closeModal();};
+window.doSignOut=async()=>{
+  if(unsub){unsub();unsub=null;}
+  if(friendRequestsUnsub){friendRequestsUnsub();friendRequestsUnsub=null;}
+  _pendingIncomingRequests=[];
+  localStorage.removeItem('streaks-theme');
+  await signOut(auth);closeModal();
+};
 
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
@@ -2123,11 +2368,19 @@ onAuthStateChanged(auth,async(user)=>{
         state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
         state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
         if(!state.challenges)state.challenges=[];
+        if(!state.userCode){state.userCode=generateUserCode();}
+        if(!state.displayName){state.displayName=currentUser.email.split('@')[0];}
+        if(!state.friendIds)state.friendIds=[];
+        if(!state.sentFriendRequests)state.sentFriendRequests=[];
         applyTheme(state.theme||'blush');
+        // Ensure public profile exists (idempotent)
+        setDoc(doc(db,'profiles',user.uid),{uid:user.uid,displayName:state.displayName,userCode:state.userCode,createdAt:state.createdAt||new Date().toISOString()},{merge:true}).catch(console.warn);
       }else{
-        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],challenges:[]};
+        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],challenges:[],userCode:generateUserCode(),displayName:user.email.split('@')[0],friendIds:[],sentFriendRequests:[]};
         await setDoc(ref,state);
         isNewUser=true;
+        // Write public profile
+        await setDoc(doc(db,'profiles',user.uid),{uid:user.uid,displayName:state.displayName,userCode:state.userCode,createdAt:new Date().toISOString()});
         applyTheme('blush');
       }
       unsub=onSnapshot(ref,(snap)=>{
@@ -2144,6 +2397,13 @@ onAuthStateChanged(auth,async(user)=>{
           }
         }
       });
+      // Real-time listener for incoming friend requests
+      if(friendRequestsUnsub){friendRequestsUnsub();friendRequestsUnsub=null;}
+      const frQuery=query(collection(db,'friendRequests'),where('toUid','==',user.uid),where('status','==','pending'));
+      friendRequestsUnsub=onSnapshot(frQuery,(snap)=>{
+        _pendingIncomingRequests=snap.docs.map(d=>({docId:d.id,...d.data()}));
+        updateFriendNotificationBadge();
+      },{error:console.warn});
       document.getElementById('loading-screen').style.display='none';
       document.getElementById('auth-screen').style.display='none';
       document.getElementById('app-screen').style.display='block';
