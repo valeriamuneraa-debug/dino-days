@@ -56,9 +56,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;height:var(--tab-height);background:var(--page-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:200;padding-bottom:env(safe-area-inset-bottom,0px);isolation:isolate;overflow:hidden;}
 .tab{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 16px;border-radius:12px;transition:background .2s;flex:1;}
 .tab:hover{background:var(--linen);}
-.tab .tab-icon{font-size:22px;line-height:1;}
+.tab .tab-icon{line-height:1;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
 .tab .tab-label{font-size:12px;color:var(--ink-faint);font-weight:500;letter-spacing:.3px;}
 .tab.active .tab-label{color:var(--almond);}
+.tab.active .tab-icon{color:var(--almond);}
 
 /* TODAY */
 .today-hero{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
@@ -481,7 +482,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
-        <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()">✏️</button>
+        <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <div style="position:relative;display:inline-block;cursor:pointer;" onclick="showAccountModal()">
           <div class="user-avatar" id="user-avatar">?</div>
           <div id="friend-notif-dot" style="display:none;width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:0;right:0;"></div>
@@ -497,9 +498,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         </div>
       </div>
       <div class="streak-row">
-        <div class="streak-chip" id="tour-streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
-        <div class="streak-chip">⭐ <span class="num" id="points-count">0</span> pts</div>
-        <div class="streak-chip">✅ <span class="num" id="done-count">0/0</span> done</div>
+        <div class="streak-chip" id="tour-streak-chip"><span class="num" id="streak-count">0</span> day streak</div>
+        <div class="streak-chip"><span class="num" id="points-count">0</span> pts</div>
+        <div class="streak-chip"><span class="num" id="done-count">0/0</span> done</div>
         <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
       </div>
       <div class="progress-bar-wrap" style="margin-top:14px;">
@@ -586,10 +587,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="tab-bar">
-      <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
-      <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon">📊</div><div class="tab-label">Progress</div></div>
-      <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
-      <div class="tab" data-tab="challenges" style="position:relative;" onclick="switchTab('challenges',this)"><div class="tab-icon">🎯</div><div class="tab-label">Challenges</div><div class="challenges-tab-notif" id="challenges-tab-notif"></div></div>
+      <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tab-label">Today</div></div>
+      <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><div class="tab-label">Progress</div></div>
+      <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="tab-label">Rewards</div></div>
+      <div class="tab" data-tab="challenges" style="position:relative;" onclick="switchTab('challenges',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="tab-label">Challenges</div><div class="challenges-tab-notif" id="challenges-tab-notif"></div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
   </div>
@@ -1102,7 +1103,7 @@ function renderTasks(){
   const done=state.completedDays[TODAY]||{};
   const todayDow=new Date().getDay();
   const secs=cf==='all'?state.sections.map(s=>s.id):[cf];
-  const lbls=Object.fromEntries(state.sections.map(s=>[s.id,s.emoji+' '+s.label]));
+  const lbls=Object.fromEntries(state.sections.map(s=>[s.id,s.label]));
   let td=0,ta=0;
   for(const sec of secs){
     const tasks=state.tasks.filter(t=>t.section===sec&&(t.days??ALL_DAYS).includes(todayDow));if(!tasks.length)continue;
@@ -1116,7 +1117,7 @@ function renderTasks(){
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
       const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -1134,7 +1135,7 @@ function renderTasks(){
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
       const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -2926,8 +2927,8 @@ window.showAccountModal=async()=>{
   <div style="margin-bottom:4px;"><div class="form-label" style="margin-bottom:6px;">Your invite code</div>
     <div class="acc-code-row">
       <span class="acc-code-pill">${state.userCode||'------'}</span>
-      <button class="acc-icon-btn" onclick="copyUserCode()">📋</button>
-      <button class="acc-icon-btn" onclick="navigator.share?navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>copyUserCode()):copyUserCode()">🔗</button>
+      <button class="acc-icon-btn" onclick="copyUserCode()" title="Copy code"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+      <button class="acc-icon-btn" onclick="navigator.share?navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>copyUserCode()):copyUserCode()" title="Share code"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
     </div>
     <div style="font-size:13px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
   </div>`;
