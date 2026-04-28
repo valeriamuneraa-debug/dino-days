@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Dino Days">
+<meta name="apple-mobile-web-app-title" content="Streaks">
 <meta name="theme-color" content="#FBFEFB">
 <link rel="manifest" href="manifest.json">
-<title>Dino Days</title>
+<title>Streaks</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--almond:#D0B8AC;--powder:#F3D8C7;--linen:#EFE5DC;--porcelain:#FBFEFB;--white:#FFFFFF;--ink:#1d1e1e;--ink-soft:#5a5550;--ink-faint:#9a908a;--success:#7BAE8A;--danger:#C97B6E;--page-bg:#FBFEFB;--border:#EFE5DC;--shadow:rgba(208,184,172,0.15);--tab-height:72px;--header-height:60px;}
@@ -17,15 +17,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* LOADING */
 #loading-screen{position:fixed;inset:0;background:var(--powder);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;}
-.load-dino{width:80px;animation:bounce 1s ease-in-out infinite;}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.load-spinner{width:40px;height:40px;border-radius:50%;background:var(--almond);animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.85);opacity:0.6;}}
 #loading-screen p{margin-top:16px;font-size:14px;color:var(--ink-soft);font-family:'Playfair Display',serif;}
 
 /* AUTH */
 #auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:24px;}
 .auth-card{background:var(--white);border-radius:28px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(208,184,172,0.25);}
-.auth-dino{width:80px;margin:0 auto 20px;}
-.auth-dino svg{width:100%;height:auto;}
 .auth-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;text-align:center;margin-bottom:4px;}
 .auth-sub{font-size:13px;color:var(--ink-faint);text-align:center;margin-bottom:28px;}
 .auth-tabs{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin-bottom:24px;}
@@ -66,8 +64,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .today-hero{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .today-hero h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:4px;}
 .today-hero .sub{font-size:13px;color:var(--ink-soft);font-weight:300;}
-.dino-wrap{width:90px;flex-shrink:0;}
-.dino-wrap svg{width:100%;height:auto;}
 .streak-row{display:flex;gap:10px;padding:14px 20px;background:var(--white);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
 .streak-chip{display:flex;align-items:center;gap:6px;background:var(--linen);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--ink-soft);}
 .streak-chip .num{font-size:15px;font-weight:600;color:var(--ink);}
@@ -129,39 +125,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .btn-secondary:hover{background:var(--powder);}
 .btn-danger{background:var(--danger);color:white;}
 
-/* GARDEN */
-.garden-page{padding:20px;}
-.dino-card{background:linear-gradient(160deg,var(--linen),var(--powder));border-radius:24px;padding:28px;text-align:center;margin-bottom:20px;}
-.dino-big{width:140px;margin:0 auto 16px;}
-.dino-big svg{width:100%;height:auto;}
-.dino-status{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink-soft);}
-.dino-status.fainted{color:var(--danger);}
-/* DINO HEARTS */
-.dino-hearts{display:flex;gap:10px;justify-content:center;align-items:center;margin:0 0 10px;}
-.heart-icon{font-size:22px;line-height:1;display:inline-block;}
-.heart-full{color:var(--almond);}
-.heart-full.happy{animation:heartbeat 2s ease-in-out infinite;}
-.heart-full.warn{color:var(--danger);animation:heartpulse 1.5s ease-in-out infinite;}
-.heart-empty{color:var(--border);}
-@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-@keyframes heartpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
-/* DINO BIG ANIMATIONS */
-.dino-big-wrap{display:flex;justify-content:center;}
-.dino-big-wrap.idle{animation:dinoIdle 3s ease-in-out infinite;}
-.dino-big-wrap.weak{animation:dinoWeak 4s ease-in-out infinite;}
-.dino-big-wrap.fainted{transform:rotate(-15deg);filter:grayscale(0.8);}
-@keyframes dinoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes dinoWeak{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
-/* REWARDS FAINTED OVERLAY */
+/* PROGRESS PAGE */
+.progress-page{padding:20px;}
+.progress-hero-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:20px;padding:24px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.progress-streak-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.progress-streak-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
+.progress-ring-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;}
+.progress-ring-bg{stroke:var(--border);}
+.progress-ring-fill{stroke:var(--almond);stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 0.6s ease;}
+.progress-ring-pct{position:absolute;font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);}
+/* REWARDS */
 .rewards-store-wrap{position:relative;border-radius:20px;overflow:hidden;}
-.rewards-fainted-overlay{position:absolute;inset:0;background:rgba(251,254,251,0.92);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:10;}
-.rewards-fainted-dino{width:80px;margin:0 auto 14px;transform:rotate(-15deg);filter:grayscale(0.8);opacity:.9;}
-.rewards-fainted-dino svg{width:100%;height:auto;}
-.rewards-fainted-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--danger);margin-bottom:8px;}
-.rewards-fainted-sub{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;max-width:260px;}
-.rewards-fainted-progress{font-size:13px;font-weight:600;color:var(--ink);}
-/* HEART CHIP */
-.heart-chip-text{font-size:13px;letter-spacing:1px;}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
@@ -269,7 +243,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* ONBOARDING */
 #onboarding-welcome{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 24px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
-.welcome-dino{width:120px;margin-bottom:24px;}.welcome-dino svg{width:100%;height:auto;}
 .welcome-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:12px;color:var(--ink);}
 .welcome-sub{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-bottom:32px;max-width:300px;}
 .welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:16px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
@@ -293,8 +266,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .theme-card.selected{transform:scale(1.03);}
 .theme-card-hero{flex:0 0 96px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .theme-card-circle{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;}
-.theme-card-dino-wrap{width:64px;height:68px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.theme-card-dino-wrap svg{width:96px;height:auto;}
 .theme-card-body{flex:1;padding:10px 12px 0;display:flex;flex-direction:column;gap:7px;}
 .theme-card-pill{height:15px;border-radius:8px;}
 .theme-card-bar{flex:0 0 22px;margin-top:auto;}
@@ -303,28 +274,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .theme-swatches{display:flex;gap:12px;align-items:center;padding:4px;margin:-4px;margin-bottom:2px;overflow:visible;}
 .theme-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;padding:0;transition:box-shadow .2s;flex-shrink:0;}
 
-/* DINO NAME SCREEN */
-#onboarding-dino-name{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
-.dino-name-dino-wrap{width:160px;margin:0 auto 16px;animation:dinoIdle 3s ease-in-out infinite;}
-.dino-name-dino-wrap svg{width:100%;height:auto;}
-.dino-name-preview{font-size:14px;color:var(--ink-faint);margin:10px 0 20px;font-style:italic;}
-.dino-rules-card{background:rgba(255,255,255,0.7);border-radius:20px;padding:20px;margin:0 0 20px;text-align:left;width:100%;}
-.dino-rules-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);margin-bottom:16px;}
-.dino-rule-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
-.dino-rule-row:last-child{margin-bottom:0;}
-.dino-rule-icon{width:36px;height:36px;background:var(--linen);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.dino-rule-text{flex:1;}
-.dino-rule-label{font-size:13px;font-weight:500;color:var(--ink);}
-.dino-rule-desc{font-size:12px;color:var(--ink-faint);margin-top:2px;}
-/* DINO NAME IN DINO TAB */
-.dino-tab-name{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);text-align:center;margin-bottom:4px;}
-/* TODAY HERO DINO LINE */
-.hero-dino-line{font-size:12px;color:var(--ink-faint);margin-top:3px;}
-/* ACCOUNT DINO ROW */
-.acc-dino-row{display:flex;align-items:center;gap:12px;padding:6px 0;}
-.acc-dino-mini{width:40px;height:40px;flex-shrink:0;overflow:hidden;display:flex;align-items:center;}
-.acc-dino-mini svg{width:60px;height:auto;margin-top:-6px;}
-.acc-dino-name-val{flex:1;font-size:14px;font-weight:500;color:var(--ink);}
 
 /* GOAL PICKER */
 #onboarding-goals{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
@@ -338,6 +287,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .goal-card-desc{font-size:11px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
 .goal-error{font-size:13px;color:var(--danger);margin-bottom:10px;min-height:18px;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+/* ONBOARDING STEP DOTS */
 .shake{animation:shake .4s ease;}
 /* HABIT SUGGESTIONS */
 #onboarding-habits{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
@@ -363,15 +313,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <!-- LOADING -->
 <div id="loading-screen">
-  <div class="load-dino" id="load-dino"></div>
+  <div class="load-spinner"></div>
   <p>Loading your day…</p>
 </div>
 
 <!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-dino" id="auth-dino"></div>
-    <div class="auth-title">Dino Days</div>
+    <div class="auth-title">Streaks</div>
     <div class="auth-sub">Your daily companion for growth 🌱</div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Sign in</button>
@@ -398,7 +347,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div id="app">
     <div class="header">
       <div>
-        <div class="header-title">Dino Days</div>
+        <div class="header-title">Streaks</div>
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
@@ -412,15 +361,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="today-hero-left">
           <h2 id="hero-greeting">Good morning</h2>
           <div class="sub" id="hero-sub">Let's make today count</div>
-          <div class="hero-dino-line" id="hero-dino-line" style="display:none;"></div>
         </div>
-        <div class="dino-wrap" id="dino-small"></div>
       </div>
       <div class="streak-row">
         <div class="streak-chip" id="tour-streak-chip">🔥 <span class="num" id="streak-count">0</span> day streak</div>
         <div class="streak-chip">⭐ <span class="num" id="points-count">0</span> pts</div>
         <div class="streak-chip">✅ <span class="num" id="done-count">0/0</span> done</div>
-        <div class="streak-chip" id="heart-chip"><span class="heart-chip-text" id="heart-chip-text">❤️❤️❤️</span></div>
         <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
       </div>
       <div class="progress-bar-wrap" style="margin-top:14px;">
@@ -431,13 +377,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div style="height:20px;"></div>
     </div>
 
-    <div class="page" id="page-garden">
-      <div class="garden-page">
-        <div class="dino-card">
-          <div class="dino-big-wrap" id="dino-big-wrap"><div class="dino-big" id="dino-big"></div></div>
-          <div class="dino-tab-name" id="dino-tab-name">Dino</div>
-          <div class="dino-hearts" id="dino-hearts"></div>
-          <div class="dino-status" id="dino-status-text">Feeling great!</div>
+    <div class="page" id="page-progress">
+      <div class="progress-page">
+        <div class="progress-hero-card">
+          <div id="progress-streak-display" class="progress-streak-num">🔥 0 day streak</div>
+          <div id="progress-streak-sub" class="progress-streak-sub">Start your streak today</div>
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" width="120" height="120" viewBox="0 0 120 120">
+              <circle class="progress-ring-bg" cx="60" cy="60" r="50" fill="none" stroke-width="10"/>
+              <circle class="progress-ring-fill" id="progress-ring-fill" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="progress-ring-pct" id="progress-ring-pct">0%</div>
+          </div>
         </div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-lbl">Day streak</div></div>
@@ -473,7 +424,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
     <div class="tab-bar">
       <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
-      <div class="tab" data-tab="garden" id="tour-tab-garden" onclick="switchTab('garden',this)"><div class="tab-icon">🦕</div><div class="tab-label">Dino</div></div>
+      <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon">📊</div><div class="tab-label">Progress</div></div>
       <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
@@ -482,14 +433,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <!-- ONBOARDING -->
 <div id="onboarding-theme" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="theme-pick-heading">Make it yours</div>
   <div class="theme-pick-sub">Choose a color palette for your app. You can always change this later.</div>
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
 <div id="onboarding-goals" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">What do you want to work on?</div>
     <div class="welcome-sub" style="margin-bottom:0;">Select everything that resonates. We'll create your habit categories from these.</div>
@@ -499,7 +450,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
 </div>
 <div id="onboarding-habits" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
     <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add the ones that feel right. You can always change these later.</div>
@@ -510,7 +461,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div id="onboarding-rewards" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
   <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
   <div class="welcome-sub" style="margin-bottom:0;text-align:left;max-width:100%;">Earn points by completing your habits and spend them on things that bring you joy. You control what's in your store and what each reward costs.</div>
   <div class="reward-flow-row">
@@ -518,8 +469,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">⭐</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Collect points</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">They add up daily</span></div>
     <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">🛍️</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Buy rewards</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">Treat yourself</span></div>
   </div>
-  <div style="background:rgba(255,255,255,0.5);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--ink-soft);margin-bottom:4px;">⚠️ If your dino faints, your reward store will be locked until you revive them by completing a full day of habits.</div>
-
   <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Popular rewards</div>
   <div id="reward-suggestions-chips" style="display:flex;flex-wrap:wrap;width:100%;"></div>
 
@@ -539,25 +488,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipRewardsSetup()">Skip for now →</button>
   </div>
 </div>
-<div id="onboarding-dino-name" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
-  <div class="dino-name-dino-wrap" id="name-screen-dino"></div>
-  <div class="welcome-title" style="margin-bottom:10px;">Meet your new companion!</div>
-  <div class="welcome-sub" style="margin-bottom:20px;">This little dino will grow with you. Keep up with your habits to keep them happy and healthy.</div>
-  <input class="form-input dino-name-input-field" id="dino-name-input" placeholder="Give them a name…" maxlength="20" oninput="updateDinoNamePreview()" style="text-align:center;max-width:280px;"/>
-  <div class="dino-name-preview" id="dino-name-preview">Hello, I'm Dino!</div>
-  <div class="dino-rules-card">
-    <div class="dino-rules-title">How it works</div>
-    <div class="dino-rule-row"><div class="dino-rule-icon">❤️</div><div class="dino-rule-text"><div class="dino-rule-label">Complete habits, earn hearts</div><div class="dino-rule-desc">Finish all your habits in a day to gain a heart (max 3)</div></div></div>
-    <div class="dino-rule-row"><div class="dino-rule-icon">💔</div><div class="dino-rule-text"><div class="dino-rule-label">Miss habits, lose hearts</div><div class="dino-rule-desc">Complete less than 50% in a day and lose a heart</div></div></div>
-    <div class="dino-rule-row"><div class="dino-rule-icon">🏪</div><div class="dino-rule-text"><div class="dino-rule-label">Fainted dino = locked rewards</div><div class="dino-rule-desc">Revive them by completing a full day of habits</div></div></div>
-  </div>
-  <button class="btn btn-primary" style="width:100%;max-width:280px;padding:16px;" onclick="confirmDinoName()">Continue →</button>
-  <button class="welcome-skip" onclick="skipDinoNaming()">Skip</button>
-</div>
 <div id="onboarding-welcome" style="display:none;">
-  <div class="welcome-dino" id="welcome-dino"></div>
-  <div class="welcome-title">Welcome to Dino Days</div>
+  <div class="welcome-title">Welcome to Streaks</div>
   <div class="welcome-sub">Your personal habit tracker that grows with you. Everything you see here is fully customizable.</div>
   <button class="welcome-cta" onclick="startTour()">Show me around →</button>
   <button class="welcome-skip" onclick="skipTour()">Skip tour</button>
@@ -610,11 +542,11 @@ function applyTheme(name){
   const r=document.documentElement.style;
   r.setProperty('--almond',t.almond);r.setProperty('--powder',t.powder);r.setProperty('--linen',t.linen);
   r.setProperty('--porcelain',t.porcelain);r.setProperty('--page-bg',t.pageBg);r.setProperty('--border',t.border);
-  localStorage.setItem('dino-theme',name);
+  localStorage.setItem('streaks-theme',name);
 }
 
 // Apply cached theme instantly so loading screen matches user's saved theme
-try{const cachedTheme=localStorage.getItem('dino-theme')||'blush';applyTheme(cachedTheme);}catch(e){console.warn('Could not apply cached theme:',e);}
+try{const cachedTheme=localStorage.getItem('streaks-theme')||'blush';applyTheme(cachedTheme);}catch(e){console.warn('Could not apply cached theme:',e);}
 
 const app=initializeApp({apiKey:"AIzaSyC8ijp4iwqKsCR6nyQYC7evtU4XsJWvFO8",authDomain:"dino-days-1a7ed.firebaseapp.com",projectId:"dino-days-1a7ed",storageBucket:"dino-days-1a7ed.firebasestorage.app",messagingSenderId:"790406214150",appId:"1:790406214150:web:65c99a53be7be0af6c1011"});
 const auth=getAuth(app),db=getFirestore(app);
@@ -715,10 +647,9 @@ window.confirmHabits=()=>{
 
 function showThemePicker(){
   _selectedTheme=state?.theme||'blush';
-  const dinoSvg=getDinoSVG(80);
   document.getElementById('theme-carousel').innerHTML=Object.keys(THEMES).map(key=>{
     const t=THEMES[key];const sel=_selectedTheme===key;
-    return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><div class="theme-card-dino-wrap">${dinoSvg}</div></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
+    return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><div style="width:48px;height:48px;border-radius:50%;background:${t.almond};"></div></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
   }).join('');
   document.getElementById('onboarding-theme').style.display='flex';
 }
@@ -784,35 +715,12 @@ window.confirmRewards=()=>{
   state.rewards=[...fromSugg,...fromCustom];
   save();
   document.getElementById('onboarding-rewards').style.display='none';
-  showDinoNameScreen();
+  showWelcome();
 };
 window.skipRewardsSetup=()=>{
   state.rewards=[];
   save();
   document.getElementById('onboarding-rewards').style.display='none';
-  showDinoNameScreen();
-};
-function showDinoNameScreen(){
-  const inp=document.getElementById('dino-name-input');
-  if(inp)inp.value=state.dinoName&&state.dinoName!=='Dino'?state.dinoName:'';
-  window.updateDinoNamePreview();
-  document.getElementById('name-screen-dino').innerHTML=getDinoSVG(100);
-  document.getElementById('onboarding-dino-name').style.display='flex';
-}
-window.updateDinoNamePreview=()=>{
-  const val=(document.getElementById('dino-name-input')?.value||'').trim();
-  const pr=document.getElementById('dino-name-preview');
-  if(pr)pr.textContent=`Hello, I'm ${val||'Dino'}!`;
-};
-window.confirmDinoName=()=>{
-  const val=(document.getElementById('dino-name-input')?.value||'').trim();
-  state.dinoName=val||'Dino';save();
-  document.getElementById('onboarding-dino-name').style.display='none';
-  showWelcome();
-};
-window.skipDinoNaming=()=>{
-  if(!state.dinoName)state.dinoName='Dino';
-  document.getElementById('onboarding-dino-name').style.display='none';
   showWelcome();
 };
 window.applyAccountTheme=(name)=>{
@@ -823,45 +731,6 @@ window.applyAccountTheme=(name)=>{
   });
 };
 
-const DSVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 414.71 438.18"><defs><style>.dc1{fill:CHEEK}.dc2{fill:OUTLINE}</style></defs><g><path class="dc2" d="M304.23,192.62c8.1,14.03,13.41,28.58,17.17,43.72,1.51,6.09,2.38,12.3,2.82,18.56,.18,2.55,.97,4.07,3.83,4.33,2.71,.25,5.38,.97,7.87,2.2,2.9,1.44,4.57,3.94,4.62,6.97,.18,11.06,.57,22.16-2.78,32.94-.32,1.03-.57,2.07-.91,3.09-.73,2.21-2.08,3.23-4.61,3.09-5.32-.29-5.32-.16-5.84,5.13-2.6,26.33-12.44,49.36-31.43,68.1-2.27,2.24-2.7,4.25-1.94,7.2,1.78,6.9,3.76,13.76,4.87,20.83,.15,.97,.27,1.94,.32,2.92,.26,5.66-.79,7.77-6.21,9.01-11.15,2.56-21.86,6.77-33.14,8.75-3.54,.62-6.05-.67-7.83-3.78-1.47-2.58-2.13-5.43-2.83-8.28-.2-.82,0-2.29-1.39-2.12-1.2,.14-2,.91-1.83,2.47,.21,2.04,.05,4.11,.15,6.17,.22,4.53-1.81,7.67-5.77,9.71-5.23,2.7-10.89,4.06-16.65,4.26-10.47,.37-20.96,.62-31.43-.36-5.76-.54-6.83-1.36-8.29-6.87-.7-2.64-1.35-5.32-1.67-8.03-.22-1.8-.71-1.83-2.17-1.21-24.51,10.37-50.02,9.8-75.74,6.8-23.37-2.73-46.39-7.12-68.7-14.8-11.5-3.96-22.54-8.9-32.64-15.77-1.14-.78-2.44-1.39-1.99-3.16,.41-1.61,1.7-2.21,3.08-2.26,2.14-.09,2.42-1.06,2.3-2.99-.27-4.3-.35-8.63,.83-12.85,1.31-4.68,4.2-5.47,7.62-2.02,3.47,3.49,6.47,7.38,8.75,11.73,1.35,2.59,2.97,.84,4.49,.7,1.78-.16,1.37-1.35,1.18-2.57-.76-4.96-.74-9.97-.48-14.96,.34-6.45,4.03-8.14,9.45-4.5,5.1,3.42,8.37,8.44,11.82,13.31,.51,.71,.7,2.14,2.02,1.68,1.29-.45,.61-1.71,.59-2.58-.13-6.76-.37-13.52-.51-20.28-.05-2.37,0-4.9,2.49-6.16,2.48-1.25,4.77-.21,6.85,1.23,6.44,4.44,11.54,10.3,16.53,16.2,1.5,1.77,2.54,1.25,4.15,.65,2.07-.78,.87-2,.62-3.09-1.66-7.34-3.8-14.6-4.21-22.16-.35-6.4,3.04-8.61,8.6-5.33,7.34,4.34,14.07,9.6,20.3,15.43,1.51,1.41,2.56,1.54,4.2,.34,2.68-1.96,5.48-3.77,8.31-5.51,1.6-.98,1.94-1.88,1.2-3.76-2.95-7.45-5.93-14.9-8.11-22.63-.27-.94-.61-1.87-.79-2.83-.94-4.97,1.85-7.71,6.82-6.79,2.16,.4,4.1,1.27,5.93,2.43,6.62,4.2,13.28,8.36,18.34,14.51,.78,.94,1.28,.87,2.1,.16,2.07-1.79,4.15-3.59,6.33-5.25,1.36-1.04,1.37-1.85,.49-3.35-4.33-7.44-8.29-15.08-10.39-23.52-1.45-5.82,.58-8.6,6.52-8.25,8.77,.52,16.7,3.9,24.28,8.06,1.8,.99,2.57,.84,3.52-.94,1.42-2.68,3.03-5.26,4.7-7.78,.95-1.43,.68-2.26-.49-3.45-5.29-5.4-9.96-11.31-14.03-17.68-.89-1.39-1.73-2.87-2.3-4.41-1.72-4.61,.37-7.73,5.33-7.95,8.19-.35,16.2,1.02,24.15,2.75,2.19,.48,3.17,.12,3.77-2.08,1.02-3.67,3.66-7.49,3.09-10.81-.55-3.22-5.35-4.57-8.18-6.87-5.17-4.21-10.34-8.4-14.96-13.22-4.17-4.35-3.3-7.64,2.62-9.05,6.8-1.62,13.77-1.78,20.73-1.88,5.8-.08,5.8-.06,6.22-5.77,.2-2.73,.22-5.5,.72-8.18,.44-2.39-.65-3.13-2.61-3.53-8.57-1.72-16.26-5.46-23.53-10.2-2.84-1.85-5.85-3.7-5.66-7.58,.2-4.06,3.33-6.01,6.61-7.53,7.47-3.46,15.39-5.12,23.59-5.38,1.98-.06,2.76-.52,2.65-2.63-.16-3.22-.12-6.47,.07-9.7,.11-1.85-.62-2.48-2.3-2.9-8.17-2.04-16.13-4.72-23.53-8.83-2.79-1.56-6.31-2.97-6.29-6.72,.02-3.94,3.56-5.65,6.56-7.23,7.34-3.87,15.38-5.05,23.53-5.44,2.15-.1,3.09-.5,3.16-2.89,.09-2.92,.53-5.87,1.25-8.7,.5-1.97-.18-2.82-1.72-3.71-6.26-3.61-12.84-6.69-18.77-10.88-1.92-1.35-3.87-2.68-4.98-4.88-1.53-3.04-.94-5.73,1.81-7.74,3.06-2.23,6.63-2.84,10.28-2.95,6.67-.21,13.33,0,19.93,1.02,1.61,.25,2.44-.12,3.17-1.63,1.4-2.9,2.78-5.88,4.71-8.42,1.82-2.4,1.54-4.38,.48-6.87-3.47-8.18-8.01-15.9-10.64-24.44-.57-1.86-1.14-3.76-1.42-5.68-.57-3.95,.53-5.18,4.49-5.41,3.99-.22,7.8,.7,11.52,1.95,7.84,2.64,15.1,6.43,21.66,11.49,1.16,.9,1.92,.87,3.07,.16,5.67-3.51,11.67-6.36,18.04-8.35,1.54-.48,1.76-1.32,1.76-2.76,0-7.45,.17-14.9,1.73-22.22,.51-2.41,1.46-4.66,2.91-6.67,2.38-3.29,4.94-3.55,7.82-.74,.84,.82,1.63,1.71,2.28,2.68,4.82,7.15,9.22,14.52,11.96,22.76,.41,1.24,.97,1.64,2.27,1.61,6.28-.13,12.54,.14,18.73,1.32,1.47,.28,2.13-.34,2.76-1.47,3.18-5.66,7.46-10.53,11.46-15.6,.96-1.22,2.07-2.37,3.24-3.4,3.4-3,5.67-2.53,7.93,1.46,2.17,3.82,2.37,8.04,2.56,12.23,.19,4.31,.27,8.63,.15,12.93-.05,1.64,.43,2.4,1.87,3.1,24.04,11.59,41.89,29.67,54.18,53.12,11.28,21.53,12.82,43.68,1.74,65.92-5.03,10.1-13.29,17.31-22.32,23.72-14.28,10.14-29.95,16.53-47.65,16.81-10.06,.16-19.81-2.04-29.33-5.26-1-.34-2-.68-3.63-1.24Z"/><path class="dc1" d="M291.37,114.45c11.27,.04,19.26,8.33,19.35,19.86,.08,9.78-7.29,19.17-19.42,19.37-11.78,.19-19.94-9.08-19.94-20.19,0-10,8.69-19.71,20.01-19.04Z"/><path class="dc2" d="M336.65,87.76c-.05,3.46-1.18,6.53-3.54,9.07-2.89,3.11-7.3,2.33-8.7-1.65-1.41-4.02-1.03-7.96,1.84-11.31,1.77-2.07,3.94-3.72,6.9-2.58,2.92,1.12,3.57,3.64,3.5,6.48Z"/></g></svg>`;
-
-function getDinoSVG(h){
-  try{
-    const t=Math.max(0,Math.min(1,h/100));
-    const isDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if(isDark){
-      // Dark mode: solid filled silhouette, #2d2926 (healthy) → #1a1816 (ill)
-      const r=Math.round(26+19*t),g=Math.round(24+17*t),b=Math.round(22+16*t);
-      const outline=`rgb(${r},${g},${b})`;
-      const cheek=t>0.4?'#c97b6e':`rgba(201,123,110,${(t/0.4).toFixed(2)})`;
-      // Eye dot: #d4c5b8 (healthy) → #8a7d74 (ill)
-      const er=Math.round(138+(212-138)*t),eg=Math.round(125+(197-125)*t),eb=Math.round(116+(184-116)*t);
-      const eyeFill=`rgb(${er},${eg},${eb})`;
-      return DSVG
-        .replace(/OUTLINE/g,outline)
-        .replace(/CHEEK/g,cheek)
-        .replace('<path class="dc2" d="M336.65',`<path class="dc2" style="fill:${eyeFill};" d="M336.65`);
-    } else {
-      // Light mode: cream body + dark outlines, all fading with health
-      const br=Math.round(247+(251-247)*(1-t)),bg2=Math.round(239+(254-239)*(1-t)),bb=Math.round(232+(251-232)*(1-t));
-      const bodyFill=`rgb(${br},${bg2},${bb})`;
-      const op=(0.2+0.8*t).toFixed(2);
-      const outline=`rgba(29,30,30,${op})`;
-      const cop=(0.2+0.8*t).toFixed(2);
-      const cheek=`rgba(244,162,153,${cop})`;
-      const sop=(0.15+0.85*t).toFixed(2);
-      const strokeColor=`rgba(29,30,30,${sop})`;
-      return DSVG
-        .replace(/OUTLINE/g,outline)
-        .replace(/CHEEK/g,cheek)
-        .replace('<path class="dc2" d="M304.23',`<path class="dc2" style="fill:${bodyFill};stroke:${strokeColor};stroke-width:4;stroke-linejoin:round;stroke-linecap:round;" d="M304.23`)
-        .replace('<path class="dc1"',`<path class="dc1" style="stroke:${strokeColor};stroke-width:2;"`);
-    }
-  }catch(e){
-    console.error('getDinoSVG error:',e);
-    return DSVG.replace(/OUTLINE/g,'#1d1e1e').replace(/CHEEK/g,'#f4a299');
-  }
-}
 
 const DEFAULT_TASKS=[
   {id:'m1',name:'Wake up & stretch',section:'morning',emoji:'🧘',points:5,days:[0,1,2,3,4,5,6]},
@@ -941,9 +810,6 @@ function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 function showToast(msg,dur=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
-function getHealth(){return(state?.dinoHearts??3)*33;}
-function heartStatusText(hearts,fainted){if(fainted||hearts===0)return'Your dino has fainted… 💔';if(hearts>=3)return'Thriving and happy! 🌟';if(hearts===2)return'Feeling good today';if(hearts===1)return'Not feeling great… 💛';return'Hanging by a thread… 🥺';}
-
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason,allowUndo=false){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();if(allowUndo){showUndoSnackbar(amt,reason);}else{showToast(`Enjoyed: ${reason} 🎉`);}}
 function showUndoSnackbar(amt,reason){
@@ -981,13 +847,7 @@ function checkStreak(){
   const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
   const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
   if(total>0&&doneCount===total){
-    // Revival mechanic — fainted dino revives on full day completion
-    if(state.dinoFainted){
-      state.dinoFainted=false;state.dinoHearts=1;
-      setTimeout(()=>showToast(`${state.dinoName||'Dino'} is back! 🦕💖 Keep going!`),50);
-    }
     if(state.lastFullDay!==TODAY){
-      // Confirm the full day first, then and only then update bestStreak
       state.lastFullDay=TODAY;
       state.streak++;
       if(state.lastFullDay===TODAY&&state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
@@ -996,68 +856,6 @@ function checkStreak(){
   }
 }
 
-function renderDino(){
-  if(!state)return;
-  const hearts=state.dinoHearts??3;
-  const fainted=state.dinoFainted??false;
-  const svg=getDinoSVG(hearts*33);
-  // Today page small dino
-  const small=document.getElementById('dino-small');if(small)small.innerHTML=svg;
-  // Dino tab big dino
-  const big=document.getElementById('dino-big');if(big)big.innerHTML=svg;
-  const wrap=document.getElementById('dino-big-wrap');
-  if(wrap){
-    wrap.className='dino-big-wrap';
-    if(fainted)wrap.classList.add('fainted');
-    else if(hearts>=3)wrap.classList.add('idle');
-    else if(hearts<=1)wrap.classList.add('weak');
-  }
-  // Dino name
-  const nameEl=document.getElementById('dino-tab-name');
-  if(nameEl)nameEl.textContent=state.dinoName||'Dino';
-  // Hearts row
-  const heartsEl=document.getElementById('dino-hearts');
-  if(heartsEl){
-    let h='';
-    for(let i=0;i<3;i++){
-      if(i<hearts){
-        const cls=hearts>=3?'heart-icon heart-full happy':(hearts===1?'heart-icon heart-full warn':'heart-icon heart-full');
-        h+=`<span class="${cls}">♥</span>`;
-      }else{h+=`<span class="heart-icon heart-empty">♡</span>`;}
-    }
-    heartsEl.innerHTML=h;
-  }
-}
-
-let _lastEvalDate=null;
-function evaluateHearts(){
-  if(!state)return;
-  if(state.lastHeartCheck===TODAY)return;
-  _lastEvalDate=TODAY;
-  // Look at yesterday's completions
-  const yest=new Date();yest.setDate(yest.getDate()-1);
-  const yk=dateKey(yest);const ydow=yest.getDay();
-  const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(ydow));
-  const done=state.completedDays[yk]||{};
-  const doneCount=scheduled.filter(t=>done[t.id]).length;
-  const total=scheduled.length;
-  let changed=false;
-  if(total>0){
-    const rate=doneCount/total;
-    if(rate<0.5){state.dinoHearts=Math.max(0,(state.dinoHearts??3)-1);changed=true;}
-    else if(rate===1){state.dinoHearts=Math.min(3,(state.dinoHearts??3)+1);changed=true;}
-  }
-  // Handle faint/revival transitions
-  const dn=state.dinoName||'Dino';
-  if((state.dinoHearts??3)===0&&!state.dinoFainted){
-    state.dinoFainted=true;changed=true;
-    setTimeout(()=>showToast(`${dn} has fainted 💔 Complete all habits today to revive them`,4000),50);
-  } else if((state.dinoHearts??3)===1&&!state.dinoFainted&&changed){
-    setTimeout(()=>showToast(`${dn} only has 1 heart left! Complete your habits 🥺`),50);
-  }
-  state.lastHeartCheck=TODAY;
-  save();
-}
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
@@ -1112,19 +910,31 @@ function renderTasks(){
   document.getElementById('progress-bar').style.width=(ta?(td/ta*100):0)+'%';
 }
 function renderStats(){
-  const hearts=state?.dinoHearts??3;const fainted=state?.dinoFainted??false;
   ['streak-count','stat-streak'].forEach(id=>document.getElementById(id).textContent=state.streak);
   ['points-count','stat-points','reward-points'].forEach(id=>document.getElementById(id).textContent=state.points);
   document.getElementById('stat-best').textContent=state.bestStreak;
   document.getElementById('stat-spent').textContent=state.totalSpent;
-  const st=document.getElementById('dino-status-text');
-  if(st){st.textContent=heartStatusText(hearts,fainted);st.className='dino-status'+(fainted?' fainted':'');}
-  // Heart chip on today page
-  const hct=document.getElementById('heart-chip-text');
-  if(hct){if(fainted){hct.textContent='💔';}else{hct.textContent='❤️'.repeat(hearts)+'♡'.repeat(3-hearts);}}
-  // Hero dino line (thriving message)
-  const hdl=document.getElementById('hero-dino-line');
-  if(hdl){if(hearts>=3&&!fainted){hdl.textContent=`${state.dinoName||'Dino'} is thriving today! 🌟`;hdl.style.display='block';}else{hdl.style.display='none';}}
+  // Update progress hero card
+  const streak=state.streak||0;
+  const sd=document.getElementById('progress-streak-display');
+  if(sd)sd.textContent=`🔥 ${streak} day streak`;
+  const ss=document.getElementById('progress-streak-sub');
+  if(ss){
+    if(streak===0)ss.textContent='Start your streak today';
+    else if(streak<7)ss.textContent='You\'re building momentum!';
+    else if(streak<14)ss.textContent='One week strong! 💪';
+    else if(streak<30)ss.textContent='Two weeks of consistency!';
+    else ss.textContent='You\'re unstoppable! 🌟';
+  }
+  // Update progress ring
+  const todayDow=new Date().getDay();
+  const todayTasks=state.tasks.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow));
+  const doneTasks=todayTasks.filter(t=>(state.completedDays[TODAY]||{})[t.id]);
+  const pct=todayTasks.length>0?Math.round((doneTasks.length/todayTasks.length)*100):0;
+  const ringFill=document.getElementById('progress-ring-fill');
+  if(ringFill)ringFill.style.strokeDashoffset=314-(314*pct/100);
+  const ringPct=document.getElementById('progress-ring-pct');
+  if(ringPct)ringPct.textContent=pct+'%';
   const wd=document.getElementById('week-dots');if(!wd)return;wd.innerHTML='';
   const WMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dn=['S','M','T','W','T','F','S'],now=new Date(),dow=now.getDay();
@@ -1164,24 +974,6 @@ window.loadMoreHistory=()=>{historyVisible+=10;renderHistorySection();};
 window.collapseHistory=()=>{historyVisible=5;renderHistorySection();};
 function renderRewards(){
   historyVisible=5;
-  // Fainted overlay
-  const storeWrap=document.getElementById('rewards-store-wrap');
-  if(storeWrap){
-    const existing=storeWrap.querySelector('.rewards-fainted-overlay');
-    if(existing)existing.remove();
-    if(state?.dinoFainted){
-      const todayDow=new Date().getDay();
-      const todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
-      const done=state.completedDays[TODAY]||{};
-      const doneCount=todayTasks.filter(t=>done[t.id]).length;
-      const total=todayTasks.length;
-      const pct=total>0?Math.round((doneCount/total)*100):0;
-      const rdn=state.dinoName||'Dino';
-      const ov=document.createElement('div');ov.className='rewards-fainted-overlay';
-      ov.innerHTML=`<div class="rewards-fainted-dino">${getDinoSVG(0)}</div><div class="rewards-fainted-title">${rdn} has fainted 💔</div><div class="rewards-fainted-sub">Complete all your habits today to revive them and unlock your rewards.</div><div class="rewards-fainted-progress">${pct}% of today's habits done</div>`;
-      storeWrap.appendChild(ov);
-    }
-  }
   const list=document.getElementById('reward-list');list.innerHTML='';
   for(const r of state.rewards){
     const can=state.points>=r.cost;
@@ -1201,7 +993,7 @@ function renderSectionTabs(){
     const btn=document.createElement('button');btn.className='section-tab'+(cf===s.id?' active':'');btn.onclick=function(){filterSection(s.id,this);};btn.textContent=s.emoji+' '+s.label;c.appendChild(btn);
   }
 }
-function updateAll(){evaluateHearts();renderDino();renderTasks();renderStats();renderRewards();renderSectionTabs();}
+function updateAll(){renderTasks();renderStats();renderRewards();renderSectionTabs();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1311,14 +1103,14 @@ window.saveDayModal=function(){
   updateAll();
   closeModal();
   dayEditState=null;
-  showToast('Updated! Streak recalculated 🦕');
+  showToast('Updated! Streak recalculated ✅');
 };
 
 // expose to window
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){if(pts>0)awardPts(pts,'Habit completed');else{save();updateAll();showToast('Habit completed ✅');}}else{if(pts>0){state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();showToast(`-${pts} pts — Habit uncompleted`);}else{showToast('Habit uncompleted');}save();updateAll();}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='garden'){weekOffset=0;renderStats();}};
+window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderStats();}};
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
 window.changeWeek=(dir)=>{
@@ -1587,11 +1379,6 @@ window.showAccountModal=()=>{
 
   <div class="acc-divider"></div>
 
-  <div class="acc-section-title">Your dino</div>
-  <div id="acc-dino-section"><div class="acc-dino-row"><div class="acc-dino-mini">${getDinoSVG((state?.dinoHearts??3)*33)}</div><div class="acc-dino-name-val">${state?.dinoName||'Dino'}</div><button class="task-action-btn" onclick="startEditDinoName()">✏️</button></div></div>
-
-  <div class="acc-divider"></div>
-
   <div class="acc-section-title">Preferences</div>
   <div class="acc-pref-row">
     <div>
@@ -1627,19 +1414,6 @@ window.showAccountModal=()=>{
   openModal();
 };
 
-window.startEditDinoName=()=>{
-  const sec=document.getElementById('acc-dino-section');if(!sec)return;
-  const name=state.dinoName||'Dino';
-  sec.innerHTML=`<div style="display:flex;align-items:center;gap:8px;"><input class="form-input" id="acc-dino-input" value="${name}" maxlength="20" style="flex:1;font-size:14px;padding:8px 12px;text-align:center;" onkeydown="if(event.key==='Enter')saveDinoName()"/><button class="btn btn-primary" style="padding:8px 14px;font-size:13px;flex-shrink:0;" onclick="saveDinoName()">Save</button></div>`;
-  setTimeout(()=>document.getElementById('acc-dino-input')?.focus(),50);
-};
-window.saveDinoName=()=>{
-  const val=(document.getElementById('acc-dino-input')?.value||'').trim();
-  state.dinoName=val||'Dino';save();updateAll();
-  const sec=document.getElementById('acc-dino-section');
-  if(sec)sec.innerHTML=`<div class="acc-dino-row"><div class="acc-dino-mini">${getDinoSVG((state.dinoHearts??3)*33)}</div><div class="acc-dino-name-val">${state.dinoName}</div><button class="task-action-btn" onclick="startEditDinoName()">✏️</button></div>`;
-  showToast(`Say hi to ${state.dinoName}! 🦕`);
-};
 window.doChangePassword=async()=>{
   const curr=document.getElementById('acc-curr-pw').value;
   const nw=document.getElementById('acc-new-pw').value;
@@ -1716,7 +1490,7 @@ window.confirmDeleteAccount=async()=>{
     // Reset local state
     state=null;
     currentUser=null;
-    localStorage.removeItem('dino-theme');
+    localStorage.removeItem('streaks-theme');
 
     // Navigate directly to auth screen — don't rely on onAuthStateChanged
     document.getElementById('loading-screen').style.display='none';
@@ -1745,7 +1519,7 @@ window.showAuthTab=(tab)=>{['login','signup'].forEach(t=>{document.getElementByI
 window.doLogin=async()=>{const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}try{const rememberMe=document.getElementById('remember-me').checked;await setPersistence(auth,rememberMe?browserLocalPersistence:browserSessionPersistence);await signInWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign in failed. Please try again.','error');}};
 window.doSignup=async()=>{const email=document.getElementById('signup-email').value.trim(),pass=document.getElementById('signup-pass').value;if(!email||!pass){showMsg('Please fill in all fields.','error');return;}if(pass.length<6){showMsg('Password must be at least 6 characters.','error');return;}try{await setPersistence(auth,browserLocalPersistence);await createUserWithEmailAndPassword(auth,email,pass);}catch(e){showMsg(errMsgs[e.code]||'Sign up failed.','error');}};
 window.doForgot=async()=>{const email=document.getElementById('login-email').value.trim();if(!email){showMsg('Enter your email above first.','error');return;}try{await sendPasswordResetEmail(auth,email);showMsg('Reset email sent! Check your inbox.','success');}catch(e){showMsg('Could not send reset email.','error');}};
-window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}localStorage.removeItem('dino-theme');await signOut(auth);closeModal();};
+window.doSignOut=async()=>{if(unsub){unsub();unsub=null;}localStorage.removeItem('streaks-theme');await signOut(auth);closeModal();};
 
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
@@ -1753,7 +1527,7 @@ const TOUR_STEPS=[
   {id:'tour-pencil-btn',  tip:'Tap here to manage your categories, reorder habits, and do bulk edits.',                                                                         lift:'.header',  setPos:false},
   {id:'tour-fab-btn',     tip:'Tap here to add a new habit. You can set its name, category, emoji, and how many points it gives you.',                                           lift:null,       setPos:false},
   {id:'tour-tab-rewards', tip:'Earn points by completing habits and spend them here on things you enjoy — you set the rewards and their prices.',                                 lift:'.tab-bar', setPos:false},
-  {id:'tour-tab-garden',  tip:"Your dino's health reflects your consistency. Complete all your habits every day to keep them happy and glowing!",                                lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-progress',  tip:'Track your streaks, stats, and weekly progress here.',                                                                                             lift:'.tab-bar', setPos:false},
   {id:'tour-streak-chip', tip:'Build a streak by completing all your habits every day. The longer your streak, the more bonus points you earn.',                                  lift:null,       setPos:true},
 ];
 
@@ -1789,7 +1563,7 @@ function showTourStep(step){
   // Update tooltip
   document.getElementById('tour-step-ind').textContent=`${step+1} of ${TOUR_STEPS.length}`;
   document.getElementById('tour-tip-text').textContent=cfg.tip;
-  document.getElementById('tour-next-btn').textContent=step===TOUR_STEPS.length-1?"Let's go! 🦕":'Next →';
+  document.getElementById('tour-next-btn').textContent=step===TOUR_STEPS.length-1?"Let's go! 🎯":'Next →';
   const tooltip=document.getElementById('tour-tooltip');
   tooltip.style.display='block';
 
@@ -1829,20 +1603,6 @@ function endTour(){
 }
 window.endTour=endTour;
 
-// init dinos in loading/auth screens
-try{
-  document.getElementById('load-dino').innerHTML=getDinoSVG(80);
-  document.getElementById('auth-dino').innerHTML=getDinoSVG(80);
-  document.getElementById('welcome-dino').innerHTML=getDinoSVG(100);
-}catch(e){console.error('dino init error:',e);}
-
-// re-render dino when system color scheme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{
-  document.getElementById('load-dino').innerHTML=getDinoSVG(80);
-  document.getElementById('auth-dino').innerHTML=getDinoSVG(80);
-  document.getElementById('welcome-dino').innerHTML=getDinoSVG(100);
-  if(state)renderDino();
-});
 
 function initModalDrag(){
   const ov=document.getElementById('modal-overlay');
@@ -1919,13 +1679,9 @@ onAuthStateChanged(auth,async(user)=>{
         if(!state.tasks)state.tasks=[];
         state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
         state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
-        if(state.dinoHearts==null)state.dinoHearts=3;
-        if(state.dinoFainted==null)state.dinoFainted=false;
-        if(state.lastHeartCheck==null)state.lastHeartCheck=null;
-        if(state.dinoName==null)state.dinoName='Dino';
         applyTheme(state.theme||'blush');
       }else{
-        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],dinoHearts:3,dinoFainted:false,lastHeartCheck:null,dinoName:'Dino'};
+        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
         await setDoc(ref,state);
         isNewUser=true;
         applyTheme('blush');
