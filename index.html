@@ -343,6 +343,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .threshold-pills{display:flex;gap:8px;margin-bottom:12px;}
 .threshold-pill{flex:1;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .threshold-pill.selected{background:var(--ink);color:white;border-color:var(--ink);}
+.ch-section-label{font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px;}
+.ch-dur-row{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.ch-dur-row::-webkit-scrollbar{display:none;}
+.ch-pill{padding:10px 16px;border-radius:100px;border:none;background:var(--linen);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.ch-pill.ch-pill-sel{background:var(--ink);color:white;}
+@keyframes chShake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
 .habit-checklist{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;}
 .habit-check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:16px;}
 .habit-check-row:last-child{border-bottom:none;}
@@ -1547,73 +1553,84 @@ window.openChallengeDetail=openChallengeDetail;
 let _chDuration=30,_chThreshold=100,_chHabitIds=[],_chType='standard',_chStreakRequired=21,_chAllowMisses=false,_chVictoryCondition='streak',_chTotalTarget=21;
 
 function showNewChallengeModal(){
-  _chDuration=30;_chThreshold=100;_chHabitIds=[];_chType='standard';
-  _chStreakRequired=21;_chAllowMisses=false;_chVictoryCondition='streak';_chTotalTarget=21;
-  const habitOptions=state.tasks.map((t,i)=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
+  _chDuration=30;_chThreshold=100;_chHabitIds=[];
+  _chAllowMisses=false;_chVictoryCondition='streak';_chTotalTarget=30;
+  const habitOptions=state.tasks.map(t=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
   const body=`<div class="modal-scroll">
-    <div class="form-group"><label class="form-label">Challenge type</label>
-      <div class="sc-mode-row">
-        <div class="sc-mode-card selected" id="ch-type-standard" onclick="setChType('standard',this)">
-          <span class="sc-mode-icon">👤</span>
-          <div class="sc-mode-title">Standard</div>
-          <div class="sc-mode-desc">Build a daily streak until you hit your target.</div>
-        </div>
-        <div class="sc-mode-card" id="ch-type-custom" onclick="setChType('custom',this)">
-          <span class="sc-mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="20" y2="6"/><circle cx="12" cy="6" r="2"/><line x1="4" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="20" y2="12"/><circle cx="10" cy="12" r="2"/><line x1="4" y1="18" x2="16" y2="18"/><line x1="20" y1="18" x2="20" y2="18"/><circle cx="18" cy="18" r="2"/></svg></span>
-          <div class="sc-mode-title">Custom</div>
-          <div class="sc-mode-desc">Set your own rules, streak requirements, and completion goals.</div>
-        </div>
+    <div style="margin-bottom:20px;">
+      <div class="ch-section-label">Name</div>
+      <input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60"/>
+      <div id="ch-name-error" style="font-size:12px;color:var(--danger);margin-top:4px;display:none;">Please name your challenge</div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div class="ch-section-label">Duration</div>
+      <div class="ch-dur-row" id="ch-dur-row">
+        <button class="ch-pill" onclick="setCHDur(21,this)">21 days</button>
+        <button class="ch-pill ch-pill-sel" onclick="setCHDur(30,this)">30 days</button>
+        <button class="ch-pill" onclick="setCHDur(60,this)">60 days</button>
+        <button class="ch-pill" onclick="setCHDur(180,this)">6 mo</button>
+        <button class="ch-pill" onclick="setCHDur(365,this)">1 yr</button>
+        <button class="ch-pill" id="ch-custom-dur-pill" onclick="toggleCHCustomDur(this)">Custom</button>
+      </div>
+      <div id="ch-custom-dur-wrap" style="display:none;margin-top:10px;align-items:center;gap:8px;">
+        <input class="form-input" type="number" id="ch-custom-dur-input" min="1" max="3650" placeholder="365" style="width:90px;" oninput="setCHCustomDuration(this.value)"/>
+        <span style="font-size:14px;color:var(--ink-soft);">days</span>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Challenge name *</label><input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60"/></div>
-    <div class="form-group"><label class="form-label">Description (optional)</label><input class="form-input" id="ch-desc" placeholder="What's your goal?"/></div>
-    <div class="form-group"><label class="form-label">Duration</label>
-      <div class="duration-pills">
-        <button class="duration-pill" onclick="setChallengeD(21,this)">21 days</button>
-        <button class="duration-pill selected" onclick="setChallengeD(30,this)">30 days</button>
-        <button class="duration-pill" onclick="setChallengeD(60,this)">60 days</button>
-        <button class="duration-pill" onclick="setChallengeD(180,this)">6 months</button>
-        <button class="duration-pill" onclick="setChallengeD(365,this)">1 year</button>
+    <div style="margin-bottom:4px;">
+      <div class="ch-section-label">A day counts when I complete</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-thresh-row">
+        <button class="ch-pill" onclick="setCHThresh(50,this)">50% of habits</button>
+        <button class="ch-pill ch-pill-sel" onclick="setCHThresh(100,this)">All habits</button>
+        <button class="ch-pill" onclick="setCHThresh(-1,this)">Specific habits</button>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">A day counts when I complete…</label>
-      <div class="threshold-pills">
-        <button class="threshold-pill" onclick="setChallengeT(50,this)">50% of habits</button>
-        <button class="threshold-pill selected" onclick="setChallengeT(100,this)">All habits</button>
-        <button class="threshold-pill" onclick="setChallengeT(-1,this)">Specific habits</button>
-      </div>
-    </div>
-    <div id="ch-habit-list" style="display:none;">
+    <div id="ch-habit-list" style="display:none;margin-top:10px;">
       <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div>
     </div>
-    <div id="ch-custom-fields" style="display:none;">
-      <div class="form-group"><label class="form-label">Victory condition</label>
-        <div class="threshold-pills">
-          <button class="threshold-pill selected" id="ch-vic-streak" onclick="setCHVictory('streak',this)">Reach a streak</button>
-          <button class="threshold-pill" id="ch-vic-total" onclick="setCHVictory('total',this)">Total days completed</button>
+    <div onclick="toggleCHAdvanced()" style="font-size:13px;color:var(--ink-faint);cursor:pointer;display:flex;align-items:center;gap:6px;margin:20px 0 0;user-select:none;">
+      <span id="ch-adv-arrow" style="display:inline-block;transition:transform .2s;font-size:16px;line-height:1;">›</span>
+      Advanced options
+    </div>
+    <div id="ch-advanced" style="max-height:0;overflow:hidden;transition:max-height .35s ease;">
+      <div style="padding-top:16px;">
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">Description (optional)</div>
+          <input class="form-input" id="ch-desc" placeholder="What's your goal?"/>
         </div>
-      </div>
-      <div class="form-group" id="ch-streak-req-group"><label class="form-label">Streak required to win</label>
-        <input class="form-input" type="number" id="ch-streak-req" value="21" min="1" max="365" style="width:100px;" oninput="setCHStreakReq(this.value)"/>
-      </div>
-      <div class="form-group" id="ch-total-target-group" style="display:none;"><label class="form-label">Total days to complete</label>
-        <input class="form-input" type="number" id="ch-total-target" value="21" min="1" max="365" style="width:100px;" oninput="setCHTotalTarget(this.value)"/>
-      </div>
-      <div class="form-group"><label class="form-label">If you miss a day…</label>
-        <div class="threshold-pills">
-          <button class="threshold-pill selected" id="ch-miss-reset" onclick="setCHMissMode(false,this)">Streak resets</button>
-          <button class="threshold-pill" id="ch-miss-note" onclick="setCHMissMode(true,this)">Just note it</button>
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">I win when</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-vic-row">
+            <button class="ch-pill ch-pill-sel" id="ch-vic-streak" onclick="setCHVictory('streak',this)">I reach my streak goal</button>
+            <button class="ch-pill" id="ch-vic-total" onclick="setCHVictory('total',this)">I complete X total days</button>
+          </div>
+          <div id="ch-total-target-wrap" style="display:none;margin-top:10px;align-items:center;gap:8px;">
+            <span style="font-size:14px;color:var(--ink-soft);">Target:</span>
+            <input class="form-input" type="number" id="ch-total-target" min="1" max="3650" value="${30}" style="width:90px;" oninput="setCHTotalTarget(this.value)"/>
+            <span style="font-size:14px;color:var(--ink-soft);">days</span>
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">If I miss a day</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-miss-row">
+            <button class="ch-pill ch-pill-sel" id="ch-miss-reset" onclick="setCHMissMode(false,this)">Streak resets</button>
+            <button class="ch-pill" id="ch-miss-note" onclick="setCHMissMode(true,this)">Just note it</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink-faint);margin-top:8px;">Just note it counts total completions instead of consecutive days</div>
+        </div>
+        <div style="margin-bottom:4px;">
+          <div class="ch-section-label">Start date</div>
+          <input class="form-input" type="date" id="ch-start" value="${TODAY}"/>
         </div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Start date</label><input class="form-input" type="date" id="ch-start" value="${TODAY}"/></div>
-    <div class="auth-msg" id="ch-error"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createChallenge()">Create challenge</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="createChallenge()">Create challenge</button>
   </div>`;
   showModal('New challenge',body);
 }
 window.showNewChallengeModal=showNewChallengeModal;
 
+// Social challenge modal duration/threshold (uses .duration-pill/.threshold-pill classes)
 window.setChallengeD=(d,btn)=>{
   _chDuration=d;
   btn.closest('.duration-pills').querySelectorAll('.duration-pill').forEach(p=>p.classList.remove('selected'));
@@ -1626,29 +1643,60 @@ window.setChallengeT=(t,btn)=>{
   const hl=document.getElementById('ch-habit-list');
   if(hl)hl.style.display=t===-1?'block':'none';
 };
-window.setChType=(type,card)=>{
-  _chType=type;
-  ['ch-type-standard','ch-type-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
-  card.classList.add('selected');
-  const cf=document.getElementById('ch-custom-fields');
-  if(cf)cf.style.display=type==='custom'?'block':'none';
+
+// New challenge modal helpers (uses .ch-pill/.ch-pill-sel classes)
+window.setCHDur=(d,btn)=>{
+  _chDuration=d;
+  const row=document.getElementById('ch-dur-row');
+  if(row)row.querySelectorAll('.ch-pill').forEach(p=>p.classList.remove('ch-pill-sel'));
+  btn.classList.add('ch-pill-sel');
+  const wrap=document.getElementById('ch-custom-dur-wrap');
+  if(wrap)wrap.style.display='none';
+};
+window.toggleCHCustomDur=(btn)=>{
+  const row=document.getElementById('ch-dur-row');
+  if(row)row.querySelectorAll('.ch-pill').forEach(p=>p.classList.remove('ch-pill-sel'));
+  btn.classList.add('ch-pill-sel');
+  const wrap=document.getElementById('ch-custom-dur-wrap');
+  if(wrap){
+    const show=wrap.style.display!=='flex';
+    wrap.style.display=show?'flex':'none';
+    if(show){const inp=document.getElementById('ch-custom-dur-input');if(inp)inp.focus();}
+  }
+};
+window.setCHCustomDuration=v=>{const n=parseInt(v);if(n>=1&&n<=3650)_chDuration=n;};
+window.setCHThresh=(t,btn)=>{
+  _chThreshold=t;
+  const row=document.getElementById('ch-thresh-row');
+  if(row)row.querySelectorAll('.ch-pill').forEach(p=>p.classList.remove('ch-pill-sel'));
+  btn.classList.add('ch-pill-sel');
+  const hl=document.getElementById('ch-habit-list');
+  if(hl)hl.style.display=t===-1?'block':'none';
+};
+window.toggleCHAdvanced=()=>{
+  const adv=document.getElementById('ch-advanced');
+  const arrow=document.getElementById('ch-adv-arrow');
+  if(!adv)return;
+  const open=adv.style.maxHeight!=='0px'&&adv.style.maxHeight!=='';
+  adv.style.maxHeight=open?'0px':'800px';
+  if(arrow)arrow.style.transform=open?'rotate(0deg)':'rotate(90deg)';
 };
 window.setCHMissMode=(allowMisses,btn)=>{
   _chAllowMisses=allowMisses;
-  ['ch-miss-reset','ch-miss-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
-  btn.classList.add('selected');
+  const row=document.getElementById('ch-miss-row');
+  if(row)row.querySelectorAll('.ch-pill').forEach(p=>p.classList.remove('ch-pill-sel'));
+  btn.classList.add('ch-pill-sel');
 };
 window.setCHVictory=(condition,btn)=>{
   _chVictoryCondition=condition;
-  ['ch-vic-streak','ch-vic-total'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
-  btn.classList.add('selected');
-  const sg=document.getElementById('ch-streak-req-group');
-  const tg=document.getElementById('ch-total-target-group');
-  if(sg)sg.style.display=condition==='streak'?'block':'none';
-  if(tg)tg.style.display=condition==='total'?'block':'none';
+  const row=document.getElementById('ch-vic-row');
+  if(row)row.querySelectorAll('.ch-pill').forEach(p=>p.classList.remove('ch-pill-sel'));
+  btn.classList.add('ch-pill-sel');
+  const tw=document.getElementById('ch-total-target-wrap');
+  if(tw)tw.style.display=condition==='total'?'flex':'none';
 };
 window.setCHStreakReq=v=>{_chStreakRequired=parseInt(v)||21;};
-window.setCHTotalTarget=v=>{_chTotalTarget=parseInt(v)||21;};
+window.setCHTotalTarget=v=>{_chTotalTarget=parseInt(v)||30;};
 window.toggleChallengeHabit=(id)=>{
   const idx=_chHabitIds.indexOf(id);
   if(idx>=0)_chHabitIds.splice(idx,1);else _chHabitIds.push(id);
@@ -1658,13 +1706,20 @@ window.toggleChallengeHabit=(id)=>{
 
 window.createChallenge=()=>{
   const title=(document.getElementById('ch-title')?.value||'').trim();
-  const err=document.getElementById('ch-error');
-  if(!title){if(err){err.textContent='Please enter a challenge name.';err.className='auth-msg show error';}return;}
+  if(!title){
+    const ni=document.getElementById('ch-title');
+    const errEl=document.getElementById('ch-name-error');
+    if(ni){ni.style.animation='none';requestAnimationFrame(()=>{ni.style.animation='chShake .3s ease';});}
+    if(errEl)errEl.style.display='block';
+    return;
+  }
+  const errEl=document.getElementById('ch-name-error');if(errEl)errEl.style.display='none';
   const desc=(document.getElementById('ch-desc')?.value||'').trim();
   const startDate=document.getElementById('ch-start')?.value||TODAY;
   const threshold=_chThreshold===-1?100:_chThreshold;
   const habitIds=_chThreshold===-1?[..._chHabitIds]:[];
-  const isCustom=_chType==='custom';
+  // Auto-detect custom type from advanced settings
+  const isCustom=_chVictoryCondition!=='streak'||_chAllowMisses!==false;
   const ch={
     id:makeChallengeId(),title,description:desc,duration:_chDuration,
     type:isCustom?'custom':'solo',
@@ -1674,10 +1729,10 @@ window.createChallenge=()=>{
     createdAt:new Date().toISOString()
   };
   if(isCustom){
-    ch.streakRequired=_chStreakRequired;
+    ch.streakRequired=_chDuration;
     ch.allowMisses=_chAllowMisses;
     ch.victoryCondition=_chVictoryCondition;
-    ch.totalTarget=_chTotalTarget;
+    ch.totalTarget=_chTotalTarget||_chDuration;
     ch.completedDaysTotal=0;
   }
   if(!state.challenges)state.challenges=[];
