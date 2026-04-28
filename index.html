@@ -359,11 +359,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .heatmap-cell.future{background:transparent;border:1px solid var(--border);}
 .heatmap-cell.today{background:var(--powder);border:2px solid var(--almond);}
 .swipe-container{position:relative;overflow:hidden;border-radius:20px;margin-bottom:12px;}
-.swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--danger);display:flex;align-items:center;justify-content:center;box-shadow:inset 4px 0 8px rgba(0,0,0,0.08);border-radius:0 20px 20px 0;}
+.swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--danger);display:flex;align-items:center;justify-content:center;opacity:0;border-radius:0 20px 20px 0;}
 .swipe-delete-label{color:white;font-size:13px;font-weight:500;opacity:0;transform:translateX(10px);transition:opacity .2s,transform .2s;user-select:none;}
-.swipe-card{position:relative;will-change:transform;border-radius:20px;}
-.swipe-card .challenge-card{margin-bottom:0;border-radius:20px;}
-.swipe-card .race-card{margin-bottom:0;}
+.swipe-card{position:relative;will-change:transform;border-radius:20px;width:100%;background:var(--white);}
+.swipe-card .challenge-card{margin-bottom:0;border-radius:20px;background:var(--white);}
+.swipe-card .race-card{margin-bottom:0;background:var(--white);}
 .active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
 .active-challenges-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .onb-steps{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;width:100%;}
@@ -1880,7 +1880,9 @@ function initSwipeDelete(container,onDelete){
     currentX=Math.min(0,dx);
     card.style.transform=`translateX(${currentX}px)`;
     card.style.boxShadow=currentX<0?'-4px 0 12px rgba(0,0,0,0.1)':'';
-    const pct=Math.min(1,Math.abs(currentX)/40);
+    const abs=Math.abs(currentX);
+    bg.style.opacity=Math.min(1,abs/80);
+    const pct=Math.min(1,abs/40);
     label.style.opacity=pct;
     label.style.transform=`translateX(${10-pct*10}px)`;
   }
@@ -1891,6 +1893,7 @@ function initSwipeDelete(container,onDelete){
     card.style.transition='transform .2s ease,box-shadow .2s';
     if(Math.abs(currentX)>=THRESHOLD){
       card.style.transform=`translateX(-${THRESHOLD}px)`;
+      bg.style.opacity='1';
       currentlySwipedCard=container;
     }else{
       snapBack(container);
@@ -1900,9 +1903,11 @@ function initSwipeDelete(container,onDelete){
   function snapBack(cont){
     const c=cont.querySelector('.swipe-card');
     const l=cont.querySelector('.swipe-delete-label');
+    const b=cont.querySelector('.swipe-delete-bg');
     c.style.transition='transform .2s ease,box-shadow .2s';
     c.style.transform='translateX(0)';
     c.style.boxShadow='';
+    if(b)b.style.opacity='0';
     if(l){l.style.opacity='0';l.style.transform='translateX(10px)';}
     if(currentlySwipedCard===cont)currentlySwipedCard=null;
   }
