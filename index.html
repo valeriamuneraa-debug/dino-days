@@ -435,8 +435,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .celebrate-sub{font-size:17px;color:var(--ink-soft);line-height:1.5;max-width:280px;}
 .celebrate-tap{font-size:14px;color:var(--ink-faint);margin-top:24px;}
 .bond-participant-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:15px;}
-.sc-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.sc-mode-card{background:var(--linen);border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
+.sc-mode-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:20px;}
+.sc-mode-row::-webkit-scrollbar{display:none;}
+.sc-mode-card{min-width:160px;flex-shrink:0;background:var(--linen);border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
 .sc-mode-card.selected{background:var(--powder);border-color:var(--almond);}
 .sc-mode-icon{font-size:30px;margin-bottom:8px;display:block;}
 .sc-mode-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px;}
@@ -1050,6 +1051,7 @@ let socialChallengesCache=[];
 let _socialChallengeListeners=[];
 let _socialChEvalDay=null;
 let _scDuration=30,_scThreshold=100,_scHabitMode='all',_scHabitIds=[],_scType='race';
+let _scStreakRequired=21,_scAllowMisses=false,_scVictoryCondition='streak',_scTotalTarget=21;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1359,7 +1361,31 @@ function evaluateChallenges(){
     const doneCount=habitPool.filter(t=>yDone[t.id]).length;
     const pct=Math.round(doneCount/habitPool.length*100);
     const threshold=ch.completionThreshold??100;
-    if(pct>=threshold){
+    const dayMet=pct>=threshold;
+
+    // ── Custom evaluation ────────────────────────────────────────
+    if(ch.type==='custom'){
+      ch.completedDays=ch.completedDays||{};
+      if(dayMet){
+        ch.completedDays[yKey]=true;
+        ch.completedDaysTotal=(ch.completedDaysTotal||0)+1;
+        ch.currentStreak=(ch.currentStreak||0)+1;
+        if(ch.currentStreak>=(ch.bestStreak||0))ch.bestStreak=ch.currentStreak;
+        ch.lastCompletedDay=yKey;
+        const won=ch.victoryCondition==='total'
+          ?(ch.completedDaysTotal>=(ch.totalTarget||ch.duration))
+          :(ch.currentStreak>=(ch.streakRequired||ch.duration));
+        if(won){ch.status='completed';showToast('🏆 Custom challenge complete! You did it!');}
+      }else{
+        ch.completedDays[yKey]=false;
+        if(!ch.allowMisses&&yKey>ch.startDate){ch.currentStreak=0;}
+      }
+      ch.lastEvaluatedDay=yKey;changed=true;
+      continue;
+    }
+
+    // ── Standard / solo evaluation ───────────────────────────────
+    if(dayMet){
       ch.completedDays=ch.completedDays||{};
       ch.completedDays[yKey]=true;
       ch.currentStreak=(ch.currentStreak||0)+1;
@@ -1395,7 +1421,21 @@ function markChallengeToday(id,e){
   ch.currentStreak=streak;
   if(streak>=(ch.bestStreak||0))ch.bestStreak=streak;
   ch.lastCompletedDay=TODAY;
-  if(streak>=ch.duration){
+
+  if(ch.type==='custom'){
+    ch.completedDaysTotal=(ch.completedDaysTotal||0)+1;
+    const won=ch.victoryCondition==='total'
+      ?(ch.completedDaysTotal>=(ch.totalTarget||ch.duration))
+      :(streak>=(ch.streakRequired||ch.duration));
+    if(won){
+      ch.status='completed';
+      showToast('🏆 Custom challenge complete! Incredible!');
+    }else{
+      const target=ch.victoryCondition==='total'?ch.totalTarget||ch.duration:ch.streakRequired||ch.duration;
+      const progress=ch.victoryCondition==='total'?ch.completedDaysTotal:streak;
+      showToast(`${progress}/${target} — keep going! ⚙️`);
+    }
+  }else if(streak>=ch.duration){
     ch.status='completed';
     showToast('🏆 Challenge complete! Incredible!');
   }else{
@@ -1455,12 +1495,27 @@ function openChallengeDetail(id){
 }
 window.openChallengeDetail=openChallengeDetail;
 
-let _chDuration=30,_chThreshold=100,_chHabitIds=[];
+let _chDuration=30,_chThreshold=100,_chHabitIds=[],_chType='standard',_chStreakRequired=21,_chAllowMisses=false,_chVictoryCondition='streak',_chTotalTarget=21;
 
 function showNewChallengeModal(){
-  _chDuration=30;_chThreshold=100;_chHabitIds=[];
+  _chDuration=30;_chThreshold=100;_chHabitIds=[];_chType='standard';
+  _chStreakRequired=21;_chAllowMisses=false;_chVictoryCondition='streak';_chTotalTarget=21;
   const habitOptions=state.tasks.map((t,i)=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
   const body=`<div class="modal-scroll">
+    <div class="form-group"><label class="form-label">Challenge type</label>
+      <div class="sc-mode-row">
+        <div class="sc-mode-card selected" id="ch-type-standard" onclick="setChType('standard',this)">
+          <span class="sc-mode-icon">👤</span>
+          <div class="sc-mode-title">Standard</div>
+          <div class="sc-mode-desc">Build a daily streak until you hit your target.</div>
+        </div>
+        <div class="sc-mode-card" id="ch-type-custom" onclick="setChType('custom',this)">
+          <span class="sc-mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="20" y2="6"/><circle cx="12" cy="6" r="2"/><line x1="4" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="20" y2="12"/><circle cx="10" cy="12" r="2"/><line x1="4" y1="18" x2="16" y2="18"/><line x1="20" y1="18" x2="20" y2="18"/><circle cx="18" cy="18" r="2"/></svg></span>
+          <div class="sc-mode-title">Custom</div>
+          <div class="sc-mode-desc">Set your own rules, streak requirements, and completion goals.</div>
+        </div>
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">Challenge name *</label><input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60"/></div>
     <div class="form-group"><label class="form-label">Description (optional)</label><input class="form-input" id="ch-desc" placeholder="What's your goal?"/></div>
     <div class="form-group"><label class="form-label">Duration</label>
@@ -1482,6 +1537,26 @@ function showNewChallengeModal(){
     <div id="ch-habit-list" style="display:none;">
       <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div>
     </div>
+    <div id="ch-custom-fields" style="display:none;">
+      <div class="form-group"><label class="form-label">Victory condition</label>
+        <div class="threshold-pills">
+          <button class="threshold-pill selected" id="ch-vic-streak" onclick="setCHVictory('streak',this)">Reach a streak</button>
+          <button class="threshold-pill" id="ch-vic-total" onclick="setCHVictory('total',this)">Total days completed</button>
+        </div>
+      </div>
+      <div class="form-group" id="ch-streak-req-group"><label class="form-label">Streak required to win</label>
+        <input class="form-input" type="number" id="ch-streak-req" value="21" min="1" max="365" style="width:100px;" oninput="setCHStreakReq(this.value)"/>
+      </div>
+      <div class="form-group" id="ch-total-target-group" style="display:none;"><label class="form-label">Total days to complete</label>
+        <input class="form-input" type="number" id="ch-total-target" value="21" min="1" max="365" style="width:100px;" oninput="setCHTotalTarget(this.value)"/>
+      </div>
+      <div class="form-group"><label class="form-label">If you miss a day…</label>
+        <div class="threshold-pills">
+          <button class="threshold-pill selected" id="ch-miss-reset" onclick="setCHMissMode(false,this)">Streak resets</button>
+          <button class="threshold-pill" id="ch-miss-note" onclick="setCHMissMode(true,this)">Just note it</button>
+        </div>
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">Start date</label><input class="form-input" type="date" id="ch-start" value="${TODAY}"/></div>
     <div class="auth-msg" id="ch-error"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createChallenge()">Create challenge</button>
@@ -1502,6 +1577,29 @@ window.setChallengeT=(t,btn)=>{
   const hl=document.getElementById('ch-habit-list');
   if(hl)hl.style.display=t===-1?'block':'none';
 };
+window.setChType=(type,card)=>{
+  _chType=type;
+  ['ch-type-standard','ch-type-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  card.classList.add('selected');
+  const cf=document.getElementById('ch-custom-fields');
+  if(cf)cf.style.display=type==='custom'?'block':'none';
+};
+window.setCHMissMode=(allowMisses,btn)=>{
+  _chAllowMisses=allowMisses;
+  ['ch-miss-reset','ch-miss-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  btn.classList.add('selected');
+};
+window.setCHVictory=(condition,btn)=>{
+  _chVictoryCondition=condition;
+  ['ch-vic-streak','ch-vic-total'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  btn.classList.add('selected');
+  const sg=document.getElementById('ch-streak-req-group');
+  const tg=document.getElementById('ch-total-target-group');
+  if(sg)sg.style.display=condition==='streak'?'block':'none';
+  if(tg)tg.style.display=condition==='total'?'block':'none';
+};
+window.setCHStreakReq=v=>{_chStreakRequired=parseInt(v)||21;};
+window.setCHTotalTarget=v=>{_chTotalTarget=parseInt(v)||21;};
 window.toggleChallengeHabit=(id)=>{
   const idx=_chHabitIds.indexOf(id);
   if(idx>=0)_chHabitIds.splice(idx,1);else _chHabitIds.push(id);
@@ -1517,17 +1615,26 @@ window.createChallenge=()=>{
   const startDate=document.getElementById('ch-start')?.value||TODAY;
   const threshold=_chThreshold===-1?100:_chThreshold;
   const habitIds=_chThreshold===-1?[..._chHabitIds]:[];
+  const isCustom=_chType==='custom';
   const ch={
-    id:makeChallengeId(),title,description:desc,duration:_chDuration,type:'solo',
+    id:makeChallengeId(),title,description:desc,duration:_chDuration,
+    type:isCustom?'custom':'solo',
     status:'active',startDate,currentStreak:0,bestStreak:0,
     lastCompletedDay:null,lastEvaluatedDay:null,
     completedDays:{},habitIds,completionThreshold:threshold,
     createdAt:new Date().toISOString()
   };
+  if(isCustom){
+    ch.streakRequired=_chStreakRequired;
+    ch.allowMisses=_chAllowMisses;
+    ch.victoryCondition=_chVictoryCondition;
+    ch.totalTarget=_chTotalTarget;
+    ch.completedDaysTotal=0;
+  }
   if(!state.challenges)state.challenges=[];
   state.challenges.push(ch);
   save();closeModal();renderChallenges();renderTodayBanner();
-  showToast('Challenge started! 🎯');
+  showToast(isCustom?'Custom challenge started! ⚙️':'Challenge started! 🎯');
 };
 
 function renderTodayBanner(){
@@ -1563,7 +1670,8 @@ function renderChallenges(){
   const inner=document.getElementById('challenges-inner');
   if(!inner)return;
   const challenges=state.challenges||[];
-  const active=challenges.filter(c=>c.status==='active');
+  const active=challenges.filter(c=>c.status==='active'&&c.type!=='custom');
+  const activeCustom=challenges.filter(c=>c.status==='active'&&c.type==='custom');
   const completed=challenges.filter(c=>c.status==='completed');
   const past=challenges.filter(c=>c.status==='failed'||c.status==='paused');
 
@@ -1571,6 +1679,7 @@ function renderChallenges(){
   const incomingSC=(socialChallengesCache||[]).filter(c=>c.status==='pending'&&c.invitedUid===myUid);
   const activeRaceSC=(socialChallengesCache||[]).filter(c=>c.type==='race'&&c.status==='active'&&c.participants?.[myUid]);
   const activeBondSC=(socialChallengesCache||[]).filter(c=>c.type==='bond'&&c.status==='active'&&c.participants?.[myUid]);
+  const activeCustomSC=(socialChallengesCache||[]).filter(c=>c.type==='custom'&&c.status==='active'&&c.participants?.[myUid]);
   const completedSC=(socialChallengesCache||[]).filter(c=>c.status==='completed'&&c.participants?.[myUid]);
   const failedSC=(socialChallengesCache||[]).filter(c=>c.status==='failed'&&c.participants?.[myUid]);
 
@@ -1583,7 +1692,7 @@ function renderChallenges(){
 </div>
 <div style="padding:0 20px;">`;
 
-  const hasAnything=challenges.length||incomingSC.length||activeRaceSC.length||activeBondSC.length||completedSC.length;
+  const hasAnything=challenges.length||incomingSC.length||activeRaceSC.length||activeBondSC.length||activeCustomSC.length||activeCustom.length||completedSC.length;
   if(!hasAnything){
     html+=`<div class="challenges-empty">
       <div class="challenges-empty-icon">🎯</div>
@@ -1608,6 +1717,11 @@ function renderChallenges(){
       html+=`<div class="challenge-section-label">🤝 Bonded</div>`;
       html+=activeBondSC.map(ch=>renderActiveBondCard(ch)).join('');
     }
+    if(activeCustom.length||activeCustomSC.length){
+      html+=`<div class="challenge-section-label">⚙️ Custom</div>`;
+      html+=activeCustom.map(ch=>renderChallengeCard(ch)).join('');
+      html+=activeCustomSC.map(ch=>renderActiveCustomCard(ch)).join('');
+    }
     if(completed.length||completedSC.length){
       html+=`<div class="challenge-section-label">Completed 🏆</div>`;
       html+=completed.map(ch=>renderChallengeCard(ch)).join('');
@@ -1630,9 +1744,10 @@ function renderIncomingChallengeCard(ch){
   const dur=ch.duration;
   const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
   const isBond=ch.type==='bond';
-  const modeIcon=isBond?'🤝':'🏁';
-  const modeName=isBond?'Bond':'Race';
-  const acceptLabel=isBond?'Accept 🤝':'Accept 🎯';
+  const isCustom=ch.type==='custom';
+  const modeIcon=isBond?'🤝':isCustom?'⚙️':'🏁';
+  const modeName=isBond?'Bond':isCustom?'Custom':'Race';
+  const acceptLabel=isBond?'Accept 🤝':isCustom?'Accept ⚙️':'Accept 🎯';
   return `<div class="incoming-challenge-card">
     <div class="incoming-challenge-name">${creatorName} challenged you! ${modeIcon}</div>
     <div class="incoming-challenge-meta"><span class="mode-badge">${modeIcon} ${modeName}</span> ${durationLabel} · ${ch.completionThreshold??100}% of habits per day</div>
@@ -1727,25 +1842,131 @@ function renderActiveBondCard(ch){
   </div>`;
 }
 
+function renderActiveCustomCard(ch){
+  const myUid=currentUser?.uid;
+  const myData=ch.participants?.[myUid];
+  const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
+  const friendData=otherUids.length>0?ch.participants[otherUids[0]]:null;
+  const friendName=friendData?.displayName||'Friend';
+  const dur=ch.duration;
+  const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
+  const myStreak=myData?.currentStreak||0;
+  const myTotal=myData?.completedDaysTotal||0;
+  const isStreak=ch.victoryCondition==='total'?false:true;
+  const target=isStreak?(ch.streakRequired||ch.duration):(ch.totalTarget||ch.duration);
+  const progress=isStreak?myStreak:myTotal;
+  const pct=Math.min(100,Math.round(progress/target*100));
+  const subtitle=isStreak?`Streak: ${myStreak} / ${target} needed`:`Total days: ${myTotal} / ${target} needed`;
+  const todayDone=myData?.completedDays?.[TODAY];
+  const myStatus=myData?.status||'active';
+  let bottomRow='';
+  if(myStatus==='won'){
+    bottomRow=`<div class="race-done-badge">🏆 You completed it!</div>`;
+  }else if(myStatus==='lost'){
+    bottomRow=`<div class="race-done-badge" style="color:var(--ink-faint);">⚙️ ${friendName.split(' ')[0]} finished first</div>`;
+  }else if(todayDone){
+    bottomRow=`<div class="race-done-badge">✓ Marked today</div>`;
+  }else{
+    bottomRow=`<button class="race-mark-btn" onclick="markCustomSocialToday('${ch.id}',event)">Mark today complete ✓</button>`;
+  }
+  return `<div class="race-card">
+    <div class="race-card-header">
+      <div><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><line x1="4" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="20" y2="6"/><circle cx="12" cy="6" r="2"/><line x1="4" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="20" y2="12"/><circle cx="10" cy="12" r="2"/><line x1="4" y1="18" x2="16" y2="18"/><line x1="20" y1="18" x2="20" y2="18"/><circle cx="18" cy="18" r="2"/></svg> <span class="race-card-title">Custom · ${durationLabel}</span></div>
+      <div class="race-card-friend">vs ${friendName.split(' ')[0]}</div>
+    </div>
+    <div style="font-size:14px;color:var(--ink-faint);margin-bottom:10px;">${subtitle}</div>
+    <div class="race-participant-row">
+      <div class="race-participant-label" style="font-weight:600;color:var(--ink);">You</div>
+      <div class="race-participant-bar-wrap"><div class="race-participant-bar-fill" style="width:${pct}%;background:var(--almond);"></div></div>
+      <div class="race-participant-streak" style="font-weight:600;color:var(--ink);">${progress}/${target}</div>
+    </div>
+    ${bottomRow}
+  </div>`;
+}
+
+window.markCustomSocialToday=async(id,e)=>{
+  if(e)e.stopPropagation();
+  const ch=socialChallengesCache.find(c=>c.id===id);
+  if(!ch||ch.status!=='active')return;
+  const myData=ch.participants?.[currentUser.uid];
+  if(!myData||myData.status!=='active')return;
+  if(myData.completedDays?.[TODAY]){showToast('Already marked today ✓');return;}
+  const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
+  const todayDoneState=state.completedDays[TODAY]||{};
+  const doneCount=habitPool.length>0?habitPool.filter(t=>todayDoneState[t.id]).length:0;
+  const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+  const threshold=ch.completionThreshold??100;
+  if(habitPool.length>0&&pct<threshold){
+    const need=Math.ceil(habitPool.length*(threshold/100))-doneCount;
+    showToast(`Complete ${need} more habit${need!==1?'s':''} first!`);
+    return;
+  }
+  const newCompletedDays={...(myData.completedDays||{}),[TODAY]:true};
+  let newStreak=0;
+  const checkD=new Date();
+  while(newStreak<=ch.duration){
+    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+    if(newCompletedDays[k]){newStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+  }
+  const newBest=Math.max(myData.bestStreak||0,newStreak);
+  const newTotal=(myData.completedDaysTotal||0)+1;
+  const pk=`participants.${currentUser.uid}`;
+  const won=ch.victoryCondition==='total'
+    ?(newTotal>=(ch.totalTarget||ch.duration))
+    :(newStreak>=(ch.streakRequired||ch.duration));
+  const updates={
+    [`${pk}.completedDays`]:newCompletedDays,
+    [`${pk}.currentStreak`]:newStreak,
+    [`${pk}.bestStreak`]:newBest,
+    [`${pk}.lastCompletedDay`]:TODAY,
+    [`${pk}.completedDaysTotal`]:newTotal,
+  };
+  if(won){
+    updates[`${pk}.status`]='won';
+    updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
+    Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
+  }
+  try{
+    await updateDoc(doc(db,'socialChallenges',id),updates);
+    if(won){
+      const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==currentUser.uid);
+      const friendName=ch.participants?.[otherUids[0]]?.displayName||'your friend';
+      showWinnerCelebration(id,true,friendName,newStreak,ch.duration);
+    }else{
+      const target=ch.victoryCondition==='total'?ch.totalTarget||ch.duration:ch.streakRequired||ch.duration;
+      const progress=ch.victoryCondition==='total'?newTotal:newStreak;
+      showToast(`${progress}/${target} — keep going! ⚙️`);
+    }
+  }catch(err){console.warn('Error marking custom day:',err);showToast('Error saving. Try again.');}
+};
+
 function renderCompletedSocialCard(ch){
   const myUid=currentUser?.uid;
   const isBond=ch.type==='bond';
+  const isCustom=ch.type==='custom';
   const dur=ch.duration;
   const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
   const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
   const friendName=ch.participants?.[otherUids[0]]?.displayName||'Friend';
   const isFailed=ch.status==='failed';
-  let badge,outcomeText;
+  let badge,outcomeText,modeIcon;
   if(isBond){
+    modeIcon='🤝';
     badge=isFailed?'💔':'🤝🏆';
     outcomeText=isFailed?'Streak ended':`Completed together · ${durationLabel} bond`;
+  }else if(isCustom){
+    modeIcon='⚙️';
+    const won=ch.winnerId===myUid;
+    badge=won?'🏆':'🥈';
+    outcomeText=won?'You completed it first!':friendName.split(' ')[0]+' finished first';
+    outcomeText+=` · ${durationLabel} custom`;
   }else{
+    modeIcon='🏁';
     const won=ch.winnerId===myUid;
     badge=won?'🏆':'🥈';
     outcomeText=won?'You won!':friendName.split(' ')[0]+' won';
     outcomeText+=` · ${durationLabel} race`;
   }
-  const modeIcon=isBond?'🤝':'🏁';
   return `<div class="race-card" style="opacity:0.65;">
     <div class="race-card-header">
       <div><span style="font-size:17px;">${modeIcon}</span> <span class="race-card-title">${ch.title}</span></div>
@@ -1914,12 +2135,13 @@ function setupSocialChallengeListeners(){
 
 function showSendChallengeModal(friendUid,friendName){
   _scDuration=30;_scThreshold=100;_scHabitMode='all';_scHabitIds=[];_scType='race';
+  _scStreakRequired=21;_scAllowMisses=false;_scVictoryCondition='streak';_scTotalTarget=21;
   const habitOptions=(state.tasks||[]).map(t=>`<div class="habit-check-row" id="schcrow-${t.id}" onclick="toggleSCHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="schcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
   const safeUid=friendUid;
   const safeName=friendName.replace(/'/g,"\\'");
   const body=`<div class="modal-scroll">
     <div class="form-group"><label class="form-label">Challenge type</label>
-      <div class="sc-mode-grid">
+      <div class="sc-mode-row">
         <div class="sc-mode-card selected" id="sc-type-race" onclick="setSCType('race',this)">
           <span class="sc-mode-icon">🏁</span>
           <div class="sc-mode-title">Race</div>
@@ -1929,6 +2151,11 @@ function showSendChallengeModal(friendUid,friendName){
           <span class="sc-mode-icon">🤝</span>
           <div class="sc-mode-title">Bond</div>
           <div class="sc-mode-desc">Share one streak. If either of you misses a day, you both reset. Win together.</div>
+        </div>
+        <div class="sc-mode-card" id="sc-type-custom" onclick="setSCType('custom',this)">
+          <span class="sc-mode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="20" y2="6"/><circle cx="12" cy="6" r="2"/><line x1="4" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="20" y2="12"/><circle cx="10" cy="12" r="2"/><line x1="4" y1="18" x2="16" y2="18"/><line x1="20" y1="18" x2="20" y2="18"/><circle cx="18" cy="18" r="2"/></svg></span>
+          <div class="sc-mode-title">Custom</div>
+          <div class="sc-mode-desc">Set your own rules, streak requirements, and completion goals.</div>
         </div>
       </div>
     </div>
@@ -1954,6 +2181,26 @@ function showSendChallengeModal(friendUid,friendName){
         <button class="threshold-pill selected" onclick="setSCThreshold(100,this)">All habits</button>
       </div>
     </div>
+    <div id="sc-custom-fields" style="display:none;">
+      <div class="form-group"><label class="form-label">Victory condition</label>
+        <div class="threshold-pills">
+          <button class="threshold-pill selected" id="sc-vic-streak" onclick="setSCVictory('streak',this)">Reach a streak</button>
+          <button class="threshold-pill" id="sc-vic-total" onclick="setSCVictory('total',this)">Total days completed</button>
+        </div>
+      </div>
+      <div class="form-group" id="sc-streak-req-group"><label class="form-label">Streak required to win</label>
+        <input class="form-input" type="number" id="sc-streak-req" value="21" min="1" max="365" style="width:100px;" oninput="setSCStreakReq(this.value)"/>
+      </div>
+      <div class="form-group" id="sc-total-target-group" style="display:none;"><label class="form-label">Total days to complete</label>
+        <input class="form-input" type="number" id="sc-total-target" value="21" min="1" max="365" style="width:100px;" oninput="setSCTotalTarget(this.value)"/>
+      </div>
+      <div class="form-group"><label class="form-label">If you miss a day…</label>
+        <div class="threshold-pills">
+          <button class="threshold-pill selected" id="sc-miss-reset" onclick="setSCMissMode(false,this)">Streak resets</button>
+          <button class="threshold-pill" id="sc-miss-note" onclick="setSCMissMode(true,this)">Just note it</button>
+        </div>
+      </div>
+    </div>
     <div class="auth-msg" id="sc-error"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="submitSendChallenge('${safeUid}','${safeName}')">Send challenge →</button>
   </div>`;
@@ -1963,9 +2210,27 @@ window.showSendChallengeModal=showSendChallengeModal;
 
 window.setSCType=(type,card)=>{
   _scType=type;
-  ['sc-type-race','sc-type-bond'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  ['sc-type-race','sc-type-bond','sc-type-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
   card.classList.add('selected');
+  const cf=document.getElementById('sc-custom-fields');
+  if(cf)cf.style.display=type==='custom'?'block':'none';
 };
+window.setSCMissMode=(allowMisses,btn)=>{
+  _scAllowMisses=allowMisses;
+  ['sc-miss-reset','sc-miss-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  btn.classList.add('selected');
+};
+window.setSCVictory=(condition,btn)=>{
+  _scVictoryCondition=condition;
+  ['sc-vic-streak','sc-vic-total'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  btn.classList.add('selected');
+  const sg=document.getElementById('sc-streak-req-group');
+  const tg=document.getElementById('sc-total-target-group');
+  if(sg)sg.style.display=condition==='streak'?'block':'none';
+  if(tg)tg.style.display=condition==='total'?'block':'none';
+};
+window.setSCStreakReq=v=>{_scStreakRequired=parseInt(v)||21;};
+window.setSCTotalTarget=v=>{_scTotalTarget=parseInt(v)||21;};
 
 window.setSCDuration=(d,btn)=>{
   _scDuration=d;
@@ -2001,10 +2266,13 @@ window.submitSendChallenge=async(friendUid,friendName)=>{
     completedDays:{},lastCompletedDay:null,
   };
   const isRace=_scType==='race';
-  if(isRace){myParticipant.currentStreak=0;myParticipant.bestStreak=0;myParticipant.status='active';myParticipant.joinedAt=now;}
+  const isCustom=_scType==='custom';
+  if(isRace||isCustom){myParticipant.currentStreak=0;myParticipant.bestStreak=0;myParticipant.status='active';myParticipant.joinedAt=now;}
+  if(isCustom){myParticipant.completedDaysTotal=0;}
+  const typeLabel=isRace?'Race':isCustom?'Custom':'Bond';
   const challengeDoc={
     id,type:_scType,
-    title:`${_scDuration} Day ${isRace?'Race':'Bond'}`,
+    title:`${_scDuration} Day ${typeLabel}`,
     duration:_scDuration,status:'pending',
     createdBy:currentUser.uid,createdAt:now,
     participants:{[currentUser.uid]:myParticipant},
@@ -2012,17 +2280,25 @@ window.submitSendChallenge=async(friendUid,friendName)=>{
     habitIds,completionThreshold:_scThreshold,
     invitedUid:friendUid,respondedAt:null,
   };
-  if(!isRace){
+  if(!isRace&&!isCustom){
     challengeDoc.sharedStreak=0;
     challengeDoc.sharedBestStreak=0;
     challengeDoc.sharedCompletedDays={};
     challengeDoc.lastEvaluatedDay=null;
     challengeDoc.failedAt=null;
   }
+  if(isCustom){
+    challengeDoc.streakRequired=_scStreakRequired;
+    challengeDoc.allowMisses=_scAllowMisses;
+    challengeDoc.victoryCondition=_scVictoryCondition;
+    challengeDoc.totalTarget=_scTotalTarget;
+    challengeDoc.completedDaysTotal=0;
+  }
+  const toastIcon=isRace?'🏁':isCustom?'⚙️':'🤝';
   try{
     await setDoc(doc(db,'socialChallenges',id),challengeDoc);
     closeModal();
-    showToast(`Challenge sent to ${friendName}! ${isRace?'🏁':'🤝'}`);
+    showToast(`Challenge sent to ${friendName}! ${toastIcon}`);
   }catch(e){
     console.warn('Error sending challenge:',e);
     const errEl=document.getElementById('sc-error');
@@ -2046,10 +2322,12 @@ window.acceptSocialChallenge=async(id)=>{
   }else{
     updates[`${pk}.currentStreak`]=0;updates[`${pk}.bestStreak`]=0;
     updates[`${pk}.status`]='active';updates[`${pk}.joinedAt`]=now;
+    if(ch.type==='custom')updates[`${pk}.completedDaysTotal`]=0;
   }
+  const toastMsg=ch.type==='bond'?'Bond accepted! 🤝 Build it together!':ch.type==='custom'?'Custom challenge accepted! ⚙️':'Challenge accepted! 🏁 The race is on!';
   try{
     await updateDoc(doc(db,'socialChallenges',id),updates);
-    showToast(ch.type==='bond'?'Bond accepted! 🤝 Build it together!':'Challenge accepted! 🏁 The race is on!');
+    showToast(toastMsg);
   }catch(e){console.warn('Error accepting:',e);showToast('Error accepting. Try again.');}
 };
 
@@ -2231,6 +2509,46 @@ async function evaluateSocialChallenges(){
     const myData=ch.participants?.[currentUser.uid];
     if(!myData)continue;
 
+    // ── Custom evaluation ────────────────────────────────────────
+    if(ch.type==='custom'){
+      if(myData.status!=='active')continue;
+      if(myData.completedDays&&myData.completedDays[yKey]!==undefined)continue;
+      const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
+      const yDone=state.completedDays[yKey]||{};
+      const doneCount=habitPool.length>0?habitPool.filter(t=>yDone[t.id]).length:0;
+      const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+      const threshold=ch.completionThreshold??100;
+      const pk=`participants.${currentUser.uid}`;
+      const newCompletedDays={...(myData.completedDays||{}),[yKey]:pct>=threshold};
+      const updates={[`${pk}.completedDays`]:newCompletedDays,[`${pk}.lastCompletedDay`]:pct>=threshold?yKey:myData.lastCompletedDay};
+      if(pct>=threshold){
+        let newStreak=0;
+        const checkD=new Date(yesterday);
+        while(newStreak<=ch.duration){
+          const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+          if(newCompletedDays[k]){newStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+        }
+        const newBest=Math.max(myData.bestStreak||0,newStreak);
+        const newTotal=(myData.completedDaysTotal||0)+1;
+        updates[`${pk}.currentStreak`]=newStreak;
+        updates[`${pk}.bestStreak`]=newBest;
+        updates[`${pk}.completedDaysTotal`]=newTotal;
+        const won=ch.victoryCondition==='total'
+          ?(newTotal>=(ch.totalTarget||ch.duration))
+          :(newStreak>=(ch.streakRequired||ch.duration));
+        if(won){
+          updates[`${pk}.status`]='won';
+          updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
+          Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
+        }
+      }else if(!ch.allowMisses){
+        updates[`${pk}.currentStreak`]=0;
+      }
+      try{await updateDoc(doc(db,'socialChallenges',ch.id),updates);}
+      catch(e){console.warn('evaluateSocialChallenges custom error:',e);}
+      continue;
+    }
+
     // ── Bond evaluation ─────────────────────────────────────────
     if(ch.type==='bond'){
       if(ch.lastEvaluatedDay===yKey)continue;
@@ -2334,10 +2652,21 @@ window.switchChallengesView=(view,btn)=>{
 };
 
 function renderChallengeCard(ch){
-  const pct=Math.min(100,Math.round((ch.currentStreak||0)/ch.duration*100));
-  const daysLeft=Math.max(0,ch.duration-(ch.currentStreak||0));
+  const isCustom=ch.type==='custom';
+  const target=isCustom
+    ?(ch.victoryCondition==='total'?(ch.totalTarget||ch.duration):(ch.streakRequired||ch.duration))
+    :ch.duration;
+  const progress=isCustom
+    ?(ch.victoryCondition==='total'?(ch.completedDaysTotal||0):(ch.currentStreak||0))
+    :(ch.currentStreak||0);
+  const pct=Math.min(100,Math.round(progress/target*100));
+  const daysLeft=Math.max(0,target-progress);
   const todayDone=ch.completedDays&&ch.completedDays[TODAY];
   const statusLabel={active:'Active',completed:'Completed ✓',failed:'Abandoned',paused:'Paused'}[ch.status]||ch.status;
+  const modeBadge=isCustom?'⚙️ Custom':'👤 Solo';
+  const progressLabel=isCustom
+    ?(ch.victoryCondition==='total'?`${progress} / ${target} days`:`Streak: ${ch.currentStreak||0} / ${target}`)
+    :`Day ${ch.currentStreak||0} of ${ch.duration}`;
   const bottomRow=ch.status==='active'
     ?(todayDone
       ?`<div class="challenge-done-badge">✓ Completed today</div>`
@@ -2345,11 +2674,11 @@ function renderChallengeCard(ch){
     :'';
   return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
     <div class="challenge-card-top">
-      <div class="challenge-card-title">${ch.title}<span class="mode-badge">👤 Solo</span></div>
+      <div class="challenge-card-title">${ch.title}<span class="mode-badge">${modeBadge}</span></div>
       <div class="challenge-status-badge">${statusLabel}</div>
     </div>
     <div class="challenge-progress-bar-wrap"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
-    <div class="challenge-progress-text">Day ${ch.currentStreak||0} of ${ch.duration}</div>
+    <div class="challenge-progress-text">${progressLabel}</div>
     <div class="challenge-stats-row">
       <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.currentStreak||0}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
       <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
