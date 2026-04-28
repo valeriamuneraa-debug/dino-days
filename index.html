@@ -429,6 +429,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .celebrate-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:var(--ink);margin:20px 0 12px;}
 .celebrate-sub{font-size:15px;color:var(--ink-soft);line-height:1.5;max-width:280px;}
 .celebrate-tap{font-size:12px;color:var(--ink-faint);margin-top:24px;}
+.bond-participant-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
+.sc-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.sc-mode-card{background:var(--linen);border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
+.sc-mode-card.selected{background:var(--powder);border-color:var(--almond);}
+.sc-mode-icon{font-size:28px;margin-bottom:8px;display:block;}
+.sc-mode-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.sc-mode-desc{font-size:11px;color:var(--ink-faint);line-height:1.4;}
+.mode-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:100px;background:var(--linen);color:var(--ink-soft);font-weight:500;margin-left:6px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -1016,7 +1024,7 @@ let _challengesSubview='challenges'; // 'challenges' or 'friends'
 let socialChallengesCache=[];
 let _socialChallengeListeners=[];
 let _socialChEvalDay=null;
-let _scDuration=30,_scThreshold=100,_scHabitMode='all',_scHabitIds=[];
+let _scDuration=30,_scThreshold=100,_scHabitMode='all',_scHabitIds=[],_scType='race';
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1036,7 +1044,7 @@ window.saveFS=saveFS;
 window.restartTour=async function(){state.onboardingComplete=false;await setDoc(doc(db,'users',currentUser.uid),state);location.reload();};
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 
-function showToast(msg,dur=2200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function showToast(msg,dur=2200,type=''){const t=document.getElementById('toast');t.textContent=msg;t.style.background=type==='danger'?'var(--danger)':'';t.classList.add('show');setTimeout(()=>{t.classList.remove('show');t.style.background='';},dur);}
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
@@ -1500,10 +1508,29 @@ window.createChallenge=()=>{
 function renderTodayBanner(){
   const banner=document.getElementById('active-challenges-banner');
   if(!banner||!state)return;
-  const active=(state.challenges||[]).filter(c=>c.status==='active').length;
-  banner.style.display=active>0?'flex':'none';
+  const myUid=currentUser?.uid;
+  const activeSolo=(state.challenges||[]).filter(c=>c.status==='active').length;
+  const activeSocial=(socialChallengesCache||[]).filter(c=>c.status==='active'&&c.participants?.[myUid]).length;
+  const total=activeSolo+activeSocial;
+  banner.style.display=total>0?'flex':'none';
   const bt=document.getElementById('active-challenges-banner-text');
-  if(bt)bt.textContent=`🎯 ${active} active challenge${active!==1?'s':''}`;
+  if(!bt)return;
+  const urgentBond=(socialChallengesCache||[]).find(c=>
+    c.type==='bond'&&c.status==='active'&&c.participants?.[myUid]&&
+    !c.participants[myUid]?.completedDays?.[TODAY]
+  );
+  if(urgentBond){
+    const uids=Object.keys(urgentBond.participants||{});
+    const friendUid=uids.find(u=>u!==myUid);
+    const friendName=friendUid?urgentBond.participants[friendUid]?.displayName||'Your partner':'Your partner';
+    bt.textContent=`🤝 ${friendName} is waiting for you!`;
+    banner.style.background='linear-gradient(135deg,var(--linen),var(--powder))';
+    banner.style.border='1px solid var(--almond)';
+  }else{
+    bt.textContent=`🎯 ${total} active challenge${total!==1?'s':''}`;
+    banner.style.background='';
+    banner.style.border='';
+  }
 }
 
 function renderChallenges(){
@@ -1517,8 +1544,10 @@ function renderChallenges(){
 
   const myUid=currentUser?.uid;
   const incomingSC=(socialChallengesCache||[]).filter(c=>c.status==='pending'&&c.invitedUid===myUid);
-  const activeSC=(socialChallengesCache||[]).filter(c=>c.status==='active'&&c.participants?.[myUid]);
+  const activeRaceSC=(socialChallengesCache||[]).filter(c=>c.type==='race'&&c.status==='active'&&c.participants?.[myUid]);
+  const activeBondSC=(socialChallengesCache||[]).filter(c=>c.type==='bond'&&c.status==='active'&&c.participants?.[myUid]);
   const completedSC=(socialChallengesCache||[]).filter(c=>c.status==='completed'&&c.participants?.[myUid]);
+  const failedSC=(socialChallengesCache||[]).filter(c=>c.status==='failed'&&c.participants?.[myUid]);
 
   let html=`<div class="challenges-seg-ctrl">
   <button class="seg-pill active" onclick="switchChallengesView('challenges',this)">Challenges</button>
@@ -1529,7 +1558,7 @@ function renderChallenges(){
     <button class="new-challenge-btn" onclick="showNewChallengeModal()">+ New</button>
   </div>`;
 
-  const hasAnything=challenges.length||incomingSC.length||activeSC.length||completedSC.length;
+  const hasAnything=challenges.length||incomingSC.length||activeRaceSC.length||activeBondSC.length||completedSC.length;
   if(!hasAnything){
     html+=`<div class="challenges-empty">
       <div class="challenges-empty-icon">🎯</div>
@@ -1543,21 +1572,26 @@ function renderChallenges(){
       html+=incomingSC.map(ch=>renderIncomingChallengeCard(ch)).join('');
     }
     if(active.length){
-      html+=`<div class="challenge-section-label">Active</div>`;
+      html+=`<div class="challenge-section-label">Solo</div>`;
       html+=active.map(ch=>renderChallengeCard(ch)).join('');
     }
-    if(activeSC.length){
+    if(activeRaceSC.length){
       html+=`<div class="challenge-section-label">Racing</div>`;
-      html+=activeSC.map(ch=>renderActiveRaceCard(ch)).join('');
+      html+=activeRaceSC.map(ch=>renderActiveRaceCard(ch)).join('');
+    }
+    if(activeBondSC.length){
+      html+=`<div class="challenge-section-label">🤝 Bonded</div>`;
+      html+=activeBondSC.map(ch=>renderActiveBondCard(ch)).join('');
     }
     if(completed.length||completedSC.length){
       html+=`<div class="challenge-section-label">Completed 🏆</div>`;
       html+=completed.map(ch=>renderChallengeCard(ch)).join('');
-      html+=completedSC.map(ch=>renderCompletedRaceCard(ch)).join('');
+      html+=completedSC.map(ch=>renderCompletedSocialCard(ch)).join('');
     }
-    if(past.length){
+    if(past.length||failedSC.length){
       html+=`<div class="challenge-section-label">Past</div>`;
       html+=past.map(ch=>renderChallengeCard(ch)).join('');
+      html+=failedSC.map(ch=>renderCompletedSocialCard(ch)).join('');
     }
   }
   inner.innerHTML=html;
@@ -1569,11 +1603,15 @@ function renderIncomingChallengeCard(ch){
   const creatorName=creatorData?.displayName||'Someone';
   const dur=ch.duration;
   const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
+  const isBond=ch.type==='bond';
+  const modeIcon=isBond?'🤝':'🏁';
+  const modeName=isBond?'Bond':'Race';
+  const acceptLabel=isBond?'Accept 🤝':'Accept 🎯';
   return `<div class="incoming-challenge-card">
-    <div class="incoming-challenge-name">${creatorName} challenged you! 🏁</div>
-    <div class="incoming-challenge-meta">🏁 Race · ${durationLabel} · ${ch.completionThreshold??100}% of habits per day</div>
+    <div class="incoming-challenge-name">${creatorName} challenged you! ${modeIcon}</div>
+    <div class="incoming-challenge-meta"><span class="mode-badge">${modeIcon} ${modeName}</span> ${durationLabel} · ${ch.completionThreshold??100}% of habits per day</div>
     <div class="incoming-challenge-actions">
-      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px;" onclick="acceptSocialChallenge('${ch.id}')">Accept 🎯</button>
+      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px;" onclick="acceptSocialChallenge('${ch.id}')">${acceptLabel}</button>
       <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px;" onclick="declineSocialChallenge('${ch.id}')">Decline</button>
     </div>
   </div>`;
@@ -1626,19 +1664,68 @@ function renderActiveRaceCard(ch){
   </div>`;
 }
 
-function renderCompletedRaceCard(ch){
+function renderActiveBondCard(ch){
   const myUid=currentUser?.uid;
-  const won=ch.winnerId===myUid;
+  const myData=ch.participants?.[myUid];
+  const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
+  const friendUid=otherUids[0];
+  const friendData=friendUid?ch.participants[friendUid]:null;
+  const friendName=friendData?.displayName||'Friend';
+  const sharedStreak=ch.sharedStreak||0;
+  const dur=ch.duration;
+  const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
+  const pct=Math.min(100,Math.round(sharedStreak/dur*100));
+  const iDone=myData?.completedDays?.[TODAY]===true;
+  const friendDone=friendData?.completedDays?.[TODAY]===true;
+  const hour=new Date().getHours();
+  const warningHtml=iDone&&!friendDone&&hour>=20
+    ?`<div style="background:rgba(201,123,110,0.1);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--danger);margin-top:8px;">⚠️ ${friendName.split(' ')[0]} hasn't completed today yet</div>`
+    :'';
+  const btn=iDone
+    ?`<div class="race-done-badge">✓ Your part is done — waiting for ${friendName.split(' ')[0]}</div>`
+    :`<button class="race-mark-btn" onclick="markBondToday('${ch.id}',event)">Mark my day complete ✓</button>`;
+  return `<div class="race-card">
+    <div class="race-card-header">
+      <div><span style="font-size:15px;">🤝</span> <span class="race-card-title">Bond · ${durationLabel}</span></div>
+      <div class="race-card-friend">with ${friendName.split(' ')[0]}</div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div class="challenge-progress-bar-wrap" style="margin-bottom:10px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
+      <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--ink);text-align:center;line-height:1;">${sharedStreak}</div>
+      <div style="font-size:13px;color:var(--ink-faint);text-align:center;margin-top:4px;">shared streak · Day ${sharedStreak} of ${dur}</div>
+    </div>
+    <div class="bond-participant-status-row"><span style="font-weight:600;color:var(--ink);">You</span><span style="color:${iDone?'var(--success)':'var(--ink-faint)'};font-weight:${iDone?'500':'400'};">${iDone?'✓ Done today':'⏳ Pending'}</span></div>
+    <div class="bond-participant-status-row"><span style="color:var(--ink-soft);">${friendName.split(' ')[0]}</span><span style="color:${friendDone?'var(--success)':'var(--ink-faint)'};">${friendDone?'✓ Done today':'⏳ Pending'}</span></div>
+    ${warningHtml}
+    ${btn}
+  </div>`;
+}
+
+function renderCompletedSocialCard(ch){
+  const myUid=currentUser?.uid;
+  const isBond=ch.type==='bond';
   const dur=ch.duration;
   const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
   const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
   const friendName=ch.participants?.[otherUids[0]]?.displayName||'Friend';
+  const isFailed=ch.status==='failed';
+  let badge,outcomeText;
+  if(isBond){
+    badge=isFailed?'💔':'🤝🏆';
+    outcomeText=isFailed?'Streak ended':`Completed together · ${durationLabel} bond`;
+  }else{
+    const won=ch.winnerId===myUid;
+    badge=won?'🏆':'🥈';
+    outcomeText=won?'You won!':friendName.split(' ')[0]+' won';
+    outcomeText+=` · ${durationLabel} race`;
+  }
+  const modeIcon=isBond?'🤝':'🏁';
   return `<div class="race-card" style="opacity:0.65;">
     <div class="race-card-header">
-      <div><span style="font-size:15px;">🏁</span> <span class="race-card-title">${ch.title}</span></div>
-      <div style="font-size:16px;">${won?'🏆':'🥈'}</div>
+      <div><span style="font-size:15px;">${modeIcon}</span> <span class="race-card-title">${ch.title}</span></div>
+      <div style="font-size:16px;">${badge}</div>
     </div>
-    <div style="font-size:13px;color:var(--ink-soft);">${won?'You won!':friendName.split(' ')[0]+' won'} · ${durationLabel} race vs ${friendName.split(' ')[0]}</div>
+    <div style="font-size:13px;color:var(--ink-soft);">${outcomeText} ${isBond?'with':'vs'} ${friendName.split(' ')[0]}</div>
   </div>`;
 }
 
@@ -1786,6 +1873,8 @@ function setupSocialChallengeListeners(){
     socialChallengesCache=all;
     updateFriendNotificationBadge();
     if(currentTab==='challenges'&&_challengesSubview==='challenges')renderChallenges();
+    if(currentTab==='today')renderTodayBanner();
+    checkBondCompletion(); // detect both-done races from real-time updates
   }
   const q1=query(collection(db,'socialChallenges'),where('createdBy','==',currentUser.uid));
   const unsub1=onSnapshot(q1,(snap)=>{createdByCache=snap.docs.map(d=>d.data());mergeAndUpdate();},{error:console.warn});
@@ -1796,14 +1885,24 @@ function setupSocialChallengeListeners(){
 }
 
 function showSendChallengeModal(friendUid,friendName){
-  _scDuration=30;_scThreshold=100;_scHabitMode='all';_scHabitIds=[];
+  _scDuration=30;_scThreshold=100;_scHabitMode='all';_scHabitIds=[];_scType='race';
   const habitOptions=(state.tasks||[]).map(t=>`<div class="habit-check-row" id="schcrow-${t.id}" onclick="toggleSCHabit('${t.id}')"><span style="font-size:16px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="schcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
+  const safeUid=friendUid;
+  const safeName=friendName.replace(/'/g,"\\'");
   const body=`<div class="modal-scroll">
-    <p style="font-size:13px;color:var(--ink-faint);margin-bottom:16px;">First to complete the streak without breaking it wins 🏆</p>
-    <div style="background:var(--linen);border-radius:16px;padding:16px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:32px;margin-bottom:8px;">🏁</div>
-      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px;">Race</div>
-      <div style="font-size:13px;color:var(--ink-soft);line-height:1.5;">You each build your own streak. First to reach the goal wins. Miss a day and your streak resets — but you stay in the race.</div>
+    <div class="form-group"><label class="form-label">Challenge type</label>
+      <div class="sc-mode-grid">
+        <div class="sc-mode-card selected" id="sc-type-race" onclick="setSCType('race',this)">
+          <span class="sc-mode-icon">🏁</span>
+          <div class="sc-mode-title">Race</div>
+          <div class="sc-mode-desc">Build your own streak. First to the goal wins.</div>
+        </div>
+        <div class="sc-mode-card" id="sc-type-bond" onclick="setSCType('bond',this)">
+          <span class="sc-mode-icon">🤝</span>
+          <div class="sc-mode-title">Bond</div>
+          <div class="sc-mode-desc">Share one streak. If either of you misses a day, you both reset. Win together.</div>
+        </div>
+      </div>
     </div>
     <div class="form-group"><label class="form-label">Duration</label>
       <div class="duration-pills">
@@ -1828,11 +1927,17 @@ function showSendChallengeModal(friendUid,friendName){
       </div>
     </div>
     <div class="auth-msg" id="sc-error"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="submitSendChallenge('${friendUid}','${friendName.replace(/'/g,"\\'")}')">Send challenge →</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="submitSendChallenge('${safeUid}','${safeName}')">Send challenge →</button>
   </div>`;
   showModal('Challenge '+friendName,body);
 }
 window.showSendChallengeModal=showSendChallengeModal;
+
+window.setSCType=(type,card)=>{
+  _scType=type;
+  ['sc-type-race','sc-type-bond'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('selected');});
+  card.classList.add('selected');
+};
 
 window.setSCDuration=(d,btn)=>{
   _scDuration=d;
@@ -1862,25 +1967,34 @@ window.submitSendChallenge=async(friendUid,friendName)=>{
   const id='sc'+Date.now()+Math.random().toString(36).slice(2,6);
   const now=new Date().toISOString();
   const habitIds=_scHabitMode==='specific'?[..._scHabitIds]:[];
+  const myParticipant={
+    displayName:state.displayName||currentUser.email.split('@')[0],
+    userCode:state.userCode||'',
+    completedDays:{},lastCompletedDay:null,
+  };
+  const isRace=_scType==='race';
+  if(isRace){myParticipant.currentStreak=0;myParticipant.bestStreak=0;myParticipant.status='active';myParticipant.joinedAt=now;}
   const challengeDoc={
-    id,type:'race',title:`${_scDuration} Day Race`,duration:_scDuration,
-    status:'pending',createdBy:currentUser.uid,createdAt:now,
-    participants:{
-      [currentUser.uid]:{
-        displayName:state.displayName||currentUser.email.split('@')[0],
-        userCode:state.userCode||'',
-        currentStreak:0,bestStreak:0,completedDays:{},
-        lastCompletedDay:null,status:'active',joinedAt:now
-      }
-    },
+    id,type:_scType,
+    title:`${_scDuration} Day ${isRace?'Race':'Bond'}`,
+    duration:_scDuration,status:'pending',
+    createdBy:currentUser.uid,createdAt:now,
+    participants:{[currentUser.uid]:myParticipant},
     winnerId:null,completedAt:null,
     habitIds,completionThreshold:_scThreshold,
-    invitedUid:friendUid,respondedAt:null
+    invitedUid:friendUid,respondedAt:null,
   };
+  if(!isRace){
+    challengeDoc.sharedStreak=0;
+    challengeDoc.sharedBestStreak=0;
+    challengeDoc.sharedCompletedDays={};
+    challengeDoc.lastEvaluatedDay=null;
+    challengeDoc.failedAt=null;
+  }
   try{
     await setDoc(doc(db,'socialChallenges',id),challengeDoc);
     closeModal();
-    showToast(`Challenge sent to ${friendName}! 🎯`);
+    showToast(`Challenge sent to ${friendName}! ${isRace?'🏁':'🤝'}`);
   }catch(e){
     console.warn('Error sending challenge:',e);
     const errEl=document.getElementById('sc-error');
@@ -1893,17 +2007,22 @@ window.acceptSocialChallenge=async(id)=>{
   if(!ch)return;
   const now=new Date().toISOString();
   const pk=`participants.${currentUser.uid}`;
+  const updates={status:'active',respondedAt:now,
+    [`${pk}.displayName`]:state.displayName||currentUser.email.split('@')[0],
+    [`${pk}.userCode`]:state.userCode||'',
+    [`${pk}.completedDays`]:{},[`${pk}.lastCompletedDay`]:null,
+  };
+  if(ch.type==='bond'){
+    updates.sharedStreak=0;updates.sharedBestStreak=0;
+    updates.sharedCompletedDays={};updates.lastEvaluatedDay=null;
+  }else{
+    updates[`${pk}.currentStreak`]=0;updates[`${pk}.bestStreak`]=0;
+    updates[`${pk}.status`]='active';updates[`${pk}.joinedAt`]=now;
+  }
   try{
-    await updateDoc(doc(db,'socialChallenges',id),{
-      status:'active',respondedAt:now,
-      [`${pk}.displayName`]:state.displayName||currentUser.email.split('@')[0],
-      [`${pk}.userCode`]:state.userCode||'',
-      [`${pk}.currentStreak`]:0,[`${pk}.bestStreak`]:0,
-      [`${pk}.completedDays`]:{},[`${pk}.lastCompletedDay`]:null,
-      [`${pk}.status`]:'active',[`${pk}.joinedAt`]:now
-    });
-    showToast('Challenge accepted! 🏁 The race is on!');
-  }catch(e){console.warn('Error accepting challenge:',e);showToast('Error accepting. Try again.');}
+    await updateDoc(doc(db,'socialChallenges',id),updates);
+    showToast(ch.type==='bond'?'Bond accepted! 🤝 Build it together!':'Challenge accepted! 🏁 The race is on!');
+  }catch(e){console.warn('Error accepting:',e);showToast('Error accepting. Try again.');}
 };
 
 window.declineSocialChallenge=async(id)=>{
@@ -1968,6 +2087,111 @@ window.markRaceToday=async(id,e)=>{
   }catch(e){console.warn('Error marking race day:',e);showToast('Error saving. Try again.');}
 };
 
+window.markBondToday=async(id,e)=>{
+  if(e)e.stopPropagation();
+  const ch=socialChallengesCache.find(c=>c.id===id);
+  if(!ch||ch.status!=='active')return;
+  const myData=ch.participants?.[currentUser.uid];
+  if(!myData)return;
+  if(myData.completedDays?.[TODAY]===true){showToast('Already marked today ✓');return;}
+  // Check threshold
+  const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
+  const todayDoneState=state.completedDays[TODAY]||{};
+  const doneCount=habitPool.length>0?habitPool.filter(t=>todayDoneState[t.id]).length:0;
+  const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+  const threshold=ch.completionThreshold??100;
+  if(habitPool.length>0&&pct<threshold){
+    const need=Math.ceil(habitPool.length*(threshold/100))-doneCount;
+    showToast(`Complete ${need} more habit${need!==1?'s':''} first!`);
+    return;
+  }
+  const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==currentUser.uid);
+  const friendUid=otherUids[0];
+  const friendData=friendUid?ch.participants[friendUid]:null;
+  const friendName=friendData?.displayName||'your friend';
+  const friendAlsoDone=friendData?.completedDays?.[TODAY]===true;
+  const pk=`participants.${currentUser.uid}`;
+  const newMyDays={...(myData.completedDays||{}),[TODAY]:true};
+  const updates={[`${pk}.completedDays`]:newMyDays,[`${pk}.lastCompletedDay`]:TODAY};
+  if(friendAlsoDone){
+    // Both done — compute new shared streak
+    const newSharedDays={...(ch.sharedCompletedDays||{}),[TODAY]:true};
+    let newSharedStreak=0;
+    const checkD=new Date();
+    while(newSharedStreak<=ch.duration){
+      const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+      if(newSharedDays[k]){newSharedStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+    }
+    const newBest=Math.max(ch.sharedBestStreak||0,newSharedStreak);
+    updates.sharedStreak=newSharedStreak;updates.sharedBestStreak=newBest;updates.sharedCompletedDays=newSharedDays;
+    const done=newSharedStreak>=ch.duration;
+    if(done){updates.status='completed';updates.completedAt=new Date().toISOString();}
+    try{
+      await updateDoc(doc(db,'socialChallenges',id),updates);
+      if(done)showBondCelebration(id,friendName,newSharedStreak,ch.duration);
+      else showToast(`You both completed today! Streak: ${newSharedStreak} days 🔥`);
+    }catch(e){console.warn('markBondToday error:',e);showToast('Error saving. Try again.');}
+  }else{
+    try{
+      await updateDoc(doc(db,'socialChallenges',id),updates);
+      showToast(`Your part is done! Waiting for ${friendName}… 🤝`);
+    }catch(e){console.warn('markBondToday error:',e);showToast('Error saving. Try again.');}
+  }
+};
+
+async function checkBondCompletion(){
+  const myUid=currentUser?.uid;
+  if(!myUid)return;
+  for(const ch of socialChallengesCache){
+    if(ch.type!=='bond'||ch.status!=='active')continue;
+    if(ch.sharedCompletedDays?.[TODAY])continue; // already counted today
+    const allUids=Object.keys(ch.participants||{});
+    if(allUids.length<2)continue;
+    const allDone=allUids.every(uid=>ch.participants[uid].completedDays?.[TODAY]===true);
+    if(!allDone)continue;
+    // Both done but sharedCompletedDays not updated — compute and write
+    const newSharedDays={...(ch.sharedCompletedDays||{}),[TODAY]:true};
+    let newSharedStreak=0;
+    const checkD=new Date();
+    while(newSharedStreak<=ch.duration){
+      const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+      if(newSharedDays[k]){newSharedStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+    }
+    const newBest=Math.max(ch.sharedBestStreak||0,newSharedStreak);
+    const done=newSharedStreak>=ch.duration;
+    const updates={sharedStreak:newSharedStreak,sharedBestStreak:newBest,sharedCompletedDays:newSharedDays};
+    if(done){updates.status='completed';updates.completedAt=new Date().toISOString();}
+    try{
+      await updateDoc(doc(db,'socialChallenges',ch.id),updates);
+      const otherUids=allUids.filter(u=>u!==myUid);
+      const friendName=ch.participants?.[otherUids[0]]?.displayName||'your friend';
+      if(done)showBondCelebration(ch.id,friendName,newSharedStreak,ch.duration);
+      else showToast(`You both completed today! Streak: ${newSharedStreak} days 🔥`);
+    }catch(e){console.warn('checkBondCompletion error:',e);}
+  }
+}
+
+function showBondCelebration(challengeId,friendName,streak,duration){
+  const key='ritual-seen-celebrations';
+  let seen=[];
+  try{seen=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  if(seen.includes(challengeId))return;
+  seen.push(challengeId);
+  try{localStorage.setItem(key,JSON.stringify(seen));}catch(e){}
+  const overlay=document.getElementById('celebrate-overlay');
+  if(!overlay)return;
+  const trophy=overlay.querySelector('.celebrate-trophy');
+  const title=overlay.querySelector('.celebrate-title');
+  const sub=overlay.querySelector('.celebrate-sub');
+  if(trophy)trophy.textContent='🤝';
+  if(title)title.textContent='You did it together! 🎉';
+  if(sub)sub.textContent=`${duration} days of mutual accountability with ${friendName}`;
+  overlay.classList.add('show');
+  const timer=setTimeout(()=>overlay.classList.remove('show'),4000);
+  overlay.onclick=()=>{clearTimeout(timer);overlay.classList.remove('show');};
+}
+window.showBondCelebration=showBondCelebration;
+
 async function evaluateSocialChallenges(){
   if(!currentUser||!state||!socialChallengesCache.length)return;
   const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
@@ -1977,8 +2201,40 @@ async function evaluateSocialChallenges(){
   for(const ch of socialChallengesCache){
     if(ch.status!=='active')continue;
     const myData=ch.participants?.[currentUser.uid];
-    if(!myData||myData.status!=='active')continue;
-    // Skip if yesterday already evaluated (entry exists in completedDays)
+    if(!myData)continue;
+
+    // ── Bond evaluation ─────────────────────────────────────────
+    if(ch.type==='bond'){
+      if(ch.lastEvaluatedDay===yKey)continue;
+      const allUids=Object.keys(ch.participants||{});
+      const allCompleted=allUids.length>=2&&allUids.every(uid=>ch.participants[uid].completedDays?.[yKey]===true);
+      const iDid=myData?.completedDays?.[yKey]===true;
+      if(allCompleted){
+        // Already handled in real-time — just set the guard
+        try{await updateDoc(doc(db,'socialChallenges',ch.id),{lastEvaluatedDay:yKey});}
+        catch(e){console.warn('Bond eval guard error:',e);}
+      }else{
+        const prevSharedStreak=ch.sharedStreak||0;
+        const friendUid=allUids.find(u=>u!==currentUser.uid);
+        const friendName=friendUid?ch.participants[friendUid]?.displayName||'Your friend':'Your friend';
+        const friendDid=friendUid&&ch.participants[friendUid]?.completedDays?.[yKey]===true;
+        try{
+          await updateDoc(doc(db,'socialChallenges',ch.id),{sharedStreak:0,lastEvaluatedDay:yKey});
+          if(prevSharedStreak>0){
+            if(!iDid){
+              showToast(`You missed yesterday — the bond streak reset 💔`);
+            }else{
+              // Friend missed, I didn't — unfair reset
+              showToast(`${friendName} missed yesterday — your shared streak reset to 0 💔`,4000,'danger');
+            }
+          }
+        }catch(e){console.warn('Bond eval reset error:',e);}
+      }
+      continue; // Do not fall through to race logic
+    }
+
+    // ── Race evaluation ──────────────────────────────────────────
+    if(myData.status!=='active')continue;
     if(myData.completedDays&&myData.completedDays[yKey]!==undefined)continue;
     const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
     const yDone=state.completedDays[yKey]||{};
@@ -2004,15 +2260,14 @@ async function evaluateSocialChallenges(){
       try{
         await updateDoc(doc(db,'socialChallenges',ch.id),updates);
         if(won){const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==currentUser.uid);showWinnerCelebration(ch.id,true,ch.participants?.[otherUids[0]]?.displayName||'your friend',newStreak,ch.duration);}
-      }catch(e){console.warn('evaluateSocialChallenges win error:',e);}
+      }catch(e){console.warn('evaluateSocialChallenges race win error:',e);}
     }else{
-      // Threshold not met — reset streak, mark day as false
       const prevStreak=myData.currentStreak||0;
       const newCompletedDays={...(myData.completedDays||{}),[yKey]:false};
       try{
         await updateDoc(doc(db,'socialChallenges',ch.id),{[`${pk}.currentStreak`]:0,[`${pk}.completedDays`]:newCompletedDays});
         if(prevStreak>0)showToast(`Streak reset in "${ch.title}" race 😔 Keep going!`);
-      }catch(e){console.warn('evaluateSocialChallenges reset error:',e);}
+      }catch(e){console.warn('evaluateSocialChallenges race reset error:',e);}
     }
   }
 }
@@ -2062,7 +2317,7 @@ function renderChallengeCard(ch){
     :'';
   return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
     <div class="challenge-card-top">
-      <div class="challenge-card-title">${ch.title}</div>
+      <div class="challenge-card-title">${ch.title}<span class="mode-badge">👤 Solo</span></div>
       <div class="challenge-status-badge">${statusLabel}</div>
     </div>
     <div class="challenge-progress-bar-wrap"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
