@@ -305,6 +305,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* HABIT SUGGESTIONS */
 #onboarding-habits{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
 #onboarding-rewards{position:fixed;inset:0;flex-direction:column;align-items:flex-start;justify-content:flex-start;z-index:2000;padding:44px 20px 36px;text-align:left;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+
+/* Challenges */
+.challenges-page{padding:16px 16px 8px;}
+.challenges-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
+.challenges-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
+.challenges-sub{font-size:13px;color:var(--ink-faint);margin-bottom:20px;}
+.new-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:13px;font-weight:500;border:none;cursor:pointer;white-space:nowrap;margin-top:4px;}
+.challenges-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
+.challenges-empty-icon{font-size:64px;margin-bottom:16px;}
+.challenges-empty-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.challenges-empty-sub{font-size:14px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;}
+.challenge-section-label{font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 4px 8px;}
+.challenge-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s;}
+.challenge-card:active{box-shadow:0 2px 12px var(--shadow);}
+.challenge-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.challenge-card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);flex:1;padding-right:8px;}
+.challenge-status-badge{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:3px 10px;font-size:11px;white-space:nowrap;flex-shrink:0;}
+.challenge-progress-bar-wrap{background:var(--linen);border-radius:100px;height:6px;margin-bottom:8px;overflow:hidden;}
+.challenge-progress-bar-fill{height:6px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
+.challenge-progress-text{font-size:13px;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
+.challenge-stats-row{display:flex;margin-bottom:14px;}
+.challenge-mini-stat{flex:1;text-align:center;}
+.challenge-mini-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.challenge-mini-lbl{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.challenge-mark-btn{width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.challenge-mark-btn:active{background:var(--almond);color:white;}
+.challenge-done-badge{text-align:center;font-size:13px;color:var(--success);font-weight:500;padding:6px;}
+.challenge-card.completed,.challenge-card.failed{opacity:0.65;}
+.duration-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.duration-pill{flex:1;min-width:60px;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.duration-pill.selected{background:var(--ink);color:white;border-color:var(--ink);}
+.threshold-pills{display:flex;gap:8px;margin-bottom:12px;}
+.threshold-pill{flex:1;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.threshold-pill.selected{background:var(--ink);color:white;border-color:var(--ink);}
+.habit-checklist{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;}
+.habit-check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;}
+.habit-check-row:last-child{border-bottom:none;}
+.challenge-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:12px 0;}
+.heatmap-cell{width:100%;aspect-ratio:1;border-radius:4px;background:var(--linen);}
+.heatmap-cell.done{background:var(--almond);}
+.heatmap-cell.future{background:transparent;border:1px solid var(--border);}
+.active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.active-challenges-banner-link{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .onb-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px;width:100%;}
 .onb-step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s;}
 .onb-step-dot.active{background:var(--ink);}
@@ -385,6 +428,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="progress-bar-wrap" style="margin-top:14px;">
         <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
       </div>
+      <div id="active-challenges-banner" style="display:none;" class="active-challenges-banner">
+        <span id="active-challenges-banner-text">🎯 0 active challenges</span>
+        <span class="active-challenges-banner-link" onclick="switchTab('challenges',document.querySelector('[data-tab=challenges]'))">View →</span>
+      </div>
       <div class="section-tabs" id="section-tabs-container"></div>
       <div id="tasks-container"></div>
       <div style="height:20px;"></div>
@@ -457,10 +504,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       </div>
     </div>
 
+    <div class="page" id="page-challenges">
+      <div class="challenges-page" id="challenges-inner"></div>
+    </div>
+
     <div class="tab-bar">
       <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
       <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon">📊</div><div class="tab-label">Progress</div></div>
       <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
+      <div class="tab" data-tab="challenges" onclick="switchTab('challenges',this)"><div class="tab-icon">🎯</div><div class="tab-label">Challenges</div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
   </div>
@@ -1112,7 +1164,279 @@ function renderSectionTabs(){
     const btn=document.createElement('button');btn.className='section-tab'+(cf===s.id?' active':'');btn.onclick=function(){filterSection(s.id,this);};btn.textContent=s.emoji+' '+s.label;c.appendChild(btn);
   }
 }
-function updateAll(){renderProgress();renderTasks();renderRewards();renderSectionTabs();}
+// ─── CHALLENGES ────────────────────────────────────────────────
+
+function makeChallengeId(){return 'ch'+Date.now()+Math.random().toString(36).slice(2,6);}
+
+function evaluateChallenges(){
+  if(!state||!state.challenges||!state.challenges.length)return;
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const yKey=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+  let changed=false;
+  for(const ch of state.challenges){
+    if(ch.status!=='active')continue;
+    if(ch.lastEvaluatedDay===yKey)continue;
+    const habitPool=ch.habitIds&&ch.habitIds.length>0
+      ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
+      :state.tasks;
+    if(!habitPool.length){ch.lastEvaluatedDay=yKey;changed=true;continue;}
+    const yDone=state.completedDays[yKey]||{};
+    const doneCount=habitPool.filter(t=>yDone[t.id]).length;
+    const pct=Math.round(doneCount/habitPool.length*100);
+    const threshold=ch.completionThreshold??100;
+    if(pct>=threshold){
+      ch.completedDays=ch.completedDays||{};
+      ch.completedDays[yKey]=true;
+      ch.currentStreak=(ch.currentStreak||0)+1;
+      if(ch.currentStreak>=(ch.bestStreak||0))ch.bestStreak=ch.currentStreak;
+      ch.lastCompletedDay=yKey;
+      if(ch.currentStreak>=ch.duration){
+        ch.status='completed';
+        showToast('🏆 Challenge complete! You did it!');
+      }
+    }else{
+      if(yKey>ch.startDate){ch.currentStreak=0;}
+    }
+    ch.lastEvaluatedDay=yKey;
+    changed=true;
+  }
+  if(changed)save();
+}
+
+function markChallengeToday(id,e){
+  if(e)e.stopPropagation();
+  const ch=state.challenges.find(c=>c.id===id);
+  if(!ch||ch.status!=='active')return;
+  ch.completedDays=ch.completedDays||{};
+  if(ch.completedDays[TODAY]){showToast('Already marked today ✓');return;}
+  ch.completedDays[TODAY]=true;
+  let streak=0;
+  const checkD=new Date();
+  while(streak<ch.duration+1){
+    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+    if(ch.completedDays[k]){streak++;checkD.setDate(checkD.getDate()-1);}
+    else break;
+  }
+  ch.currentStreak=streak;
+  if(streak>=(ch.bestStreak||0))ch.bestStreak=streak;
+  ch.lastCompletedDay=TODAY;
+  if(streak>=ch.duration){
+    ch.status='completed';
+    showToast('🏆 Challenge complete! Incredible!');
+  }else{
+    showToast(`Day ${streak} of ${ch.duration} complete! Keep going 🔥`);
+  }
+  save();
+  renderChallenges();
+  renderTodayBanner();
+}
+
+function abandonChallenge(id){
+  const ch=state.challenges.find(c=>c.id===id);
+  if(!ch)return;
+  PC=()=>{
+    ch.status='failed';
+    save();closeModal();renderChallenges();showToast('Challenge abandoned');
+  };
+  document.getElementById('confirm-title').textContent='Abandon challenge?';
+  document.getElementById('confirm-msg').textContent='Your progress will be saved but the challenge will be marked as failed.';
+  document.getElementById('confirm-ok').textContent='Abandon';
+  document.getElementById('confirm-ok').className='btn btn-danger';
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+window.abandonChallenge=abandonChallenge;
+window.markChallengeToday=markChallengeToday;
+
+function openChallengeDetail(id){
+  const ch=state.challenges.find(c=>c.id===id);
+  if(!ch)return;
+  const todayDone=ch.completedDays&&ch.completedDays[TODAY];
+  const pct=Math.min(100,Math.round((ch.currentStreak||0)/ch.duration*100));
+  const daysLeft=Math.max(0,ch.duration-(ch.currentStreak||0));
+  let heatmapHTML='';
+  const now=new Date();
+  for(let i=34;i>=0;i--){
+    const d=new Date(now);d.setDate(now.getDate()-i);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if(k<ch.startDate){heatmapHTML+='<div class="heatmap-cell" style="background:transparent;"></div>';}
+    else if(ch.completedDays&&ch.completedDays[k]){heatmapHTML+=`<div class="heatmap-cell done" title="${k}"></div>`;}
+    else{heatmapHTML+=`<div class="heatmap-cell" title="${k}"></div>`;}
+  }
+  const body=`<div class="modal-scroll">
+    <p style="font-size:13px;color:var(--ink-faint);margin-bottom:16px;">${ch.description||''}</p>
+    <div class="challenge-progress-bar-wrap" style="margin-bottom:6px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="challenge-progress-text">Day ${ch.currentStreak||0} of ${ch.duration}</div>
+    <div class="challenge-stats-row" style="margin-bottom:20px;">
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.currentStreak||0}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${daysLeft}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+    </div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">Progress calendar</div>
+    <div class="challenge-heatmap">${heatmapHTML}</div>
+    ${ch.status==='active'?`<div style="margin-top:16px;">${todayDone?'<div class="challenge-done-badge">✓ Completed today</div>':`<button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}</div>`:''}
+    ${ch.status==='active'?`<button class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="abandonChallenge('${ch.id}')">Abandon challenge</button>`:''}
+  </div>`;
+  showModal(ch.title,body);
+}
+window.openChallengeDetail=openChallengeDetail;
+
+let _chDuration=30,_chThreshold=100,_chHabitIds=[];
+
+function showNewChallengeModal(){
+  _chDuration=30;_chThreshold=100;_chHabitIds=[];
+  const habitOptions=state.tasks.map((t,i)=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:16px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
+  const body=`<div class="modal-scroll">
+    <div class="form-group"><label class="form-label">Challenge name *</label><input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60"/></div>
+    <div class="form-group"><label class="form-label">Description (optional)</label><input class="form-input" id="ch-desc" placeholder="What's your goal?"/></div>
+    <div class="form-group"><label class="form-label">Duration</label>
+      <div class="duration-pills">
+        <button class="duration-pill" onclick="setChallengeD(21,this)">21 days</button>
+        <button class="duration-pill selected" onclick="setChallengeD(30,this)">30 days</button>
+        <button class="duration-pill" onclick="setChallengeD(60,this)">60 days</button>
+        <button class="duration-pill" onclick="setChallengeD(180,this)">6 months</button>
+        <button class="duration-pill" onclick="setChallengeD(365,this)">1 year</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">A day counts when I complete…</label>
+      <div class="threshold-pills">
+        <button class="threshold-pill" onclick="setChallengeT(50,this)">50% of habits</button>
+        <button class="threshold-pill selected" onclick="setChallengeT(100,this)">All habits</button>
+        <button class="threshold-pill" onclick="setChallengeT(-1,this)">Specific habits</button>
+      </div>
+    </div>
+    <div id="ch-habit-list" style="display:none;">
+      <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:13px;color:var(--ink-faint);">No habits yet</p>'}</div>
+    </div>
+    <div class="form-group"><label class="form-label">Start date</label><input class="form-input" type="date" id="ch-start" value="${TODAY}"/></div>
+    <div class="auth-msg" id="ch-error"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createChallenge()">Create challenge</button>
+  </div>`;
+  showModal('New challenge',body);
+}
+window.showNewChallengeModal=showNewChallengeModal;
+
+window.setChallengeD=(d,btn)=>{
+  _chDuration=d;
+  btn.closest('.duration-pills').querySelectorAll('.duration-pill').forEach(p=>p.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+window.setChallengeT=(t,btn)=>{
+  _chThreshold=t;
+  btn.closest('.threshold-pills').querySelectorAll('.threshold-pill').forEach(p=>p.classList.remove('selected'));
+  btn.classList.add('selected');
+  const hl=document.getElementById('ch-habit-list');
+  if(hl)hl.style.display=t===-1?'block':'none';
+};
+window.toggleChallengeHabit=(id)=>{
+  const idx=_chHabitIds.indexOf(id);
+  if(idx>=0)_chHabitIds.splice(idx,1);else _chHabitIds.push(id);
+  const ind=document.getElementById('hcc-'+id);
+  if(ind)ind.textContent=_chHabitIds.includes(id)?'✓':'○';
+};
+
+window.createChallenge=()=>{
+  const title=(document.getElementById('ch-title')?.value||'').trim();
+  const err=document.getElementById('ch-error');
+  if(!title){if(err){err.textContent='Please enter a challenge name.';err.className='auth-msg show error';}return;}
+  const desc=(document.getElementById('ch-desc')?.value||'').trim();
+  const startDate=document.getElementById('ch-start')?.value||TODAY;
+  const threshold=_chThreshold===-1?100:_chThreshold;
+  const habitIds=_chThreshold===-1?[..._chHabitIds]:[];
+  const ch={
+    id:makeChallengeId(),title,description:desc,duration:_chDuration,type:'solo',
+    status:'active',startDate,currentStreak:0,bestStreak:0,
+    lastCompletedDay:null,lastEvaluatedDay:null,
+    completedDays:{},habitIds,completionThreshold:threshold,
+    createdAt:new Date().toISOString()
+  };
+  if(!state.challenges)state.challenges=[];
+  state.challenges.push(ch);
+  save();closeModal();renderChallenges();renderTodayBanner();
+  showToast('Challenge started! 🎯');
+};
+
+function renderTodayBanner(){
+  const banner=document.getElementById('active-challenges-banner');
+  if(!banner||!state)return;
+  const active=(state.challenges||[]).filter(c=>c.status==='active').length;
+  banner.style.display=active>0?'flex':'none';
+  const bt=document.getElementById('active-challenges-banner-text');
+  if(bt)bt.textContent=`🎯 ${active} active challenge${active!==1?'s':''}`;
+}
+
+function renderChallenges(){
+  if(!state)return;
+  const inner=document.getElementById('challenges-inner');
+  if(!inner)return;
+  const challenges=state.challenges||[];
+  const active=challenges.filter(c=>c.status==='active');
+  const completed=challenges.filter(c=>c.status==='completed');
+  const past=challenges.filter(c=>c.status==='failed'||c.status==='paused');
+
+  let html=`<div class="challenges-header">
+    <div><div class="challenges-title">Challenges</div><div class="challenges-sub">Push yourself further with time-bound goals</div></div>
+    <button class="new-challenge-btn" onclick="showNewChallengeModal()">+ New</button>
+  </div>`;
+
+  if(!challenges.length){
+    html+=`<div class="challenges-empty">
+      <div class="challenges-empty-icon">🎯</div>
+      <div class="challenges-empty-title">No challenges yet</div>
+      <div class="challenges-empty-sub">Set a challenge to push your consistency to the next level</div>
+      <button class="btn btn-primary" style="width:100%;max-width:280px;" onclick="showNewChallengeModal()">Start your first challenge →</button>
+    </div>`;
+  }else{
+    if(active.length){
+      html+=`<div class="challenge-section-label">Active</div>`;
+      html+=active.map(ch=>renderChallengeCard(ch)).join('');
+    }
+    if(completed.length){
+      html+=`<div class="challenge-section-label">Completed 🏆</div>`;
+      html+=completed.map(ch=>renderChallengeCard(ch)).join('');
+    }
+    if(past.length){
+      html+=`<div class="challenge-section-label">Past</div>`;
+      html+=past.map(ch=>renderChallengeCard(ch)).join('');
+    }
+  }
+  inner.innerHTML=html;
+  renderTodayBanner();
+}
+
+function renderChallengeCard(ch){
+  const pct=Math.min(100,Math.round((ch.currentStreak||0)/ch.duration*100));
+  const daysLeft=Math.max(0,ch.duration-(ch.currentStreak||0));
+  const todayDone=ch.completedDays&&ch.completedDays[TODAY];
+  const statusLabel={active:'Active',completed:'Completed ✓',failed:'Abandoned',paused:'Paused'}[ch.status]||ch.status;
+  const bottomRow=ch.status==='active'
+    ?(todayDone
+      ?`<div class="challenge-done-badge">✓ Completed today</div>`
+      :`<button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event)">Mark today complete ✓</button>`)
+    :'';
+  return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
+    <div class="challenge-card-top">
+      <div class="challenge-card-title">${ch.title}</div>
+      <div class="challenge-status-badge">${statusLabel}</div>
+    </div>
+    <div class="challenge-progress-bar-wrap"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="challenge-progress-text">Day ${ch.currentStreak||0} of ${ch.duration}</div>
+    <div class="challenge-stats-row">
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.currentStreak||0}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
+      <div class="challenge-mini-stat"><div class="challenge-mini-num">${daysLeft}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+    </div>
+    ${bottomRow}
+  </div>`;
+}
+
+function showModal(title,body){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=body;
+  openModal();
+}
+window.showModal=showModal;
+
+function updateAll(){evaluateChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1229,7 +1553,7 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){if(pts>0)awardPts(pts,'Habit completed');else{save();updateAll();showToast('Habit completed ✅');}}else{if(pts>0){state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();showToast(`-${pts} pts — Habit uncompleted`);}else{showToast('Habit uncompleted');}save();updateAll();}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderProgress();}};
+window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderProgress();}if(name==='challenges'){renderChallenges();}};
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
 window.changeWeek=(dir)=>{
@@ -1798,9 +2122,10 @@ onAuthStateChanged(auth,async(user)=>{
         if(!state.tasks)state.tasks=[];
         state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
         state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
+        if(!state.challenges)state.challenges=[];
         applyTheme(state.theme||'blush');
       }else{
-        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[]};
+        state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],challenges:[]};
         await setDoc(ref,state);
         isNewUser=true;
         applyTheme('blush');
@@ -1814,6 +2139,7 @@ onAuthStateChanged(auth,async(user)=>{
             if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
             if(!state.sections)state.sections=[];
             if(!state.tasks)state.tasks=[];
+            if(!state.challenges)state.challenges=[];
             updateAll();
           }
         }
