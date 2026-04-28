@@ -1,7 +1,7 @@
 {
-  "name": "Dino Days",
-  "short_name": "Dino Days",
-  "description": "Your daily self-growth companion with a dino friend",
+  "name": "Ritual",
+  "short_name": "Ritual",
+  "description": "Your daily habit and streak tracker",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FBFEFB",
