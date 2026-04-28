@@ -415,7 +415,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .incoming-challenge-name{font-family:'Fraunces', serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px;}
 .incoming-challenge-meta{font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;}
 .incoming-challenge-actions{display:flex;gap:8px;}
-.race-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;}
+.race-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;position:relative;}
+.sc-card-menu-btn{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:20px;padding:4px 8px;border-radius:8px;line-height:1;z-index:10;}
+.sc-card-menu-btn:hover{background:var(--linen);}
+.sc-card-dropdown{position:absolute;top:44px;right:12px;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.1);z-index:50;min-width:160px;overflow:hidden;display:none;}
+.sc-card-dropdown.open{display:block;}
+.sc-card-dropdown-item{display:block;padding:12px 16px;font-size:14px;cursor:pointer;width:100%;text-align:left;background:none;border:none;font-family:'DM Sans',sans-serif;color:var(--ink);}
+.sc-card-dropdown-item:hover{background:var(--linen);}
+.sc-card-dropdown-item.danger{color:var(--danger);}
 .race-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .race-card-title{font-size:15px;font-weight:500;color:var(--ink-soft);}
 .race-card-friend{font-size:15px;font-weight:500;color:var(--ink-soft);}
@@ -697,7 +704,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <h4 id="confirm-title">Are you sure?</h4>
     <p id="confirm-msg"></p>
     <div class="confirm-actions">
-      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-secondary" id="confirm-cancel" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirm-ok">Delete</button>
     </div>
   </div>
@@ -1457,6 +1464,7 @@ function abandonChallenge(id){
   document.getElementById('confirm-msg').textContent='Your progress will be saved but the challenge will be marked as failed.';
   document.getElementById('confirm-ok').textContent='Abandon';
   document.getElementById('confirm-ok').className='btn btn-danger';
+  const cc=document.getElementById('confirm-cancel');if(cc)cc.textContent='Cancel';
   document.getElementById('confirm-overlay').classList.add('open');
 }
 window.abandonChallenge=abandonChallenge;
@@ -1770,15 +1778,14 @@ function renderActiveRaceCard(ch){
   const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
   const myPct=Math.min(100,Math.round(myStreak/dur*100));
   const friendPct=Math.min(100,Math.round(friendStreak/dur*100));
-  const myLeading=myStreak>=friendStreak;
-  const myBarBg=myLeading?'var(--almond)':'var(--linen)';
-  const friendBarBg=!myLeading?'var(--almond)':'var(--linen)';
-  const myBarFg=myLeading?'var(--ink)':'var(--border)';
   const todayDone=myData?.completedDays?.[TODAY];
   const myStatus=myData?.status||'active';
+  const friendDropped=friendData?.status==='dropped';
   let bottomRow='';
   if(myStatus==='won'){
-    bottomRow=`<div class="race-done-badge">🏆 You won!</div>`;
+    bottomRow=friendDropped
+      ?`<div class="race-done-badge">🏆 ${friendName.split(' ')[0]} dropped out — you win!</div>`
+      :`<div class="race-done-badge">🏆 You won!</div>`;
   }else if(myStatus==='lost'){
     bottomRow=`<div class="race-done-badge" style="color:var(--ink-faint);">🥈 You came second</div>`;
   }else if(todayDone){
@@ -1786,8 +1793,14 @@ function renderActiveRaceCard(ch){
   }else{
     bottomRow=`<button class="race-mark-btn" onclick="markRaceToday('${ch.id}',event)">Mark today complete ✓</button>`;
   }
+  const menuId=`sc-menu-${ch.id}`;
   return `<div class="race-card">
-    <div class="race-card-header">
+    <button class="sc-card-menu-btn" onclick="toggleSCCardMenu('${ch.id}',event)">⋯</button>
+    <div class="sc-card-dropdown" id="${menuId}">
+      <button class="sc-card-dropdown-item" onclick="openSocialChallengeDetail('${ch.id}',event)">View details</button>
+      <button class="sc-card-dropdown-item danger" onclick="dropOutSocialChallenge('${ch.id}',event)">Drop out</button>
+    </div>
+    <div class="race-card-header" style="padding-right:32px;">
       <div><span style="font-size:17px;">🏁</span> <span class="race-card-title">Race · ${durationLabel}</span></div>
       <div class="race-card-friend">vs ${friendName.split(' ')[0]}</div>
     </div>
@@ -1825,8 +1838,14 @@ function renderActiveBondCard(ch){
   const btn=iDone
     ?`<div class="race-done-badge">✓ Your part is done — waiting for ${friendName.split(' ')[0]}</div>`
     :`<button class="race-mark-btn" onclick="markBondToday('${ch.id}',event)">Mark my day complete ✓</button>`;
+  const menuId=`sc-menu-${ch.id}`;
   return `<div class="race-card">
-    <div class="race-card-header">
+    <button class="sc-card-menu-btn" onclick="toggleSCCardMenu('${ch.id}',event)">⋯</button>
+    <div class="sc-card-dropdown" id="${menuId}">
+      <button class="sc-card-dropdown-item" onclick="openSocialChallengeDetail('${ch.id}',event)">View details</button>
+      <button class="sc-card-dropdown-item danger" onclick="dropOutSocialChallenge('${ch.id}',event)">Drop out</button>
+    </div>
+    <div class="race-card-header" style="padding-right:32px;">
       <div><span style="font-size:17px;">🤝</span> <span class="race-card-title">Bond · ${durationLabel}</span></div>
       <div class="race-card-friend">with ${friendName.split(' ')[0]}</div>
     </div>
@@ -2124,6 +2143,7 @@ function setupSocialChallengeListeners(){
     if(currentTab==='challenges'&&_challengesSubview==='challenges')renderChallenges();
     if(currentTab==='today')renderTodayBanner();
     checkBondCompletion(); // detect both-done races from real-time updates
+    checkDropoutWins();   // detect when friend dropped out and we won
   }
   const q1=query(collection(db,'socialChallenges'),where('createdBy','==',currentUser.uid));
   const unsub1=onSnapshot(q1,(snap)=>{createdByCache=snap.docs.map(d=>d.data());mergeAndUpdate();},{error:console.warn});
@@ -2474,6 +2494,138 @@ async function checkBondCompletion(){
       if(done)showBondCelebration(ch.id,friendName,newSharedStreak,ch.duration);
       else showToast(`You both completed today! Streak: ${newSharedStreak} days 🔥`);
     }catch(e){console.warn('checkBondCompletion error:',e);}
+  }
+}
+
+// ─── SOCIAL CARD MENU (⋯ dropdown) ─────────────────────────────
+
+window.toggleSCCardMenu=(id,e)=>{
+  if(e)e.stopPropagation();
+  const menuId=`sc-menu-${id}`;
+  const menu=document.getElementById(menuId);
+  if(!menu)return;
+  const isOpen=menu.classList.contains('open');
+  // Close all open menus first
+  document.querySelectorAll('.sc-card-dropdown.open').forEach(m=>m.classList.remove('open'));
+  if(!isOpen)menu.classList.add('open');
+};
+
+// Close all dropdowns when clicking outside
+document.addEventListener('click',()=>{
+  document.querySelectorAll('.sc-card-dropdown.open').forEach(m=>m.classList.remove('open'));
+});
+
+window.openSocialChallengeDetail=(id,e)=>{
+  if(e)e.stopPropagation();
+  document.querySelectorAll('.sc-card-dropdown.open').forEach(m=>m.classList.remove('open'));
+  const ch=socialChallengesCache.find(c=>c.id===id);
+  if(!ch)return;
+  const myUid=currentUser?.uid;
+  const myData=ch.participants?.[myUid];
+  const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
+  const friendName=ch.participants?.[otherUids[0]]?.displayName||'Friend';
+  const dur=ch.duration;
+  const durationLabel=dur>=365?'1 year':dur>=180?'6 months':dur+' days';
+  const typeLabel=ch.type==='bond'?'Bond':ch.type==='custom'?'Custom':'Race';
+  const typeIcon=ch.type==='bond'?'🤝':ch.type==='custom'?'⚙️':'🏁';
+  let statsHTML='';
+  if(ch.type==='bond'){
+    const ss=ch.sharedStreak||0;
+    const pct=Math.min(100,Math.round(ss/dur*100));
+    statsHTML=`
+      <div class="challenge-progress-bar-wrap" style="margin-bottom:6px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="challenge-progress-text">Day ${ss} of ${dur}</div>
+      <div class="challenge-stats-row">
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${ss}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.sharedBestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${Math.max(0,dur-ss)}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+      </div>`;
+  }else{
+    const ms=myData?.currentStreak||0;
+    const pct=Math.min(100,Math.round(ms/dur*100));
+    statsHTML=`
+      <div class="challenge-progress-bar-wrap" style="margin-bottom:6px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="challenge-progress-text">Your streak: Day ${ms} of ${dur}</div>
+      <div class="challenge-stats-row">
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${ms}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${myData?.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
+        <div class="challenge-mini-stat"><div class="challenge-mini-num">${Math.max(0,dur-ms)}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+      </div>`;
+  }
+  const body=`<div class="modal-scroll">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <span class="mode-badge">${typeIcon} ${typeLabel}</span>
+      <span style="font-size:14px;color:var(--ink-faint);">${durationLabel} · with ${friendName.split(' ')[0]}</span>
+    </div>
+    ${statsHTML}
+    <button class="btn btn-danger" style="width:100%;margin-top:20px;" onclick="dropOutSocialChallenge('${id}',null);closeModal();">Drop out of challenge</button>
+  </div>`;
+  showModal(ch.title||`${durationLabel} ${typeLabel}`,body);
+};
+
+window.dropOutSocialChallenge=async(id,e)=>{
+  if(e)e.stopPropagation();
+  document.querySelectorAll('.sc-card-dropdown.open').forEach(m=>m.classList.remove('open'));
+  const ch=socialChallengesCache.find(c=>c.id===id);
+  if(!ch)return;
+  const isBond=ch.type==='bond';
+  PC=async()=>{
+    const now=new Date().toISOString();
+    const myUid=currentUser.uid;
+    const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
+    const otherUid=otherUids[0];
+    const pk=`participants.${myUid}`;
+    const updates={[`${pk}.status`]:'dropped'};
+    if(isBond){
+      updates.status='failed';
+      updates.failedAt=now;
+    }else{
+      const otherAlsoDropped=ch.participants?.[otherUid]?.status==='dropped';
+      if(otherAlsoDropped||!otherUid){
+        updates.status='failed';
+      }else{
+        updates.status='completed';
+        updates.winnerId=otherUid;
+        updates.completedAt=now;
+        updates[`participants.${otherUid}.status`]='won';
+      }
+    }
+    try{
+      await updateDoc(doc(db,'socialChallenges',id),updates);
+      showToast(isBond?'The bond challenge has ended':'You\'ve dropped out of the challenge');
+      renderChallenges();
+    }catch(err){console.warn('dropOutSocialChallenge error:',err);showToast('Error. Try again.');}
+  };
+  document.getElementById('confirm-title').textContent='Drop out of this challenge?';
+  document.getElementById('confirm-msg').textContent=isBond
+    ?'Dropping out ends the challenge for both of you. Your shared streak will be lost.'
+    :'Your progress will be lost. Your friend will be notified and can continue without you.';
+  document.getElementById('confirm-ok').textContent='Drop out';
+  document.getElementById('confirm-ok').className='btn btn-danger';
+  const cc=document.getElementById('confirm-cancel');if(cc)cc.textContent='Keep going';
+  document.getElementById('confirm-overlay').classList.add('open');
+};
+
+function checkDropoutWins(){
+  const myUid=currentUser?.uid;
+  if(!myUid)return;
+  const key='ritual-seen-celebrations';
+  let seen=[];
+  try{seen=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  for(const ch of socialChallengesCache){
+    if(ch.type!=='race'&&ch.type!=='custom')continue;
+    if(ch.status!=='completed')continue;
+    const myData=ch.participants?.[myUid];
+    if(!myData||myData.status!=='won')continue;
+    if(seen.includes(ch.id+'-dropout'))continue;
+    // Check if any other participant dropped out (making this a dropout win)
+    const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==myUid);
+    const someoneDropped=otherUids.some(u=>ch.participants[u]?.status==='dropped');
+    if(!someoneDropped)continue;
+    seen.push(ch.id+'-dropout');
+    try{localStorage.setItem(key,JSON.stringify(seen));}catch(e){}
+    const friendName=ch.participants?.[otherUids[0]]?.displayName||'your friend';
+    showToast(`${friendName.split(' ')[0]} dropped out — you win! 🏆`,3000);
   }
 }
 
@@ -3091,9 +3243,9 @@ window.editReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r)return;d
 window.submitEditReward=(id)=>{const name=document.getElementById('f-name').value.trim(),cost=parseInt(document.getElementById('f-cost').value),icon=document.getElementById('f-icon').value.trim();if(!name||isNaN(cost)||cost<1){showToast('Fill in all fields');return;}const r=state.rewards.find(x=>x.id===id);if(r){r.name=name;r.cost=cost;r.icon=icon||'🎁';}save();renderRewards();closeModal();showToast('Pleasure updated');};
 window.buyReward=(id)=>{const r=state.rewards.find(x=>x.id===id);if(!r||state.points<r.cost)return;PC=()=>spendPts(r.cost,r.name,true);document.getElementById('confirm-title').textContent='Redeem this?';document.getElementById('confirm-msg').textContent=`Spend ${r.cost} pts on "${r.name}"?`;document.getElementById('confirm-ok').textContent='Yes, redeem!';document.getElementById('confirm-ok').className='btn btn-primary';document.getElementById('confirm-overlay').classList.add('open');};
 window.deleteReward=(id)=>{PC=()=>{state.rewards=state.rewards.filter(r=>r.id!==id);save();renderRewards();showToast('Reward removed');};document.getElementById('confirm-title').textContent='Remove reward?';document.getElementById('confirm-msg').textContent='This will be removed from your pleasures list.';document.getElementById('confirm-ok').textContent='Remove';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
-window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();};
+window.closeConfirm=()=>{PC=null;document.getElementById('confirm-overlay').classList.remove('open');const cc=document.getElementById('confirm-cancel');if(cc)cc.textContent='Cancel';restoreActiveTab();};
 window.closeModal=closeModal;
-document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');restoreActiveTab();});
+document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();PC=null;}document.getElementById('confirm-overlay').classList.remove('open');const cc=document.getElementById('confirm-cancel');if(cc)cc.textContent='Cancel';restoreActiveTab();});
 
 // ─── PROFILE & FRIENDS ─────────────────────────────────────────
 
