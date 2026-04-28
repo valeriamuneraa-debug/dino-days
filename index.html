@@ -321,22 +321,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .challenges-empty-icon{font-size:64px;margin-bottom:16px;}
 .challenges-empty-title{font-family:'Fraunces', serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px;}
 .challenges-empty-sub{font-size:16px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;}
-.challenge-section-label{font-size:13px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 4px 8px;}
-.challenge-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s;}
+.challenge-section-label{font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 0 8px;}
+.challenge-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s;position:relative;}
+.challenge-card.active{border-left:3px solid var(--almond);}
 .challenge-card:active{box-shadow:0 2px 12px var(--shadow);}
-.challenge-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-.challenge-card-title{font-family:'Fraunces', serif;font-size:20px;font-weight:700;color:var(--ink);flex:1;padding-right:8px;}
-.challenge-status-badge{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:3px 10px;font-size:13px;white-space:nowrap;flex-shrink:0;}
-.challenge-progress-bar-wrap{background:var(--linen);border-radius:100px;height:6px;margin-bottom:8px;overflow:hidden;}
-.challenge-progress-bar-fill{height:6px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
-.challenge-progress-text{font-size:15px;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
-.challenge-stats-row{display:flex;margin-bottom:14px;}
+.challenge-card-title{font-family:'Fraunces', serif;font-size:20px;font-weight:600;color:var(--ink);margin-bottom:16px;}
+.challenge-progress-bar-wrap{background:var(--linen);border-radius:100px;height:6px;margin-bottom:10px;overflow:hidden;}
+.challenge-progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--almond),var(--powder));border-radius:100px;transition:width 0.5s ease;}
+.challenge-progress-text{font-size:13px;color:var(--ink-faint);text-align:center;margin-bottom:16px;}
+.challenge-stats-row{display:flex;border-top:1px solid var(--border);margin-top:4px;padding-top:14px;}
 .challenge-mini-stat{flex:1;text-align:center;}
-.challenge-mini-num{font-family:'Fraunces', serif;font-size:20px;font-weight:700;color:var(--ink);}
-.challenge-mini-lbl{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
-.challenge-mark-btn{width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.challenge-mark-btn:active{background:var(--almond);color:white;}
-.challenge-done-badge{text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:6px;}
+.challenge-mini-stat:not(:last-child){border-right:1px solid var(--border);}
+.challenge-mini-num{font-family:'Fraunces', serif;font-size:26px;font-weight:600;color:var(--ink);display:block;line-height:1;}
+.challenge-mini-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;display:block;}
+.challenge-mark-btn{background:var(--ink);color:white;border:none;border-radius:100px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.challenge-done-badge{font-size:13px;color:var(--success);font-weight:500;}
 .challenge-card.completed,.challenge-card.failed{opacity:0.65;}
 .duration-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
 .duration-pill{flex:1;min-width:60px;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
@@ -347,10 +346,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .habit-checklist{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;}
 .habit-check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:16px;}
 .habit-check-row:last-child{border-bottom:none;}
-.challenge-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:12px 0;}
-.heatmap-cell{width:100%;aspect-ratio:1;border-radius:4px;background:var(--linen);}
+.challenge-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;}
+.heatmap-cell{width:100%;aspect-ratio:1;border-radius:6px;background:var(--linen);}
 .heatmap-cell.done{background:var(--almond);}
+.heatmap-cell.missed{background:var(--linen);opacity:0.5;}
 .heatmap-cell.future{background:transparent;border:1px solid var(--border);}
+.heatmap-cell.today{background:var(--powder);border:2px solid var(--almond);}
 .active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
 .active-challenges-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .onb-steps{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;width:100%;}
@@ -1473,31 +1474,71 @@ window.markChallengeToday=markChallengeToday;
 function openChallengeDetail(id){
   const ch=state.challenges.find(c=>c.id===id);
   if(!ch)return;
+  const isCustom=ch.type==='custom';
   const todayDone=ch.completedDays&&ch.completedDays[TODAY];
-  const pct=Math.min(100,Math.round((ch.currentStreak||0)/ch.duration*100));
-  const daysLeft=Math.max(0,ch.duration-(ch.currentStreak||0));
+  const target=isCustom
+    ?(ch.victoryCondition==='total'?(ch.totalTarget||ch.duration):(ch.streakRequired||ch.duration))
+    :ch.duration;
+  const progress=isCustom
+    ?(ch.victoryCondition==='total'?(ch.completedDaysTotal||0):(ch.currentStreak||0))
+    :(ch.currentStreak||0);
+  const pct=Math.min(100,Math.round(progress/target*100));
+  const daysLeft=Math.max(0,target-progress);
+
+  // Day-of-week header
+  const dayLabels=['S','M','T','W','T','F','S'].map(d=>`<div style="font-size:10px;color:var(--ink-faint);text-align:center;padding-bottom:2px;">${d}</div>`).join('');
+
+  // Heatmap: 35 cells (5 weeks), newest on the right
   let heatmapHTML='';
   const now=new Date();
   for(let i=34;i>=0;i--){
     const d=new Date(now);d.setDate(now.getDate()-i);
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    if(k<ch.startDate){heatmapHTML+='<div class="heatmap-cell" style="background:transparent;"></div>';}
-    else if(ch.completedDays&&ch.completedDays[k]){heatmapHTML+=`<div class="heatmap-cell done" title="${k}"></div>`;}
-    else{heatmapHTML+=`<div class="heatmap-cell" title="${k}"></div>`;}
+    const isToday=k===TODAY;
+    const isFuture=k>TODAY;
+    const isBeforeStart=ch.startDate&&k<ch.startDate;
+    let cls,sty='';
+    if(isBeforeStart){cls='heatmap-cell';sty='background:transparent;';}
+    else if(isToday){cls='heatmap-cell today';}
+    else if(isFuture){cls='heatmap-cell future';}
+    else if(ch.completedDays&&ch.completedDays[k]){cls='heatmap-cell done';}
+    else{cls='heatmap-cell missed';}
+    heatmapHTML+=`<div class="${cls}" style="${sty}" title="${k}"></div>`;
   }
-  const body=`<div class="modal-scroll">
-    <p style="font-size:15px;color:var(--ink-faint);margin-bottom:16px;">${ch.description||''}</p>
-    <div class="challenge-progress-bar-wrap" style="margin-bottom:6px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
-    <div class="challenge-progress-text">Day ${ch.currentStreak||0} of ${ch.duration}</div>
-    <div class="challenge-stats-row" style="margin-bottom:20px;">
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.currentStreak||0}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${daysLeft}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+
+  // 3-col stats grid
+  const statsHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;">
+    <div style="background:var(--white);padding:16px;text-align:center;">
+      <span style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--ink);display:block;line-height:1;">${ch.currentStreak||0}</span>
+      <span style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;display:block;">Streak</span>
     </div>
-    <div style="font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">Progress calendar</div>
+    <div style="background:var(--white);padding:16px;text-align:center;">
+      <span style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--ink);display:block;line-height:1;">${ch.bestStreak||0}</span>
+      <span style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;display:block;">Best</span>
+    </div>
+    <div style="background:var(--white);padding:16px;text-align:center;">
+      <span style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--ink);display:block;line-height:1;">${daysLeft}</span>
+      <span style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;display:block;">Days left</span>
+    </div>
+  </div>`;
+
+  const body=`<div class="modal-scroll">
+    ${ch.description?`<p style="font-size:15px;color:var(--ink-soft);margin-bottom:20px;line-height:1.6;">${ch.description}</p>`:''}
+    <div class="challenge-progress-bar-wrap" style="height:8px;margin-bottom:10px;"><div class="challenge-progress-bar-fill" style="width:${pct}%;height:100%;"></div></div>
+    <div style="font-size:14px;color:var(--ink-faint);text-align:center;margin:10px 0 20px;">Day ${ch.currentStreak||0} of ${ch.duration} · ${pct}% complete</div>
+    ${statsHTML}
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin-bottom:10px;">Progress</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">${dayLabels}</div>
     <div class="challenge-heatmap">${heatmapHTML}</div>
-    ${ch.status==='active'?`<div style="margin-top:16px;">${todayDone?'<div class="challenge-done-badge">✓ Completed today</div>':`<button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}</div>`:''}
-    ${ch.status==='active'?`<button class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="abandonChallenge('${ch.id}')">Abandon challenge</button>`:''}
+    ${ch.status==='active'?`
+      <div style="margin-top:20px;">
+        ${todayDone
+          ?`<div style="text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:10px 0;">Completed today ✓</div>`
+          :`<button class="btn btn-primary" style="width:100%;" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <span onclick="abandonChallenge('${ch.id}')" style="font-size:13px;color:var(--danger);cursor:pointer;text-align:center;display:block;padding:8px;">Abandon challenge</span>
+    `:''}
   </div>`;
   showModal(ch.title,body);
 }
@@ -1722,16 +1763,16 @@ function renderChallenges(){
       html+=activeRaceSC.map(ch=>renderActiveRaceCard(ch)).join('');
     }
     if(activeBondSC.length){
-      html+=`<div class="challenge-section-label">🤝 Bonded</div>`;
+      html+=`<div class="challenge-section-label">Bonded</div>`;
       html+=activeBondSC.map(ch=>renderActiveBondCard(ch)).join('');
     }
     if(activeCustom.length||activeCustomSC.length){
-      html+=`<div class="challenge-section-label">⚙️ Custom</div>`;
+      html+=`<div class="challenge-section-label">Custom</div>`;
       html+=activeCustom.map(ch=>renderChallengeCard(ch)).join('');
       html+=activeCustomSC.map(ch=>renderActiveCustomCard(ch)).join('');
     }
     if(completed.length||completedSC.length){
-      html+=`<div class="challenge-section-label">Completed 🏆</div>`;
+      html+=`<div class="challenge-section-label">Completed</div>`;
       html+=completed.map(ch=>renderChallengeCard(ch)).join('');
       html+=completedSC.map(ch=>renderCompletedSocialCard(ch)).join('');
     }
@@ -2814,27 +2855,22 @@ function renderChallengeCard(ch){
   const pct=Math.min(100,Math.round(progress/target*100));
   const daysLeft=Math.max(0,target-progress);
   const todayDone=ch.completedDays&&ch.completedDays[TODAY];
-  const statusLabel={active:'Active',completed:'Completed ✓',failed:'Abandoned',paused:'Paused'}[ch.status]||ch.status;
-  const modeBadge=isCustom?'⚙️ Custom':'👤 Solo';
   const progressLabel=isCustom
     ?(ch.victoryCondition==='total'?`${progress} / ${target} days`:`Streak: ${ch.currentStreak||0} / ${target}`)
     :`Day ${ch.currentStreak||0} of ${ch.duration}`;
-  const bottomRow=ch.status==='active'
-    ?(todayDone
-      ?`<div class="challenge-done-badge">✓ Completed today</div>`
-      :`<button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event)">Mark today complete ✓</button>`)
-    :'';
+  let bottomRow='';
+  if(ch.status==='active'){
+    bottomRow=todayDone
+      ?`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><span class="challenge-done-badge">Completed today ✓</span></div>`
+      :`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event)">Mark today ✓</button></div>`;
+  }
   return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
-    <div class="challenge-card-top">
-      <div class="challenge-card-title">${ch.title}<span class="mode-badge">${modeBadge}</span></div>
-      <div class="challenge-status-badge">${statusLabel}</div>
-    </div>
+    <div class="challenge-card-title">${ch.title}</div>
     <div class="challenge-progress-bar-wrap"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
     <div class="challenge-progress-text">${progressLabel}</div>
     <div class="challenge-stats-row">
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.currentStreak||0}</div><div class="challenge-mini-lbl">🔥 Streak</div></div>
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
-      <div class="challenge-mini-stat"><div class="challenge-mini-num">${daysLeft}</div><div class="challenge-mini-lbl">📅 Left</div></div>
+      <div class="challenge-mini-stat"><span class="challenge-mini-num">${ch.currentStreak||0}</span><span class="challenge-mini-lbl">Streak</span></div>
+      <div class="challenge-mini-stat"><span class="challenge-mini-num">${daysLeft}</span><span class="challenge-mini-lbl">Days left</span></div>
     </div>
     ${bottomRow}
   </div>`;
