@@ -609,6 +609,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
 <div id="onboarding-displayname" style="display:none;">
+  <button onclick="onboardingBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="welcome-title" style="margin-bottom:8px;">What should we call you?</div>
   <div class="welcome-sub" style="margin-bottom:20px;text-align:center;margin-left:auto;margin-right:auto;">Your friends will see this.</div>
@@ -619,6 +620,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div id="onboarding-goals" style="display:none;">
+  <button onclick="onboardingBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">What matters to you?</div>
@@ -627,8 +629,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div id="goal-grid" class="goal-grid"></div>
   <div class="goal-error" id="goal-error"></div>
   <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
+  <a onclick="skipGoals()" style="display:block;text-align:center;margin-top:12px;font-size:14px;color:var(--ink-faint);cursor:pointer;text-decoration:none;padding:8px;">Customize later</a>
 </div>
 <div id="onboarding-habits" style="display:none;">
+  <button onclick="onboardingBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
     <div class="welcome-title" style="margin-bottom:8px;">Build your first habits</div>
@@ -637,9 +641,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div id="habits-suggestions-content" style="width:100%;"></div>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" id="habits-continue-btn" style="width:100%;flex:none;" onclick="confirmHabits()">Continue →</button>
+    <a onclick="skipHabits()" style="display:block;text-align:center;margin-top:12px;font-size:14px;color:var(--ink-faint);cursor:pointer;text-decoration:none;padding:8px;">Customize later</a>
   </div>
 </div>
 <div id="onboarding-rewards" style="display:none;">
+  <button onclick="onboardingBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
   <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
   <p style="font-size:15px;color:var(--ink-soft);text-align:center;padding:0 20px;margin-bottom:20px;width:100%;">Complete habits to earn points. Spend them on things you enjoy.</p>
@@ -656,10 +662,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div style="font-size:13px;color:var(--ink-faint);text-align:center;padding:8px 20px;width:100%;">⚠️ Miss too many days and your store locks until you're back on track.</div>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmRewards()">Continue →</button>
-    <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipRewardsSetup()">Skip for now →</button>
+    <a onclick="skipRewardsSetup()" style="display:block;text-align:center;margin-top:12px;font-size:14px;color:var(--ink-faint);cursor:pointer;text-decoration:none;padding:8px;">Customize later</a>
   </div>
 </div>
 <div id="onboarding-welcome" style="display:none;">
+  <button onclick="onboardingBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;cursor:pointer;padding:8px;color:var(--ink-soft);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
   <div style="font-family:'Fraunces', serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;line-height:1;text-shadow:0 2px 12px rgba(208,184,172,0.4);">Ritual</div>
   <div style="width:40px;height:2px;background:var(--almond);margin:16px auto;border-radius:2px;"></div>
@@ -759,10 +766,32 @@ const auth=getAuth(app),db=getFirestore(app);
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 
 let _selectedTheme='blush';
+let _onbStep=1;
+const _onbScreenIds=['onboarding-theme','onboarding-displayname','onboarding-goals','onboarding-habits','onboarding-rewards','onboarding-welcome'];
+window.onboardingBack=()=>{
+  if(_onbStep<=1)return;
+  document.getElementById(_onbScreenIds[_onbStep-1]).style.display='none';
+  _onbStep--;
+  document.getElementById(_onbScreenIds[_onbStep-1]).style.display='flex';
+};
+window.skipGoals=()=>{
+  _selectedGoals=new Set();_selectedSuggestions={};
+  document.getElementById('onboarding-goals').style.display='none';
+  showHabitSuggestions();
+};
+window.skipHabits=()=>{
+  state.sections=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map(g=>({id:g.id,label:g.secLabel,emoji:g.emoji}));
+  state.tasks=[];
+  if(!state.completedDays)state.completedDays={};
+  if(!state.completedDays[TODAY])state.completedDays[TODAY]={};
+  save();updateAll();
+  document.getElementById('onboarding-habits').style.display='none';
+  showRewardsSetup();
+};
 let _selectedGoals=new Set(),_selectedSuggestions={},_customHabits=[];
 
 function showGoalPicker(){
-  _selectedGoals=new Set();_selectedSuggestions={};_customHabits=[];
+  _onbStep=3;_selectedGoals=new Set();_selectedSuggestions={};_customHabits=[];
   const grid=document.getElementById('goal-grid');
   if(grid)grid.innerHTML=GOAL_OPTIONS.map(g=>`<div class="goal-card" id="gcard-${g.id}" onclick="toggleGoal('${g.id}')"><div class="goal-card-check">✓</div><div class="goal-card-emoji">${g.emoji}</div><div class="goal-card-name">${g.name}</div></div>`).join('');
   const err=document.getElementById('goal-error');if(err)err.textContent='';
@@ -784,7 +813,7 @@ window.confirmGoals=()=>{
   showHabitSuggestions();
 };
 function showHabitSuggestions(){
-  renderHabitContent();
+  _onbStep=4;renderHabitContent();
   document.getElementById('onboarding-habits').style.display='flex';
 }
 function renderHabitContent(){
@@ -845,7 +874,7 @@ window.confirmHabits=()=>{
 };
 
 function showThemePicker(){
-  _selectedTheme=state?.theme||'blush';
+  _onbStep=1;_selectedTheme=state?.theme||'blush';
   document.getElementById('theme-carousel').innerHTML=Object.keys(THEMES).map(key=>{
     const t=THEMES[key];const sel=_selectedTheme===key;
     return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><div style="width:48px;height:48px;border-radius:50%;background:${t.almond};"></div></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
@@ -866,7 +895,7 @@ window.confirmThemePick=()=>{
 };
 
 function showDisplayNameScreen(){
-  const inp=document.getElementById('onb-displayname-input');
+  _onbStep=2;const inp=document.getElementById('onb-displayname-input');
   if(inp&&state.displayName)inp.value=state.displayName;
   document.getElementById('onboarding-displayname').style.display='flex';
 }
@@ -900,7 +929,7 @@ const REWARD_SUGGESTIONS_DATA=[
 let _selectedRewardSuggestions=new Set();
 let _customRewards=[];
 function showRewardsSetup(){
-  _selectedRewardSuggestions=new Set();
+  _onbStep=5;_selectedRewardSuggestions=new Set();
   _customRewards=[];
   renderRewardsSetup();
   document.getElementById('onboarding-rewards').style.display='flex';
@@ -3129,7 +3158,7 @@ const TOUR_STEPS=[
   {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                         lift:null,       setPos:true},
 ];
 
-function showWelcome(){document.getElementById('onboarding-welcome').style.display='flex';}
+function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';}
 
 function clearTourHighlight(){
   if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
