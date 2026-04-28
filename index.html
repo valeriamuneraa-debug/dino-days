@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#FBFEFB">
 <link rel="manifest" href="manifest.json">
 <title>Ritual</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--almond:#D0B8AC;--powder:#F3D8C7;--linen:#EFE5DC;--porcelain:#FBFEFB;--white:#FFFFFF;--ink:#1d1e1e;--ink-soft:#5a5550;--ink-faint:#9a908a;--success:#7BAE8A;--danger:#C97B6E;--page-bg:#FBFEFB;--border:#EFE5DC;--shadow:rgba(208,184,172,0.15);--tab-height:72px;--header-height:60px;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -19,12 +19,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 #loading-screen{position:fixed;inset:0;background:var(--powder);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;}
 .load-spinner{width:40px;height:40px;border-radius:50%;background:var(--almond);animation:pulse 1s ease-in-out infinite;}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.85);opacity:0.6;}}
-#loading-screen p{margin-top:16px;font-size:16px;color:var(--ink-soft);font-family:'Playfair Display',serif;}
+#loading-screen p{margin-top:16px;font-size:16px;color:var(--ink-soft);font-family:'Nunito', sans-serif;}
 
 /* AUTH */
 #auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:24px;}
 .auth-card{background:var(--white);border-radius:28px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(208,184,172,0.25);}
-.auth-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;text-align:center;margin-bottom:4px;}
+.auth-title{font-family:'Nunito', sans-serif;font-size:28px;font-weight:700;text-align:center;margin-bottom:4px;}
 .auth-sub{font-size:15px;color:var(--ink-faint);text-align:center;margin-bottom:28px;}
 .auth-tabs{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin-bottom:24px;}
 .auth-tab{flex:1;padding:8px;border-radius:9px;border:none;background:transparent;font-size:15px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
@@ -41,7 +41,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* HEADER */
 .header{position:sticky;top:0;z-index:100;background:var(--page-bg);border-bottom:1px solid var(--border);padding:0 20px;height:var(--header-height);display:flex;align-items:center;justify-content:space-between;}
-.header-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+.header-title{font-family:'Nunito', sans-serif;font-size:22px;font-weight:800;}
 .header-date{font-size:14px;color:var(--ink-faint);font-weight:300;}
 .header-right{display:flex;gap:8px;align-items:center;}
 .icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--linen);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;}
@@ -62,7 +62,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* TODAY */
 .today-hero{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.today-hero h2{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:4px;}
+.today-hero h2{font-family:'Nunito', sans-serif;font-size:30px;font-weight:700;margin-bottom:4px;}
 .today-hero .sub{font-size:15px;color:var(--ink-soft);font-weight:300;}
 .streak-row{display:flex;gap:10px;padding:14px 20px;background:var(--white);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
 .streak-chip{display:flex;align-items:center;gap:6px;background:var(--linen);border-radius:20px;padding:6px 12px;font-size:14px;font-weight:500;color:var(--ink-soft);}
@@ -103,7 +103,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:420px;padding:24px 20px 36px;animation:slideUp .3s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:20px;}
+.modal h3{font-family:'Nunito', sans-serif;font-size:22px;margin-bottom:20px;}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;cursor:grab;transition:background .15s;}
 .modal-handle.dragging{background:var(--almond);cursor:grabbing;}
 .form-group{margin-bottom:14px;}
@@ -132,10 +132,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .progress-ring-track{fill:none;stroke:var(--border);stroke-width:8;}
 .progress-ring-fill{fill:none;stroke:var(--almond);stroke-width:8;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset 0.6s ease;}
 .progress-ring-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.progress-ring-pct{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-ring-pct{font-family:'Nunito', sans-serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1;}
 .progress-ring-label{font-size:13px;color:var(--ink-faint);margin-top:2px;}
 .progress-hero-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:24px;padding:28px;margin:16px;text-align:center;}
-.progress-streak-big{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-streak-big{font-family:'Nunito', sans-serif;font-size:44px;font-weight:700;color:var(--ink);line-height:1;}
 .progress-streak-label{font-size:16px;color:var(--ink-soft);margin-top:4px;}
 .progress-streak-msg{font-size:15px;color:var(--ink-soft);margin-top:8px;font-style:italic;}
 .progress-section-row{display:flex;align-items:center;padding:10px 20px;background:var(--white);border-bottom:1px solid var(--border);}
@@ -150,7 +150,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .habit-streak-count{font-size:15px;font-weight:500;color:var(--almond);}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px;}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
-.stat-num{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--ink);}
+.stat-num{font-family:'Nunito', sans-serif;font-size:34px;font-weight:700;color:var(--ink);}
 .stat-lbl{font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
 /* REWARDS */
 .rewards-store-wrap{position:relative;border-radius:20px;overflow:hidden;}
@@ -169,10 +169,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* REWARDS */
 .rewards-page{padding:20px;}
 .points-header{background:linear-gradient(135deg,var(--ink) 0%,#3a3530 100%);border-radius:20px;padding:20px;color:white;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
-.points-num{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;line-height:1;}
+.points-num{font-family:'Nunito', sans-serif;font-size:44px;font-weight:700;line-height:1;}
 .points-label{font-size:14px;opacity:.7;text-transform:uppercase;letter-spacing:1px;}
 .points-coin{font-size:50px;}
-.rewards-section-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;margin-top:20px;}
+.rewards-section-title{font-family:'Nunito', sans-serif;font-size:20px;margin-bottom:12px;margin-top:20px;}
 .reward-list{display:flex;flex-direction:column;gap:10px;}
 .reward-item{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s;cursor:pointer;}
 .reward-icon{font-size:26px;width:44px;height:44px;background:var(--linen);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -217,7 +217,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .confirm-overlay{position:fixed;inset:0;background:rgba(29,30,30,.5);backdrop-filter:blur(4px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
 .confirm-overlay.open{display:flex;}
 .confirm-box{background:var(--white);border-radius:20px;padding:24px;width:100%;max-width:300px;text-align:center;}
-.confirm-box h4{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:8px;}
+.confirm-box h4{font-family:'Nunito', sans-serif;font-size:20px;margin-bottom:8px;}
 .confirm-box p{font-size:15px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:10px;}
 
@@ -241,7 +241,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* ACCOUNT MODAL */
 .modal-scroll{max-height:calc(80vh - 110px);overflow-y:auto;padding-right:2px;}
-.acc-section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+.acc-section-title{font-family:'Nunito', sans-serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:12px;}
 .acc-subtitle{font-size:13px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;margin:18px 0 10px;}
 .acc-email-field{padding:12px 14px;background:var(--linen);border-radius:12px;font-size:16px;color:var(--ink-soft);}
 .acc-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
@@ -256,7 +256,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* ONBOARDING */
 #onboarding-welcome{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 24px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
-.welcome-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:12px;color:var(--ink);}
+.welcome-title{font-family:'Nunito', sans-serif;font-size:30px;font-weight:700;margin-bottom:12px;color:var(--ink);}
 .welcome-sub{font-size:17px;color:var(--ink-soft);line-height:1.6;margin-bottom:32px;max-width:300px;}
 .welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:18px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
 .welcome-cta:hover{transform:scale(1.03);}
@@ -271,7 +271,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* THEME PICKER */
 #onboarding-theme{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 20px 28px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
-.theme-pick-heading{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:10px;color:var(--ink);}
+.theme-pick-heading{font-family:'Nunito', sans-serif;font-size:30px;font-weight:700;margin-bottom:10px;color:var(--ink);}
 .theme-pick-sub{font-size:16px;color:var(--ink-soft);line-height:1.5;margin-bottom:24px;max-width:300px;}
 .theme-carousel{display:flex;gap:14px;overflow-x:auto;padding:4px 4px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:100%;width:100%;justify-content:center;}
 .theme-carousel::-webkit-scrollbar{display:none;}
@@ -282,7 +282,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .theme-card-body{flex:1;padding:10px 12px 0;display:flex;flex-direction:column;gap:7px;}
 .theme-card-pill{height:15px;border-radius:8px;}
 .theme-card-bar{flex:0 0 22px;margin-top:auto;}
-.theme-card-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);margin-top:9px;text-align:center;}
+.theme-card-name{font-family:'Nunito', sans-serif;font-size:15px;color:var(--ink);margin-top:9px;text-align:center;}
 /* ACCOUNT APPEARANCE SWATCHES */
 .theme-swatches{display:flex;gap:12px;align-items:center;padding:4px;margin:-4px;margin-bottom:2px;overflow:visible;}
 .theme-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;padding:0;transition:box-shadow .2s;flex-shrink:0;}
@@ -309,25 +309,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* Challenges */
 .challenges-page{padding:16px 16px 8px;}
 .challenges-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
-.challenges-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--ink);}
+.challenges-title{font-family:'Nunito', sans-serif;font-size:30px;font-weight:700;color:var(--ink);}
 .challenges-sub{font-size:15px;color:var(--ink-faint);margin-bottom:20px;}
 .new-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:15px;font-weight:500;border:none;cursor:pointer;white-space:nowrap;margin-top:4px;}
 .challenges-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
 .challenges-empty-icon{font-size:64px;margin-bottom:16px;}
-.challenges-empty-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.challenges-empty-title{font-family:'Nunito', sans-serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px;}
 .challenges-empty-sub{font-size:16px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;}
 .challenge-section-label{font-size:13px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 4px 8px;}
 .challenge-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s;}
 .challenge-card:active{box-shadow:0 2px 12px var(--shadow);}
 .challenge-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-.challenge-card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);flex:1;padding-right:8px;}
+.challenge-card-title{font-family:'Nunito', sans-serif;font-size:20px;font-weight:700;color:var(--ink);flex:1;padding-right:8px;}
 .challenge-status-badge{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:3px 10px;font-size:13px;white-space:nowrap;flex-shrink:0;}
 .challenge-progress-bar-wrap{background:var(--linen);border-radius:100px;height:6px;margin-bottom:8px;overflow:hidden;}
 .challenge-progress-bar-fill{height:6px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
 .challenge-progress-text{font-size:15px;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
 .challenge-stats-row{display:flex;margin-bottom:14px;}
 .challenge-mini-stat{flex:1;text-align:center;}
-.challenge-mini-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
+.challenge-mini-num{font-family:'Nunito', sans-serif;font-size:20px;font-weight:700;color:var(--ink);}
 .challenge-mini-lbl{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 .challenge-mark-btn{width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .challenge-mark-btn:active{background:var(--almond);color:white;}
@@ -386,11 +386,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .friends-view{padding:12px 16px 8px;}
 .friend-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:16px 20px;margin-bottom:10px;}
 .friend-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.friend-card-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.friend-card-name{font-family:'Nunito', sans-serif;font-size:18px;font-weight:700;color:var(--ink);}
 .friend-card-code{font-size:13px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
 .friend-stats-row{display:flex;margin-bottom:12px;}
 .friend-mini-stat{flex:1;text-align:center;}
-.friend-mini-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);}
+.friend-mini-num{font-family:'Nunito', sans-serif;font-size:22px;font-weight:700;color:var(--ink);}
 .friend-mini-lbl{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 .friend-card-actions{display:flex;gap:8px;}
 .friend-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:14px;font-weight:500;border:none;cursor:pointer;flex:1;}
@@ -407,7 +407,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* SOCIAL CHALLENGES */
 .incoming-challenge-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:20px;padding:20px;margin-bottom:12px;border:1.5px solid var(--almond);}
-.incoming-challenge-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.incoming-challenge-name{font-family:'Nunito', sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px;}
 .incoming-challenge-meta{font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;}
 .incoming-challenge-actions{display:flex;gap:8px;}
 .race-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;}
@@ -426,7 +426,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 #celebrate-overlay.show{display:flex;}
 .celebrate-trophy{font-size:80px;line-height:1;animation:celebBounce .6s ease-out;}
 @keyframes celebBounce{0%{transform:scale(0.5);}60%{transform:scale(1.2);}100%{transform:scale(1);}}
-.celebrate-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--ink);margin:20px 0 12px;}
+.celebrate-title{font-family:'Nunito', sans-serif;font-size:34px;font-weight:700;color:var(--ink);margin:20px 0 12px;}
 .celebrate-sub{font-size:17px;color:var(--ink-soft);line-height:1.5;max-width:280px;}
 .celebrate-tap{font-size:14px;color:var(--ink-faint);margin-top:24px;}
 .bond-participant-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:15px;}
@@ -1691,7 +1691,7 @@ function renderActiveBondCard(ch){
     </div>
     <div style="margin-bottom:14px;">
       <div class="challenge-progress-bar-wrap" style="margin-bottom:10px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
-      <div style="font-family:'Playfair Display',serif;font-size:38px;font-weight:600;color:var(--ink);text-align:center;line-height:1;">${sharedStreak}</div>
+      <div style="font-family:'Nunito', sans-serif;font-size:38px;font-weight:700;color:var(--ink);text-align:center;line-height:1;">${sharedStreak}</div>
       <div style="font-size:15px;color:var(--ink-faint);text-align:center;margin-top:4px;">shared streak · Day ${sharedStreak} of ${dur}</div>
     </div>
     <div class="bond-participant-status-row"><span style="font-weight:600;color:var(--ink);">You</span><span style="color:${iDone?'var(--success)':'var(--ink-faint)'};font-weight:${iDone?'500':'400'};">${iDone?'✓ Done today':'⏳ Pending'}</span></div>
@@ -1755,7 +1755,7 @@ async function renderFriends(){
   if(friendCount===0){
     html+=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
       <div style="font-size:56px;margin-bottom:16px;">👥</div>
-      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;">No friends yet</div>
+      <div style="font-family:'Nunito', sans-serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px;">No friends yet</div>
       <div style="font-size:16px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;">Add friends using their invite code to see their progress and challenge each other</div>
       <button class="btn btn-primary" style="width:100%;max-width:280px;" onclick="showAddFriendModal()">Add a friend →</button>
     </div>`;
