@@ -263,12 +263,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .welcome-cta:hover{transform:scale(1.03);}
 .welcome-skip{margin-top:14px;font-size:15px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 #tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
-#tour-tooltip{position:fixed;z-index:1000;background:var(--white);border-radius:16px;padding:16px;width:260px;max-width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(29,30,30,0.18);}
-.tour-step-ind{font-size:13px;color:var(--ink-faint);margin-bottom:8px;}
-.tour-tip-text{font-size:16px;color:var(--ink);line-height:1.5;margin-bottom:14px;}
-.tour-actions{display:flex;align-items:center;justify-content:space-between;}
+#tour-tooltip{position:fixed;z-index:1000;max-width:min(280px,calc(100vw - 40px));}
+.tour-card{background:var(--white);border-radius:20px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.tour-tip-title{font-family:'Fraunces', serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.tour-tip-text{font-size:14px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;}
+.tour-actions{display:flex;align-items:center;}
 .tour-next-btn{padding:10px 20px;border-radius:10px;background:var(--ink);color:white;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.tour-skip-link{font-size:14px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+.tour-dots-row{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:12px;}
+.tour-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.tour-dot.active{background:var(--almond);}
+.tour-skip-link{font-size:14px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;display:block;text-align:center;margin-top:8px;padding:0;}
 
 /* THEME PICKER */
 #onboarding-theme{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 20px 28px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
@@ -349,9 +353,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .heatmap-cell.future{background:transparent;border:1px solid var(--border);}
 .active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
 .active-challenges-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
-.onb-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px;width:100%;}
-.onb-step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s;}
-.onb-step-dot.active{background:var(--ink);}
+.onb-steps{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;width:100%;}
+.onb-step-dot{width:5px;height:5px;border-radius:50%;background:var(--border);transition:all .2s;}
+.onb-step-dot.active{background:var(--ink);width:18px;border-radius:100px;}
 .reward-flow-row{display:flex;gap:8px;margin:16px 0;}
 .reward-flow-card{background:rgba(255,255,255,0.6);border-radius:14px;padding:12px 8px;text-align:center;flex:1;}
 .reward-suggestion-chip{background:rgba(255,255,255,0.7);border:1px solid var(--border);border-radius:100px;padding:8px 14px;font-size:15px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin:4px;transition:all .2s;user-select:none;}
@@ -590,7 +594,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tab-label">Today</div></div>
       <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><div class="tab-label">Progress</div></div>
       <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="tab-label">Rewards</div></div>
-      <div class="tab" data-tab="challenges" style="position:relative;" onclick="switchTab('challenges',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="tab-label">Challenges</div><div class="challenges-tab-notif" id="challenges-tab-notif"></div></div>
+      <div class="tab" id="tour-tab-challenges" data-tab="challenges" style="position:relative;" onclick="switchTab('challenges',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="tab-label">Challenges</div><div class="challenges-tab-notif" id="challenges-tab-notif"></div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
   </div>
@@ -598,16 +602,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 <!-- ONBOARDING -->
 <div id="onboarding-theme" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="theme-pick-heading">Make it yours</div>
-  <div class="theme-pick-sub">Choose a color palette for your app. You can always change this later.</div>
+  <div class="theme-pick-sub">Choose a feel for your app.</div>
   <div class="theme-carousel" id="theme-carousel"></div>
   <button class="welcome-cta" style="margin-top:8px" onclick="confirmThemePick()">Continue →</button>
 </div>
 <div id="onboarding-displayname" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="welcome-title" style="margin-bottom:8px;">What should we call you?</div>
-  <div class="welcome-sub" style="margin-bottom:20px;text-align:center;margin-left:auto;margin-right:auto;">This is what your friends will see</div>
+  <div class="welcome-sub" style="margin-bottom:20px;text-align:center;margin-left:auto;margin-right:auto;">Your friends will see this.</div>
   <input class="form-input" id="onb-displayname-input" placeholder="Your name or nickname" maxlength="30" style="text-align:center;max-width:280px;font-size:20px;"/>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmDisplayName()">Continue →</button>
@@ -615,20 +619,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div id="onboarding-goals" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
-    <div class="welcome-title" style="margin-bottom:8px;">What do you want to work on?</div>
-    <div class="welcome-sub" style="margin-bottom:0;">Select everything that resonates. We'll create your habit categories from these.</div>
+    <div class="welcome-title" style="margin-bottom:8px;">What matters to you?</div>
+    <div class="welcome-sub" style="margin-bottom:0;">Pick your focus areas. These become your habit categories.</div>
   </div>
   <div id="goal-grid" class="goal-grid"></div>
   <div class="goal-error" id="goal-error"></div>
   <button class="btn btn-primary" id="goals-continue-btn" style="width:100%;padding:16px;" onclick="confirmGoals()">Continue →</button>
 </div>
 <div id="onboarding-habits" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div style="text-align:center;width:100%;margin-bottom:20px;">
-    <div class="welcome-title" style="margin-bottom:8px;">Here are some ideas to get you started</div>
-    <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add the ones that feel right. You can always change these later.</div>
+    <div class="welcome-title" style="margin-bottom:8px;">Build your first habits</div>
+    <div class="welcome-sub" style="margin-bottom:0;text-align:center;margin-left:auto;margin-right:auto;">Tap to add. You can always change these later.</div>
   </div>
   <div id="habits-suggestions-content" style="width:100%;"></div>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
@@ -636,17 +640,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   </div>
 </div>
 <div id="onboarding-rewards" style="display:none;">
-  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span></div>
   <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
-  <div class="welcome-sub" style="margin-bottom:0;text-align:left;max-width:100%;">Earn points by completing your habits and spend them on things that bring you joy. You control what's in your store and what each reward costs.</div>
-  <div class="reward-flow-row">
-    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">✅</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Complete habits</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">Earn points</span></div>
-    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">⭐</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Collect points</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">They add up daily</span></div>
-    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">🛍️</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Buy rewards</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">Treat yourself</span></div>
-  </div>
-  <div style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Popular rewards</div>
+  <p style="font-size:15px;color:var(--ink-soft);text-align:center;padding:0 20px;margin-bottom:20px;width:100%;">Complete habits to earn points. Spend them on things you enjoy.</p>
+  <div style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:0 0 10px;width:100%;">Popular rewards</div>
   <div id="reward-suggestions-chips" style="display:flex;flex-wrap:wrap;width:100%;"></div>
-
   <div style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Add your own</div>
   <div style="display:flex;gap:8px;width:100%;margin-bottom:8px;">
     <input class="form-input" id="cr-emoji" placeholder="🎁" maxlength="2" style="width:60px;flex-shrink:0;text-align:center;padding:10px 6px;"/>
@@ -655,28 +653,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <button class="btn btn-secondary" style="flex:none;padding:10px 14px;font-size:15px;" onclick="addCustomReward()">Add +</button>
   </div>
   <div id="custom-rewards-list" style="width:100%;margin-bottom:8px;"></div>
-
-  <div style="font-size:14px;color:var(--ink-faint);text-align:center;padding:8px 0;width:100%;">💡 Each habit gives you 5 points by default. You can customize this later.</div>
-
+  <div style="font-size:13px;color:var(--ink-faint);text-align:center;padding:8px 20px;width:100%;">⚠️ Miss too many days and your store locks until you're back on track.</div>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmRewards()">Continue →</button>
     <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipRewardsSetup()">Skip for now →</button>
   </div>
 </div>
 <div id="onboarding-welcome" style="display:none;">
-  <div class="welcome-title">Welcome to Ritual</div>
-  <div class="welcome-sub">Your personal habit tracker that grows with you. Everything you see here is fully customizable.</div>
-  <button class="welcome-cta" onclick="startTour()">Show me around →</button>
+  <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot active"></span></div>
+  <div style="font-family:'Fraunces', serif;font-size:52px;font-weight:700;color:var(--ink);text-align:center;line-height:1;text-shadow:0 2px 12px rgba(208,184,172,0.4);">Ritual</div>
+  <div style="width:40px;height:2px;background:var(--almond);margin:16px auto;border-radius:2px;"></div>
+  <div class="welcome-title" style="font-size:28px;margin-bottom:10px;">You're all set</div>
+  <div class="welcome-sub" style="font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink-soft);text-align:center;margin-bottom:0;">Your habits, your rules. We'll show you around.</div>
+  <button class="welcome-cta" style="margin-top:32px;" onclick="startTour()">Show me around →</button>
   <button class="welcome-skip" onclick="skipTour()">Skip tour</button>
 </div>
 <div id="tour-overlay" style="display:none;"></div>
 <div id="tour-tooltip" style="display:none;">
-  <div class="tour-step-ind" id="tour-step-ind"></div>
-  <div class="tour-tip-text" id="tour-tip-text"></div>
-  <div class="tour-actions">
-    <button class="tour-next-btn" id="tour-next-btn" onclick="tourNext()">Next →</button>
-    <button class="tour-skip-link" onclick="endTour()">Skip</button>
+  <div class="tour-card">
+    <div class="tour-tip-title" id="tour-tip-title"></div>
+    <div class="tour-tip-text" id="tour-tip-text"></div>
+    <div class="tour-actions">
+      <button class="tour-next-btn" id="tour-next-btn" onclick="tourNext()">Next →</button>
+    </div>
   </div>
+  <div class="tour-dots-row" id="tour-dots-row"></div>
+  <button class="tour-skip-link" onclick="endTour()">Skip tour</button>
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOverlay(event)">
@@ -762,7 +764,7 @@ let _selectedGoals=new Set(),_selectedSuggestions={},_customHabits=[];
 function showGoalPicker(){
   _selectedGoals=new Set();_selectedSuggestions={};_customHabits=[];
   const grid=document.getElementById('goal-grid');
-  if(grid)grid.innerHTML=GOAL_OPTIONS.map(g=>`<div class="goal-card" id="gcard-${g.id}" onclick="toggleGoal('${g.id}')"><div class="goal-card-check">✓</div><div class="goal-card-emoji">${g.emoji}</div><div class="goal-card-name">${g.name}</div><div class="goal-card-desc">${g.desc}</div></div>`).join('');
+  if(grid)grid.innerHTML=GOAL_OPTIONS.map(g=>`<div class="goal-card" id="gcard-${g.id}" onclick="toggleGoal('${g.id}')"><div class="goal-card-check">✓</div><div class="goal-card-emoji">${g.emoji}</div><div class="goal-card-name">${g.name}</div></div>`).join('');
   const err=document.getElementById('goal-error');if(err)err.textContent='';
   document.getElementById('onboarding-goals').style.display='flex';
 }
@@ -795,13 +797,6 @@ function renderHabitContent(){
     suggs.forEach((s,idx)=>{html+=`<span class="habit-chip${sels.has(idx)?' selected':''}" id="chip-${g.id}-${idx}" onclick="toggleSuggestion('${g.id}',${idx})">${s.e} ${s.n}</span>`;});
     html+=`</div></div>`;
   }
-  if(_customHabits.length>0){
-    html+=`<div class="habit-group"><div class="habit-group-label">✨ My habits</div><div class="habit-chips">`;
-    _customHabits.forEach((ch,idx)=>{html+=`<span class="custom-habit-chip">${ch.emoji} ${ch.name}<button class="custom-habit-remove" onclick="removeCustomHabit(${idx})">×</button></span>`;});
-    html+=`</div></div>`;
-  }
-  const secOpts=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map((g,i)=>`<option value="${g.id}"${i===0?' selected':''}>${g.emoji} ${g.secLabel}</option>`).join('');
-  html+=`<div id="custom-habit-form-area"><button class="btn btn-secondary" style="font-size:15px;padding:8px 16px;margin-bottom:16px;" onclick="showCustomHabitForm()">+ Add your own</button></div>`;
   container.innerHTML=html;
   updateHabitsContinueBtn();
 }
@@ -3127,11 +3122,11 @@ window.doSignOut=async()=>{
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
 const TOUR_STEPS=[
-  {id:'tour-pencil-btn',  tip:'Tap here to manage your categories, reorder habits, and do bulk edits.',                                                                         lift:'.header',  setPos:false},
-  {id:'tour-fab-btn',     tip:'Tap here to add a new habit. You can set its name, category, emoji, and how many points it gives you.',                                           lift:null,       setPos:false},
-  {id:'tour-tab-rewards', tip:'Earn points by completing habits and spend them here on things you enjoy — you set the rewards and their prices.',                                 lift:'.tab-bar', setPos:false},
-  {id:'tour-tab-progress',  tip:'Track your streaks, stats, and weekly progress here.',                                                                                             lift:'.tab-bar', setPos:false},
-  {id:'tour-streak-chip', tip:'Build a streak by completing all your habits every day. The longer your streak, the more bonus points you earn.',                                  lift:null,       setPos:true},
+  {id:'tour-pencil-btn',      title:'Manage your habits',   tip:'Add, reorder, or edit your habits and categories here.',                        lift:'.header',  setPos:false},
+  {id:'tour-tab-progress',    title:'Track your progress',  tip:'See your streaks, stats, and weekly completion history.',                        lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-challenges',  title:'Set challenges',       tip:'Create time-bound goals and compete or bond with friends.',                      lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-rewards',     title:'Your reward store',    tip:'Earn points by completing habits. Spend them on things you love.',               lift:'.tab-bar', setPos:false},
+  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                         lift:null,       setPos:true},
 ];
 
 function showWelcome(){document.getElementById('onboarding-welcome').style.display='flex';}
@@ -3164,18 +3159,20 @@ function showTourStep(step){
   el.scrollIntoView({block:'nearest',behavior:'smooth'});
 
   // Update tooltip
-  document.getElementById('tour-step-ind').textContent=`${step+1} of ${TOUR_STEPS.length}`;
+  document.getElementById('tour-tip-title').textContent=cfg.title;
   document.getElementById('tour-tip-text').textContent=cfg.tip;
-  document.getElementById('tour-next-btn').textContent=step===TOUR_STEPS.length-1?"Let's go! 🎯":'Next →';
+  document.getElementById('tour-next-btn').textContent=step===TOUR_STEPS.length-1?"Let's go!":'Next →';
+  const dotsRow=document.getElementById('tour-dots-row');
+  if(dotsRow)dotsRow.innerHTML=TOUR_STEPS.map((_,i)=>`<span class="tour-dot${i===step?' active':''}"></span>`).join('');
   const tooltip=document.getElementById('tour-tooltip');
   tooltip.style.display='block';
 
   // Position tooltip near element
   requestAnimationFrame(()=>{
     const rect=el.getBoundingClientRect();
-    const tw=Math.min(260,window.innerWidth-32);
+    const tw=Math.min(280,window.innerWidth-40);
     tooltip.style.width=tw+'px';
-    const th=tooltip.offsetHeight||120;
+    const th=tooltip.offsetHeight||140;
     const vw=window.innerWidth,vh=window.innerHeight,gap=16;
     // Force direction for elements in fixed bars
     let top;
