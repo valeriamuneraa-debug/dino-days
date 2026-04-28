@@ -126,21 +126,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .btn-danger{background:var(--danger);color:white;}
 
 /* PROGRESS PAGE */
-.progress-page{padding:20px;}
-.progress-hero-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:20px;padding:24px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;text-align:center;}
-.progress-streak-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:6px;}
-.progress-streak-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
-.progress-ring-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;}
-.progress-ring-bg{stroke:var(--border);}
-.progress-ring-fill{stroke:var(--almond);stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 0.6s ease;}
-.progress-ring-pct{position:absolute;font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);}
+.progress-page{padding:0;}
+.progress-ring-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.progress-ring{transform:rotate(-90deg);}
+.progress-ring-track{fill:none;stroke:var(--border);stroke-width:8;}
+.progress-ring-fill{fill:none;stroke:var(--almond);stroke-width:8;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset 0.6s ease;}
+.progress-ring-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.progress-ring-pct{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-ring-label{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+.progress-hero-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:24px;padding:28px;margin:16px;text-align:center;}
+.progress-streak-big{font-family:'Playfair Display',serif;font-size:42px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-streak-label{font-size:14px;color:var(--ink-soft);margin-top:4px;}
+.progress-streak-msg{font-size:13px;color:var(--ink-soft);margin-top:8px;font-style:italic;}
+.progress-section-row{display:flex;align-items:center;padding:10px 20px;background:var(--white);border-bottom:1px solid var(--border);}
+.progress-section-row:first-child{border-top:1px solid var(--border);}
+.progress-section-name{font-size:13px;color:var(--ink);min-width:80px;}
+.progress-section-bar-wrap{flex:1;background:var(--linen);border-radius:100px;height:4px;margin:0 12px;overflow:hidden;}
+.progress-section-bar-fill{height:4px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
+.progress-section-frac{font-size:12px;color:var(--ink-faint);min-width:28px;text-align:right;}
+.habit-streak-row{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--white);border-bottom:1px solid var(--border);}
+.habit-streak-rank{font-size:13px;color:var(--ink-faint);width:20px;flex-shrink:0;}
+.habit-streak-name{font-size:14px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.habit-streak-count{font-size:13px;font-weight:500;color:var(--almond);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:var(--ink);}
+.stat-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
 /* REWARDS */
 .rewards-store-wrap{position:relative;border-radius:20px;overflow:hidden;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
-.stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
-.stat-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
-.week-nav{display:flex;align-items:center;justify-content:space-between;padding:0 8px;margin-bottom:8px;}
 .week-nav-arrow{font-size:18px;color:var(--ink-faint);cursor:pointer;padding:4px 12px;user-select:none;transition:color .15s;}
 .week-nav-arrow:hover{color:var(--ink);}
 .week-nav-arrow.disabled{opacity:.2;cursor:default;pointer-events:none;}
@@ -379,29 +392,51 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
     <div class="page" id="page-progress">
       <div class="progress-page">
+        <!-- Hero card -->
         <div class="progress-hero-card">
-          <div id="progress-streak-display" class="progress-streak-num">🔥 0 day streak</div>
-          <div id="progress-streak-sub" class="progress-streak-sub">Start your streak today</div>
           <div class="progress-ring-wrap">
             <svg class="progress-ring" width="120" height="120" viewBox="0 0 120 120">
-              <circle class="progress-ring-bg" cx="60" cy="60" r="50" fill="none" stroke-width="10"/>
-              <circle class="progress-ring-fill" id="progress-ring-fill" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+              <circle class="progress-ring-track" cx="60" cy="60" r="54"/>
+              <circle class="progress-ring-fill" id="progress-ring-fill" cx="60" cy="60" r="54"/>
             </svg>
-            <div class="progress-ring-pct" id="progress-ring-pct">0%</div>
+            <div class="progress-ring-center">
+              <div class="progress-ring-pct" id="progress-ring-pct">0%</div>
+              <div class="progress-ring-label">today</div>
+            </div>
+          </div>
+          <div class="progress-streak-big" id="progress-streak-big">0</div>
+          <div class="progress-streak-label">🔥 day streak</div>
+          <div class="progress-streak-msg" id="progress-streak-msg">Start your streak today ✨</div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-lbl">Day Streak</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-points">0</div><div class="stat-lbl">Total Pts</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-best">0</div><div class="stat-lbl">Best Streak</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-spent">0</div><div class="stat-lbl">Pts Spent</div></div>
+        </div>
+
+        <!-- Today's section progress -->
+        <div class="section-label" style="padding:16px 20px 8px;">Today's progress</div>
+        <div id="progress-sections-list"></div>
+
+        <!-- Weekly calendar -->
+        <div class="section-label" style="padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between;">
+          <span>This week</span>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span class="week-nav-arrow" id="week-nav-prev" onclick="weekOffset=Math.max(weekOffset-1,-8);renderProgress()">‹</span>
+            <span id="week-label" style="font-size:12px;color:var(--ink-faint);font-weight:400;"></span>
+            <span class="week-nav-arrow" id="week-nav-next" onclick="weekOffset=Math.min(weekOffset+1,0);renderProgress()">›</span>
           </div>
         </div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-lbl">Day streak</div></div>
-          <div class="stat-card"><div class="stat-num" id="stat-points">0</div><div class="stat-lbl">Total pts</div></div>
-          <div class="stat-card"><div class="stat-num" id="stat-best">0</div><div class="stat-lbl">Best streak</div></div>
-          <div class="stat-card"><div class="stat-num" id="stat-spent">0</div><div class="stat-lbl">Pts spent</div></div>
-        </div>
-        <div class="week-nav">
-          <span class="week-nav-arrow disabled" id="week-nav-prev" onclick="changeWeek(-1)">‹</span>
-          <span id="week-label" style="font-size:12px;color:var(--ink-faint);font-weight:400;"></span>
-          <span class="week-nav-arrow disabled" id="week-nav-next" onclick="changeWeek(1)">›</span>
-        </div>
         <div class="week-dots" id="week-dots"></div>
+
+        <!-- Habit streaks -->
+        <div class="section-label" style="padding:16px 20px 8px;">Habit streaks</div>
+        <div id="habit-streaks-list"></div>
+
+        <div style="height:8px;"></div>
       </div>
     </div>
 
@@ -909,53 +944,137 @@ function renderTasks(){
   document.getElementById('done-count').textContent=`${td}/${ta}`;
   document.getElementById('progress-bar').style.width=(ta?(td/ta*100):0)+'%';
 }
-function renderStats(){
-  ['streak-count','stat-streak'].forEach(id=>document.getElementById(id).textContent=state.streak);
-  ['points-count','stat-points','reward-points'].forEach(id=>document.getElementById(id).textContent=state.points);
-  document.getElementById('stat-best').textContent=state.bestStreak;
-  document.getElementById('stat-spent').textContent=state.totalSpent;
-  // Update progress hero card
+function renderProgress(){
+  if(!state) return;
   const streak=state.streak||0;
-  const sd=document.getElementById('progress-streak-display');
-  if(sd)sd.textContent=`🔥 ${streak} day streak`;
-  const ss=document.getElementById('progress-streak-sub');
-  if(ss){
-    if(streak===0)ss.textContent='Start your streak today';
-    else if(streak<7)ss.textContent='You\'re building momentum!';
-    else if(streak<14)ss.textContent='One week strong! 💪';
-    else if(streak<30)ss.textContent='Two weeks of consistency!';
-    else ss.textContent='You\'re unstoppable! 🌟';
-  }
-  // Update progress ring
   const todayDow=new Date().getDay();
-  const todayTasks=state.tasks.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow));
-  const doneTasks=todayTasks.filter(t=>(state.completedDays[TODAY]||{})[t.id]);
-  const pct=todayTasks.length>0?Math.round((doneTasks.length/todayTasks.length)*100):0;
-  const ringFill=document.getElementById('progress-ring-fill');
-  if(ringFill)ringFill.style.strokeDashoffset=314-(314*pct/100);
-  const ringPct=document.getElementById('progress-ring-pct');
-  if(ringPct)ringPct.textContent=pct+'%';
-  const wd=document.getElementById('week-dots');if(!wd)return;wd.innerHTML='';
+  const todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
+  const done=state.completedDays[TODAY]||{};
+  const doneTasks=todayTasks.filter(t=>done[t.id]);
+  const pct=todayTasks.length>0?Math.round(doneTasks.length/todayTasks.length*100):0;
+
+  // Progress ring
+  const circumference=339;
+  const offset=circumference*(1-pct/100);
+  const rf=document.getElementById('progress-ring-fill');
+  if(rf)rf.style.strokeDashoffset=offset;
+  const rp=document.getElementById('progress-ring-pct');
+  if(rp)rp.textContent=pct+'%';
+
+  // Streak hero
+  const sb=document.getElementById('progress-streak-big');
+  if(sb)sb.textContent=streak;
+  const sm=document.getElementById('progress-streak-msg');
+  if(sm){
+    if(streak===0)sm.textContent='Start your streak today ✨';
+    else if(streak<=3)sm.textContent="You're getting started! Keep going 💪";
+    else if(streak<=6)sm.textContent="Building momentum! Don't stop now 🔥";
+    else if(streak<=13)sm.textContent="One week strong! You're on a roll 🌟";
+    else if(streak<=29)sm.textContent="Two weeks of consistency! Incredible 🚀";
+    else if(streak<=59)sm.textContent="A whole month! You're unstoppable 🏆";
+    else if(streak<=179)sm.textContent="Two months strong! This is a lifestyle now 💎";
+    else sm.textContent="Half a year of consistency. Legendary 👑";
+  }
+
+  // Stats grid
+  const el=id=>document.getElementById(id);
+  ['streak-count','stat-streak'].forEach(id=>{const e=el(id);if(e)e.textContent=streak;});
+  ['points-count','stat-points','reward-points'].forEach(id=>{const e=el(id);if(e)e.textContent=state.points;});
+  if(el('stat-best'))el('stat-best').textContent=state.bestStreak;
+  if(el('stat-spent'))el('stat-spent').textContent=state.totalSpent;
+
+  // Section progress bars
+  const sl=document.getElementById('progress-sections-list');
+  if(sl){
+    if(!state.sections||state.sections.length===0){
+      sl.innerHTML='<p style="padding:12px 20px;font-size:13px;color:var(--ink-faint);">No sections yet — add some habits to see progress here.</p>';
+    }else{
+      sl.innerHTML=state.sections.map(sec=>{
+        const secTasks=todayTasks.filter(t=>t.section===sec.id);
+        const secDone=secTasks.filter(t=>done[t.id]).length;
+        const total=secTasks.length;
+        const w=total>0?Math.round(secDone/total*100):0;
+        return `<div class="progress-section-row">
+          <span class="progress-section-name">${sec.emoji||''} ${sec.label}</span>
+          <div class="progress-section-bar-wrap"><div class="progress-section-bar-fill" style="width:${w}%"></div></div>
+          <span class="progress-section-frac">${secDone}/${total}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Weekly calendar
   const WMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dn=['S','M','T','W','T','F','S'],now=new Date(),dow=now.getDay();
-  const weekStart=new Date(now);weekStart.setDate(now.getDate()-dow+weekOffset*7);
-  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
-  const lbl=document.getElementById('week-label');
-  if(lbl)lbl.textContent=`${WMONTHS[weekStart.getMonth()]} ${weekStart.getDate()} – ${WMONTHS[weekEnd.getMonth()]} ${weekEnd.getDate()}`;
+  const dn=['S','M','T','W','T','F','S'];
+  const now=new Date();
+  const dow=now.getDay();
+  const weekStart=new Date(now);
+  weekStart.setDate(now.getDate()-dow+weekOffset*7);
+  const weekEnd=new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate()+6);
+  const wl=document.getElementById('week-label');
+  if(wl)wl.textContent=`${WMONTHS[weekStart.getMonth()]} ${weekStart.getDate()} – ${WMONTHS[weekEnd.getMonth()]} ${weekEnd.getDate()}`;
   const pa=document.getElementById('week-nav-prev'),na=document.getElementById('week-nav-next');
   if(pa)pa.classList.toggle('disabled',weekOffset<=-8);
   if(na)na.classList.toggle('disabled',weekOffset>=0);
-  for(let i=0;i<7;i++){
-    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
-    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const isT=weekOffset===0&&k===TODAY,dotDow=d.getDay();
-    const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dotDow));
-    const dd=state.completedDays[k]||{},tot=scheduled.length,dn2=scheduled.filter(t=>dd[t.id]).length;
-    let cls='week-dot-circle';if(isT)cls+=' today';else if(tot>0&&dn2===tot)cls+=' full';else if(dn2>0)cls+=' partial';
-    const dot=document.createElement('div');dot.className='week-dot';
-    dot.innerHTML=`<div class="${cls}">${dn2===tot&&tot>0?'✓':dn[i]}</div><div class="week-dot-day">${d.getDate()}</div>`;
-    dot.onclick=()=>openDayModal(k);
-    wd.appendChild(dot);
+  const wd=document.getElementById('week-dots');
+  if(wd){
+    wd.innerHTML='';
+    for(let i=0;i<7;i++){
+      const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
+      const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const isT=weekOffset===0&&k===TODAY;
+      const dotDow=d.getDay();
+      const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dotDow));
+      const dd=state.completedDays[k]||{};
+      const tot=scheduled.length;
+      const dn2=scheduled.filter(t=>dd[t.id]).length;
+      let cls='week-dot-circle';
+      if(isT)cls+=' today';
+      else if(tot>0&&dn2===tot)cls+=' full';
+      else if(dn2>0)cls+=' partial';
+      const dot=document.createElement('div');
+      dot.className='week-dot';
+      dot.innerHTML=`<div class="${cls}">${dn2===tot&&tot>0?'✓':dn[i]}</div><div class="week-dot-day">${d.getDate()}</div>`;
+      dot.onclick=()=>openDayModal(k);
+      wd.appendChild(dot);
+    }
+  }
+
+  // Habit streaks
+  function calcHabitStreak(task){
+    let count=0;
+    const scheduledDays=task.days??ALL_DAYS;
+    const now2=new Date();
+    let checkDate=new Date(now2);
+    while(true){
+      const dayOfWeek=checkDate.getDay();
+      if(scheduledDays.includes(dayOfWeek)){
+        const k=`${checkDate.getFullYear()}-${String(checkDate.getMonth()+1).padStart(2,'0')}-${String(checkDate.getDate()).padStart(2,'0')}`;
+        const dayDone=state.completedDays[k]||{};
+        if(dayDone[task.id]){count++;}
+        else{
+          const todayKey=`${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+          if(k===todayKey){checkDate.setDate(checkDate.getDate()-1);continue;}
+          break;
+        }
+      }
+      checkDate.setDate(checkDate.getDate()-1);
+      if(now2-checkDate>365*24*60*60*1000)break;
+    }
+    return count;
+  }
+
+  const hsl=document.getElementById('habit-streaks-list');
+  if(hsl&&state.tasks.length>0){
+    const ranked=[...state.tasks].map(t=>({t,s:calcHabitStreak(t)})).sort((a,b)=>b.s-a.s).slice(0,5);
+    hsl.innerHTML=ranked.map(({t,s},i)=>`<div class="habit-streak-row">
+      <span class="habit-streak-rank">${i+1}</span>
+      <span class="habit-streak-name">${t.emoji?t.emoji+' ':''}${t.name}</span>
+      <span class="habit-streak-count">${s>0?s+' 🔥':'—'}</span>
+    </div>`).join('');
+  }else if(hsl){
+    hsl.innerHTML='<p style="padding:12px 20px;font-size:13px;color:var(--ink-faint);">No habits yet — add some to track streaks here.</p>';
   }
 }
 function renderHistorySection(){
@@ -993,7 +1112,7 @@ function renderSectionTabs(){
     const btn=document.createElement('button');btn.className='section-tab'+(cf===s.id?' active':'');btn.onclick=function(){filterSection(s.id,this);};btn.textContent=s.emoji+' '+s.label;c.appendChild(btn);
   }
 }
-function updateAll(){renderTasks();renderStats();renderRewards();renderSectionTabs();}
+function updateAll(){renderProgress();renderTasks();renderRewards();renderSectionTabs();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1110,7 +1229,7 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){if(pts>0)awardPts(pts,'Habit completed');else{save();updateAll();showToast('Habit completed ✅');}}else{if(pts>0){state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();showToast(`-${pts} pts — Habit uncompleted`);}else{showToast('Habit uncompleted');}save();updateAll();}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderStats();}};
+window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderProgress();}};
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
 window.changeWeek=(dir)=>{
@@ -1119,7 +1238,7 @@ window.changeWeek=(dir)=>{
   const wd=document.getElementById('week-dots');
   if(wd)wd.style.opacity='0';
   weekOffset=next;
-  setTimeout(()=>{renderStats();if(wd)wd.style.opacity='1';},160);
+  setTimeout(()=>{renderProgress();if(wd)wd.style.opacity='1';},160);
 };
 
 function openModal(){
