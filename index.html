@@ -642,7 +642,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,reauthenticateWithCredential,EmailAuthProvider,updatePassword,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot,collection,query,where,getDocs,writeBatch,updateDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,deleteDoc,onSnapshot,collection,query,where,getDocs,writeBatch,updateDoc,arrayUnion}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // IMPORTANT: Firestore security rules needed for social features:
 // collection 'profiles': allow read if authenticated, allow write if request.auth.uid == resource.id
@@ -1907,28 +1907,31 @@ async function sendFriendRequest(code){
 
 async function acceptFriendRequest(reqDocId,fromUid){
   try{
-    // Update request status
+    console.log('Updating acceptor friendIds...');
+    await updateDoc(doc(db,'users',currentUser.uid),{friendIds:arrayUnion(fromUid)});
+    console.log('Updating requester friendIds...');
+    await updateDoc(doc(db,'users',fromUid),{friendIds:arrayUnion(currentUser.uid)});
+    console.log('Updating friendRequest status...');
     await updateDoc(doc(db,'friendRequests',reqDocId),{status:'accepted',respondedAt:new Date().toISOString()});
-    // Add to both users' friendIds
+    console.log('All updates complete');
+    // Update local state immediately without waiting for snapshot
     if(!state.friendIds)state.friendIds=[];
     if(!state.friendIds.includes(fromUid))state.friendIds.push(fromUid);
-    save();
-    // Note: Firestore rules must allow authenticated users to update another user's friendIds array
-    // Update the sender's users document to add current user to their friendIds
-    const senderRef=doc(db,'users',fromUid);
-    const senderSnap=await getDoc(senderRef);
-    if(senderSnap.exists()){
-      const senderData=senderSnap.data();
-      const senderFriends=senderData.friendIds||[];
-      if(!senderFriends.includes(currentUser.uid))senderFriends.push(currentUser.uid);
-      await updateDoc(senderRef,{friendIds:senderFriends});
-    }
-    // Remove from pending display
+    state.pendingFriendRequests=(state.pendingFriendRequests||[]).filter(r=>r.fromUid!==fromUid);
+    // Remove from in-memory pending list
     _pendingIncomingRequests=_pendingIncomingRequests.filter(r=>r.docId!==reqDocId);
     updateFriendNotificationBadge();
+    save();
     showToast('Friend added! 🎉');
-    showAccountModal(); // refresh modal
-  }catch(e){console.error(e);showToast('Error accepting request. Try again.');}
+    showAccountModal();
+  }catch(e){
+    console.error('Accept friend request error:',e);
+    if(e.code==='permission-denied'){
+      showToast('Permission error — check Firestore rules');
+    }else{
+      showToast('Error: '+(e.message||'Please try again'));
+    }
+  }
 }
 
 async function declineFriendRequest(reqDocId){
