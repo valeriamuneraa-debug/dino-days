@@ -162,7 +162,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .week-dot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:opacity .15s;}
 .week-dot:hover{opacity:.75;}
 .week-dot-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-faint);}
-.week-dot-circle.full{background:var(--success);border-color:var(--success);color:white;}
+.week-dot-circle.full{background:var(--success) !important;border-color:var(--success);color:white;}
 .week-dot-circle.partial{background:var(--powder);border-color:var(--almond);color:var(--ink-soft);}
 .week-dot-circle.today{border-color:var(--ink);color:var(--ink);font-weight:600;}
 .week-dot-day{font-size:12px;color:var(--ink-faint);}
@@ -550,9 +550,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="section-label" style="padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between;">
           <span>This week</span>
           <div style="display:flex;align-items:center;gap:4px;">
-            <span class="week-nav-arrow" id="week-nav-prev" onclick="weekOffset=Math.max(weekOffset-1,-8);renderProgress()">‹</span>
+            <span class="week-nav-arrow" id="week-nav-prev" onclick="changeWeek(-1)">‹</span>
             <span id="week-label" style="font-size:14px;color:var(--ink-faint);font-weight:400;"></span>
-            <span class="week-nav-arrow" id="week-nav-next" onclick="weekOffset=Math.min(weekOffset+1,0);renderProgress()">›</span>
+            <span class="week-nav-arrow" id="week-nav-next" onclick="changeWeek(1)">›</span>
           </div>
         </div>
         <div class="week-dots" id="week-dots"></div>
