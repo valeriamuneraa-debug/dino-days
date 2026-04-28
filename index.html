@@ -378,6 +378,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .friend-code-small{font-size:11px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
 .code-input-big{text-transform:uppercase;letter-spacing:4px;font-size:24px;text-align:center;font-weight:600;}
 #onboarding-displayname{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
+
+/* Friends view */
+.challenges-seg-ctrl{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin:16px 16px 0;}
+.seg-pill{flex:1;padding:8px;border-radius:9px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-align:center;background:transparent;color:var(--ink-soft);}
+.seg-pill.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.friends-view{padding:12px 16px 8px;}
+.friend-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:16px 20px;margin-bottom:10px;}
+.friend-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.friend-card-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);}
+.friend-card-code{font-size:11px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
+.friend-stats-row{display:flex;margin-bottom:12px;}
+.friend-mini-stat{flex:1;text-align:center;}
+.friend-mini-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
+.friend-mini-lbl{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.friend-card-actions{display:flex;gap:8px;}
+.friend-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;border:none;cursor:pointer;flex:1;}
+.friend-remove-btn{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;border:none;cursor:pointer;}
+.friend-stat-skeleton{background:var(--linen);border-radius:4px;height:16px;width:40px;margin:0 auto 4px;animation:pulse 1.5s ease-in-out infinite;}
+.friend-add-dashed{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px;transition:all .2s;}
+.friend-req-banner{background:var(--powder);border-radius:14px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.friend-req-banner-link{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+.activity-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.activity-avatar{width:36px;height:36px;border-radius:50%;background:var(--almond);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:white;flex-shrink:0;}
+.activity-text{font-size:13px;color:var(--ink);flex:1;line-height:1.4;}
+.activity-time{font-size:11px;color:var(--ink-faint);white-space:nowrap;}
+.challenges-tab-notif{width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:2px;right:16px;display:none;}
 </style>
 </head>
 <body>
@@ -530,7 +556,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon">📋</div><div class="tab-label">Today</div></div>
       <div class="tab" data-tab="progress" id="tour-tab-progress" onclick="switchTab('progress',this)"><div class="tab-icon">📊</div><div class="tab-label">Progress</div></div>
       <div class="tab" data-tab="rewards" id="tour-tab-rewards" onclick="switchTab('rewards',this)"><div class="tab-icon">🌟</div><div class="tab-label">Rewards</div></div>
-      <div class="tab" data-tab="challenges" onclick="switchTab('challenges',this)"><div class="tab-icon">🎯</div><div class="tab-label">Challenges</div></div>
+      <div class="tab" data-tab="challenges" style="position:relative;" onclick="switchTab('challenges',this)"><div class="tab-icon">🎯</div><div class="tab-label">Challenges</div><div class="challenges-tab-notif" id="challenges-tab-notif"></div></div>
     </div>
     <button class="fab" id="tour-fab-btn" onclick="showAddTaskModal()">+</button>
   </div>
@@ -942,6 +968,9 @@ let friendRequestsUnsub=null;
 let _pendingIncomingRequests=[];
 let _friendProfilesCache=[];
 let _friendIdsCacheKey='';
+let friendListeners=[];
+let lastProfileUpdate=0;
+let _challengesSubview='challenges'; // 'challenges' or 'friends'
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1440,7 +1469,11 @@ function renderChallenges(){
   const completed=challenges.filter(c=>c.status==='completed');
   const past=challenges.filter(c=>c.status==='failed'||c.status==='paused');
 
-  let html=`<div class="challenges-header">
+  let html=`<div class="challenges-seg-ctrl">
+  <button class="seg-pill active" onclick="switchChallengesView('challenges',this)">Challenges</button>
+  <button class="seg-pill" onclick="switchChallengesView('friends',this)">Friends</button>
+</div>
+<div class="challenges-header">
     <div><div class="challenges-title">Challenges</div><div class="challenges-sub">Push yourself further with time-bound goals</div></div>
     <button class="new-challenge-btn" onclick="showNewChallengeModal()">+ New</button>
   </div>`;
@@ -1469,6 +1502,144 @@ function renderChallenges(){
   inner.innerHTML=html;
   renderTodayBanner();
 }
+
+async function renderFriends(){
+  const inner=document.getElementById('challenges-inner');
+  if(!inner)return;
+
+  // Show loading state immediately
+  inner.innerHTML=`
+    <div class="challenges-seg-ctrl">
+      <button class="seg-pill" onclick="switchChallengesView('challenges',this)">Challenges</button>
+      <button class="seg-pill active" onclick="switchChallengesView('friends',this)">Friends</button>
+    </div>
+    <div class="friends-view"><p style="text-align:center;color:var(--ink-faint);padding:24px 0;font-size:13px;">Loading friends…</p></div>`;
+
+  const profiles=await loadFriendProfiles();
+  const friendCount=profiles.length;
+  const pendingCount=_pendingIncomingRequests.length;
+
+  let html='';
+
+  // Pending request banner
+  if(pendingCount>0){
+    html+=`<div class="friend-req-banner"><span style="font-size:13px;color:var(--ink);">📬 ${pendingCount} friend request${pendingCount!==1?'s':''} pending</span><span class="friend-req-banner-link" onclick="showAccountModal()">Review →</span></div>`;
+  }
+
+  if(friendCount===0){
+    html+=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+      <div style="font-size:56px;margin-bottom:16px;">👥</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px;">No friends yet</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;">Add friends using their invite code to see their progress and challenge each other</div>
+      <button class="btn btn-primary" style="width:100%;max-width:280px;" onclick="showAddFriendModal()">Add a friend →</button>
+    </div>`;
+  }else{
+    // Friend cards with skeleton stats (will be populated by listeners)
+    html+=profiles.map(p=>{
+      const streak=p.streak??'—';
+      const points=p.points??'—';
+      const activeCh=p.activeChallenges??'—';
+      return `<div class="friend-card" id="friend-card-${p.uid}">
+        <div class="friend-card-top">
+          <div class="friend-card-name">${p.displayName||'Friend'}</div>
+          <div class="friend-card-code">${p.userCode||'------'}</div>
+        </div>
+        <div class="friend-stats-row" id="fstats-${p.uid}">
+          <div class="friend-mini-stat"><div class="friend-mini-num">${streak}</div><div class="friend-mini-lbl">🔥 Streak</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${points}</div><div class="friend-mini-lbl">⭐ Points</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${activeCh}</div><div class="friend-mini-lbl">🎯 Challenges</div></div>
+        </div>
+        <div class="friend-card-actions">
+          <button class="friend-challenge-btn" onclick="showToast('Challenge features coming soon! 🎯')">Challenge 🎯</button>
+          <button class="friend-remove-btn" onclick="removeFriend('${p.uid}')">Remove</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Activity feed
+    html+=`<div class="section-label" style="padding:16px 4px 8px;">Activity</div>`;
+    const activityItems=buildActivityFeed(profiles);
+    if(activityItems.length>0){
+      html+=activityItems.map(item=>`<div class="activity-item">
+        <div class="activity-avatar">${item.initial}</div>
+        <div class="activity-text">${item.text}</div>
+        <div class="activity-time">${item.time}</div>
+      </div>`).join('');
+    }else{
+      html+=`<p style="text-align:center;color:var(--ink-faint);font-size:13px;padding:16px 0;">No recent activity from friends</p>`;
+    }
+
+    html+=`<button class="friend-add-dashed" onclick="showAddFriendModal()">+ Add a friend</button>`;
+  }
+
+  // Set up real-time listeners for friend profiles
+  cleanupFriendListeners();
+  for(const p of profiles){
+    const unsubFriend=onSnapshot(doc(db,'profiles',p.uid),(snap)=>{
+      if(!snap.exists())return;
+      const data=snap.data();
+      // Update the stats row in-place if it exists
+      const statsEl=document.getElementById('fstats-'+p.uid);
+      if(statsEl){
+        statsEl.innerHTML=`
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.streak??'—'}</div><div class="friend-mini-lbl">🔥 Streak</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.points??'—'}</div><div class="friend-mini-lbl">⭐ Points</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.activeChallenges??'—'}</div><div class="friend-mini-lbl">🎯 Challenges</div></div>`;
+        // Update cache
+        const cached=_friendProfilesCache.find(x=>x.uid===p.uid);
+        if(cached){cached.streak=data.streak;cached.points=data.points;cached.activeChallenges=data.activeChallenges;cached.lastSeen=data.lastSeen;}
+      }
+    },{error:console.warn});
+    friendListeners.push(unsubFriend);
+  }
+
+  // Render final HTML into friends-view
+  const friendsView=inner.querySelector('.friends-view');
+  if(friendsView)friendsView.innerHTML=html;
+}
+
+function buildActivityFeed(profiles){
+  const items=[];
+  for(const p of profiles){
+    const name=p.displayName||'Friend';
+    const initial=(name[0]||'?').toUpperCase();
+    const time=formatTimeAgo(p.lastSeen);
+    if((p.streak||0)>7)items.push({initial,text:`🔥 ${name} is on a ${p.streak} day streak!`,time});
+    if((p.activeChallenges||0)>0)items.push({initial,text:`🎯 ${name} has ${p.activeChallenges} active challenge${p.activeChallenges!==1?'s':''}`,time});
+    if((p.points||0)>100)items.push({initial,text:`🌟 ${name} has earned ${p.points} points total`,time});
+  }
+  // Sort by recency if we have lastSeen
+  items.sort((a,b)=>a.time.localeCompare(b.time));
+  return items.slice(0,10);
+}
+
+function formatTimeAgo(isoString){
+  if(!isoString)return '';
+  const diff=Date.now()-new Date(isoString).getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<2)return 'just now';
+  if(mins<60)return `${mins}m ago`;
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return `${hrs}h ago`;
+  return `${Math.floor(hrs/24)}d ago`;
+}
+
+function cleanupFriendListeners(){
+  friendListeners.forEach(u=>u());
+  friendListeners=[];
+}
+
+window.switchChallengesView=(view,btn)=>{
+  _challengesSubview=view;
+  const ctrl=btn.closest('.challenges-seg-ctrl');
+  if(ctrl)ctrl.querySelectorAll('.seg-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  if(view==='challenges'){
+    renderChallenges();
+  }else{
+    renderFriends();
+  }
+};
 
 function renderChallengeCard(ch){
   const pct=Math.min(100,Math.round((ch.currentStreak||0)/ch.duration*100));
@@ -1511,8 +1682,27 @@ function updateAvatarDisplay(){
 function updateFriendNotificationBadge(){
   const dot=document.getElementById('friend-notif-dot');
   if(dot)dot.style.display=_pendingIncomingRequests.length>0?'block':'none';
+  const tabDot=document.getElementById('challenges-tab-notif');
+  if(tabDot)tabDot.style.display=_pendingIncomingRequests.length>0?'block':'none';
 }
-function updateAll(){evaluateChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();}
+async function updatePublicProfile(){
+  if(!currentUser||!state)return;
+  const now=Date.now();
+  if(now-lastProfileUpdate<60000)return; // throttle: max once per 60s
+  lastProfileUpdate=now;
+  try{
+    await setDoc(doc(db,'profiles',currentUser.uid),{
+      uid:currentUser.uid,
+      displayName:state.displayName||currentUser.email.split('@')[0],
+      userCode:state.userCode,
+      streak:state.streak||0,
+      points:state.points||0,
+      activeChallenges:(state.challenges||[]).filter(c=>c.status==='active').length,
+      lastSeen:new Date().toISOString()
+    },{merge:true});
+  }catch(e){console.warn('Could not update public profile:',e);}
+}
+function updateAll(){evaluateChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -1629,7 +1819,16 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){if(pts>0)awardPts(pts,'Habit completed');else{save();updateAll();showToast('Habit completed ✅');}}else{if(pts>0){state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();showToast(`-${pts} pts — Habit uncompleted`);}else{showToast('Habit uncompleted');}save();updateAll();}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
-window.switchTab=(name,btn)=>{currentTab=name;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');btn.classList.add('active');if(name==='progress'){weekOffset=0;renderProgress();}if(name==='challenges'){renderChallenges();}};
+window.switchTab=(name,btn)=>{
+  if(currentTab==='challenges'&&name!=='challenges'){cleanupFriendListeners();}
+  currentTab=name;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='progress'){weekOffset=0;renderProgress();}
+  if(name==='challenges'){_challengesSubview==='friends'?renderFriends():renderChallenges();}
+};
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
 window.changeWeek=(dir)=>{
@@ -2208,6 +2407,7 @@ window.confirmDeleteAccount=async()=>{
     if(unsub){unsub();unsub=null;}
     if(friendRequestsUnsub){friendRequestsUnsub();friendRequestsUnsub=null;}
     _pendingIncomingRequests=[];
+    cleanupFriendListeners();
 
     // Delete Firebase Auth user
     const userToDelete=currentUser;
@@ -2249,6 +2449,7 @@ window.doSignOut=async()=>{
   if(unsub){unsub();unsub=null;}
   if(friendRequestsUnsub){friendRequestsUnsub();friendRequestsUnsub=null;}
   _pendingIncomingRequests=[];
+  cleanupFriendListeners();
   localStorage.removeItem('streaks-theme');
   await signOut(auth);closeModal();
 };
