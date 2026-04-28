@@ -358,6 +358,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .heatmap-cell.missed{background:var(--linen);opacity:0.5;}
 .heatmap-cell.future{background:transparent;border:1px solid var(--border);}
 .heatmap-cell.today{background:var(--powder);border:2px solid var(--almond);}
+.swipe-container{position:relative;overflow:hidden;border-radius:20px;margin-bottom:12px;}
+.swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--danger);display:flex;align-items:center;justify-content:center;box-shadow:inset 4px 0 8px rgba(0,0,0,0.08);border-radius:0 20px 20px 0;}
+.swipe-delete-label{color:white;font-size:13px;font-weight:500;opacity:0;transform:translateX(10px);transition:opacity .2s,transform .2s;user-select:none;}
+.swipe-card{position:relative;will-change:transform;border-radius:20px;}
+.swipe-card .challenge-card{margin-bottom:0;border-radius:20px;}
+.swipe-card .race-card{margin-bottom:0;}
 .active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
 .active-challenges-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .onb-steps{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:28px;width:100%;}
@@ -1784,8 +1790,8 @@ function renderChallenges(){
   const activeRaceSC=(socialChallengesCache||[]).filter(c=>c.type==='race'&&c.status==='active'&&c.participants?.[myUid]);
   const activeBondSC=(socialChallengesCache||[]).filter(c=>c.type==='bond'&&c.status==='active'&&c.participants?.[myUid]);
   const activeCustomSC=(socialChallengesCache||[]).filter(c=>c.type==='custom'&&c.status==='active'&&c.participants?.[myUid]);
-  const completedSC=(socialChallengesCache||[]).filter(c=>c.status==='completed'&&c.participants?.[myUid]);
-  const failedSC=(socialChallengesCache||[]).filter(c=>c.status==='failed'&&c.participants?.[myUid]);
+  const completedSC=(socialChallengesCache||[]).filter(c=>c.status==='completed'&&c.participants?.[myUid]&&!c.participants[myUid]?.deletedAt);
+  const failedSC=(socialChallengesCache||[]).filter(c=>c.status==='failed'&&c.participants?.[myUid]&&!c.participants[myUid]?.deletedAt);
 
   let html=`<div style="display:flex;align-items:center;gap:10px;padding:12px 20px 16px;">
   <div class="challenges-seg-ctrl">
@@ -1828,18 +1834,125 @@ function renderChallenges(){
     }
     if(completed.length||completedSC.length){
       html+=`<div class="challenge-section-label">Completed</div>`;
-      html+=completed.map(ch=>renderChallengeCard(ch)).join('');
-      html+=completedSC.map(ch=>renderCompletedSocialCard(ch)).join('');
+      html+=completed.map(ch=>`<div class="swipe-container" data-swipe-id="${ch.id}" data-swipe-social="false"><div class="swipe-delete-bg"><span class="swipe-delete-label">Delete</span></div><div class="swipe-card">${renderChallengeCard(ch)}</div></div>`).join('');
+      html+=completedSC.map(ch=>`<div class="swipe-container" data-swipe-id="${ch.id}" data-swipe-social="true"><div class="swipe-delete-bg"><span class="swipe-delete-label">Delete</span></div><div class="swipe-card">${renderCompletedSocialCard(ch)}</div></div>`).join('');
     }
     if(past.length||failedSC.length){
       html+=`<div class="challenge-section-label">Past</div>`;
-      html+=past.map(ch=>renderChallengeCard(ch)).join('');
-      html+=failedSC.map(ch=>renderCompletedSocialCard(ch)).join('');
+      html+=past.map(ch=>`<div class="swipe-container" data-swipe-id="${ch.id}" data-swipe-social="false"><div class="swipe-delete-bg"><span class="swipe-delete-label">Delete</span></div><div class="swipe-card">${renderChallengeCard(ch)}</div></div>`).join('');
+      html+=failedSC.map(ch=>`<div class="swipe-container" data-swipe-id="${ch.id}" data-swipe-social="true"><div class="swipe-delete-bg"><span class="swipe-delete-label">Delete</span></div><div class="swipe-card">${renderCompletedSocialCard(ch)}</div></div>`).join('');
     }
   }
   html+=`</div>`;
   inner.innerHTML=html;
   renderTodayBanner();
+  initAllSwipeDeletes();
+}
+
+let currentlySwipedCard=null;
+
+function initSwipeDelete(container,onDelete){
+  const card=container.querySelector('.swipe-card');
+  const label=container.querySelector('.swipe-delete-label');
+  const bg=container.querySelector('.swipe-delete-bg');
+  const THRESHOLD=80;
+  let startX=0,startY=0,currentX=0,isDragging=false,isHorizontal=null;
+
+  function getXY(e){return e.touches?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY};}
+
+  function onStart(e){
+    const{x,y}=getXY(e);
+    startX=x;startY=y;currentX=0;isDragging=true;isHorizontal=null;
+    card.style.transition='none';
+    if(currentlySwipedCard&&currentlySwipedCard!==container)snapBack(currentlySwipedCard);
+  }
+
+  function onMove(e){
+    if(!isDragging)return;
+    const{x,y}=getXY(e);
+    const dx=x-startX,dy=y-startY;
+    if(isHorizontal===null){
+      if(Math.abs(dx)>5||Math.abs(dy)>5)isHorizontal=Math.abs(dx)>Math.abs(dy);
+      return;
+    }
+    if(!isHorizontal){isDragging=false;return;}
+    e.preventDefault();
+    currentX=Math.min(0,dx);
+    card.style.transform=`translateX(${currentX}px)`;
+    card.style.boxShadow=currentX<0?'-4px 0 12px rgba(0,0,0,0.1)':'';
+    const pct=Math.min(1,Math.abs(currentX)/40);
+    label.style.opacity=pct;
+    label.style.transform=`translateX(${10-pct*10}px)`;
+  }
+
+  function onEnd(){
+    if(!isDragging||isHorizontal===null){isDragging=false;return;}
+    isDragging=false;
+    card.style.transition='transform .2s ease,box-shadow .2s';
+    if(Math.abs(currentX)>=THRESHOLD){
+      card.style.transform=`translateX(-${THRESHOLD}px)`;
+      currentlySwipedCard=container;
+    }else{
+      snapBack(container);
+    }
+  }
+
+  function snapBack(cont){
+    const c=cont.querySelector('.swipe-card');
+    const l=cont.querySelector('.swipe-delete-label');
+    c.style.transition='transform .2s ease,box-shadow .2s';
+    c.style.transform='translateX(0)';
+    c.style.boxShadow='';
+    if(l){l.style.opacity='0';l.style.transform='translateX(10px)';}
+    if(currentlySwipedCard===cont)currentlySwipedCard=null;
+  }
+
+  card.addEventListener('touchstart',onStart,{passive:true});
+  card.addEventListener('touchmove',onMove,{passive:false});
+  card.addEventListener('touchend',onEnd);
+  card.addEventListener('mousedown',e=>{onStart(e);
+    function mm(ev){onMove(ev);}
+    function mu(){onEnd();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);}
+    document.addEventListener('mousemove',mm);
+    document.addEventListener('mouseup',mu);
+  });
+
+  bg.addEventListener('click',()=>{snapBack(container);onDelete();});
+}
+
+function initAllSwipeDeletes(){
+  document.querySelectorAll('.swipe-container').forEach(container=>{
+    const id=container.dataset.swipeId;
+    const isSocial=container.dataset.swipeSocial==='true';
+    initSwipeDelete(container,()=>{
+      document.getElementById('confirm-title').textContent='Delete this challenge?';
+      document.getElementById('confirm-msg').textContent='This will be permanently removed from your history.';
+      const okBtn=document.getElementById('confirm-ok');
+      okBtn.textContent='Delete';
+      okBtn.className='btn btn-danger';
+      PC=async()=>{
+        container.style.transition='opacity .25s ease,max-height .35s ease .05s,margin-bottom .35s ease .05s,padding .35s ease .05s';
+        container.style.overflow='hidden';
+        const h=container.offsetHeight;
+        container.style.maxHeight=h+'px';
+        container.offsetHeight;
+        container.style.opacity='0';
+        container.style.maxHeight='0';
+        container.style.marginBottom='0';
+        setTimeout(()=>container.remove(),420);
+        if(isSocial){
+          const myUid=currentUser?.uid;
+          if(!myUid)return;
+          const pk=`participants.${myUid}`;
+          try{await updateDoc(doc(db,'socialChallenges',id),{[`${pk}.deletedAt`]:new Date().toISOString()});}catch(e){console.error(e);}
+        }else{
+          state.challenges=(state.challenges||[]).filter(c=>c.id!==id);
+          save();
+        }
+      };
+      document.getElementById('confirm-overlay').classList.add('open');
+    });
+  });
 }
 
 function renderIncomingChallengeCard(ch){
