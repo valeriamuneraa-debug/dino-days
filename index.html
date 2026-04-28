@@ -1807,12 +1807,11 @@ function renderChallenges(){
   const completedSC=(socialChallengesCache||[]).filter(c=>c.status==='completed'&&c.participants?.[myUid]&&!c.participants[myUid]?.deletedAt);
   const failedSC=(socialChallengesCache||[]).filter(c=>c.status==='failed'&&c.participants?.[myUid]&&!c.participants[myUid]?.deletedAt);
 
-  let html=`<div style="display:flex;align-items:center;gap:10px;padding:12px 20px 16px;">
+  let html=`<div style="padding:12px 20px 16px;">
   <div class="challenges-seg-ctrl">
     <button class="seg-pill active" onclick="switchChallengesView('challenges',this)">Challenges</button>
     <button class="seg-pill" onclick="switchChallengesView('friends',this)">Friends</button>
   </div>
-  <button class="new-challenge-btn" onclick="showNewChallengeModal()">+ New</button>
 </div>
 <div style="padding:0 20px;">`;
 
@@ -3217,6 +3216,33 @@ window.saveDayModal=function(){
 window.expandTask=(id,e)=>{e.stopPropagation();expandedTaskId=expandedTaskId===id?null:id;renderTasks();};
 window.toggleTask=(id,e)=>{e.stopPropagation();if(!state.completedDays[TODAY])state.completedDays[TODAY]={};const was=!!state.completedDays[TODAY][id];state.completedDays[TODAY][id]=!was;const pts=(state.tasks.find(t=>t.id===id)?.points)??5;if(!was){if(pts>0)awardPts(pts,'Habit completed');else{save();updateAll();showToast('Habit completed ✅');}}else{if(pts>0){state.points=Math.max(0,state.points-pts);state.history.unshift({reason:'Habit uncompleted',amount:pts,date:TODAY,pos:false});if(state.history.length>50)state.history.pop();showToast(`-${pts} pts — Habit uncompleted`);}else{showToast('Habit uncompleted');}save();updateAll();}checkStreak();};
 window.filterSection=(sec,btn)=>{cf=sec;document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTasks();};
+function updateFAB(tabName){
+  const fab=document.querySelector('.fab');
+  if(!fab)return;
+  switch(tabName){
+    case 'today':
+      fab.style.display='flex';
+      fab.onclick=()=>showAddTaskModal();
+      fab.title='Add habit';
+      break;
+    case 'progress':
+      fab.style.display='none';
+      break;
+    case 'rewards':
+      fab.style.display='flex';
+      fab.onclick=()=>showAddRewardModal();
+      fab.title='Add reward';
+      break;
+    case 'challenges':
+      fab.style.display='flex';
+      fab.onclick=()=>showNewChallengeModal();
+      fab.title='New challenge';
+      break;
+    default:
+      fab.style.display='flex';
+      fab.onclick=()=>showAddTaskModal();
+  }
+}
 window.switchTab=(name,btn)=>{
   if(currentTab==='challenges'&&name!=='challenges'){cleanupFriendListeners();}
   currentTab=name;
@@ -3226,6 +3252,7 @@ window.switchTab=(name,btn)=>{
   btn.classList.add('active');
   if(name==='progress'){weekOffset=0;renderProgress();}
   if(name==='challenges'){_challengesSubview==='friends'?renderFriends():renderChallenges();}
+  updateFAB(name);
 };
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
@@ -4061,7 +4088,7 @@ onAuthStateChanged(auth,async(user)=>{
       document.getElementById('loading-screen').style.display='none';
       document.getElementById('auth-screen').style.display='none';
       document.getElementById('app-screen').style.display='block';
-      currentTab='today';restoreActiveTab();
+      currentTab='today';restoreActiveTab();updateFAB('today');
       document.getElementById('header-date').textContent=formatDate(new Date());
       const[g,s]=getGreeting();
       document.getElementById('hero-greeting').textContent=g;
