@@ -940,6 +940,8 @@ const HABIT_SUGGESTIONS_DATA={
 let state=null,currentUser=null,unsub=null,saveTimer=null,historyVisible=5,isNewUser=false,undoPending=null,undoTimeout=null;
 let friendRequestsUnsub=null;
 let _pendingIncomingRequests=[];
+let _friendProfilesCache=[];
+let _friendIdsCacheKey='';
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 const TODAY=getToday();
 
@@ -1873,6 +1875,26 @@ document.getElementById('confirm-ok').addEventListener('click',()=>{if(PC){PC();
 
 // ─── PROFILE & FRIENDS ─────────────────────────────────────────
 
+async function loadFriendProfiles(){
+  const ids=state.friendIds||[];
+  const cacheKey=ids.slice().sort().join(',');
+  if(cacheKey===_friendIdsCacheKey&&_friendProfilesCache.length===ids.length)return _friendProfilesCache;
+  const profiles=[];
+  for(const uid of ids){
+    try{
+      const snap=await getDoc(doc(db,'profiles',uid));
+      if(snap.exists())profiles.push({uid,...snap.data()});
+      else profiles.push({uid,displayName:'Unknown user',userCode:'------'});
+    }catch(e){
+      console.warn('Could not load profile for',uid,e);
+      profiles.push({uid,displayName:'Unknown user',userCode:'------'});
+    }
+  }
+  _friendProfilesCache=profiles;
+  _friendIdsCacheKey=cacheKey;
+  return profiles;
+}
+
 async function sendFriendRequest(code){
   const cleanCode=code.trim().toUpperCase();
   if(cleanCode.length!==6){showToast('Code must be 6 characters');return;}
@@ -1917,6 +1939,7 @@ async function acceptFriendRequest(reqDocId,fromUid){
     // Update local state immediately without waiting for snapshot
     if(!state.friendIds)state.friendIds=[];
     if(!state.friendIds.includes(fromUid))state.friendIds.push(fromUid);
+    _friendIdsCacheKey=''; // bust cache so modal re-fetches profiles
     state.pendingFriendRequests=(state.pendingFriendRequests||[]).filter(r=>r.fromUid!==fromUid);
     // Remove from in-memory pending list
     _pendingIncomingRequests=_pendingIncomingRequests.filter(r=>r.docId!==reqDocId);
@@ -1946,6 +1969,7 @@ async function declineFriendRequest(reqDocId){
 async function removeFriend(uid){
   PC=async()=>{
     state.friendIds=(state.friendIds||[]).filter(id=>id!==uid);
+    _friendIdsCacheKey=''; // bust cache so modal re-fetches profiles
     save();
     // Also remove from their list
     try{
@@ -2009,7 +2033,7 @@ window.declineFriendRequest=declineFriendRequest;
 window.removeFriend=removeFriend;
 window.updateDisplayName=updateDisplayName;
 
-window.showAccountModal=()=>{
+window.showAccountModal=async()=>{
   const notifOn=state?.preferences?.notifications??false;
   const friendCount=(state.friendIds||[]).length;
   const incomingHTML=_pendingIncomingRequests.map(r=>`
@@ -2021,9 +2045,9 @@ window.showAccountModal=()=>{
       <button class="btn btn-secondary" style="flex:1;padding:8px;" onclick="declineFriendRequest('${r.docId}')">Decline ✗</button>
     </div>
   </div>`).join('');
-  // TODO: cache friend display names in state.friendCache in a future session
-  const friendsListHTML=(state.friendIds||[]).length>0
-    ? (state.friendIds).map(uid=>`<div class="friend-row"><span class="friend-name" style="font-family:monospace;font-size:12px;">${uid.slice(0,8)}…</span><button class="acc-icon-btn" onclick="removeFriend('${uid}')">🗑️</button></div>`).join('')
+  const friendProfiles=await loadFriendProfiles();
+  const friendsListHTML=friendProfiles.length>0
+    ? friendProfiles.map(p=>`<div class="friend-row"><div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--ink);">${p.displayName||'Unknown user'}</div><div style="font-size:11px;color:var(--ink-faint);letter-spacing:1px;font-family:monospace;">${p.userCode||'------'}</div></div><button class="acc-icon-btn" onclick="removeFriend('${p.uid}')">🗑️</button></div>`).join('')
     : '<p style="font-size:13px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
   const profileSection=`
   <div class="acc-subtitle">Profile</div>
