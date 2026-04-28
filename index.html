@@ -1982,6 +1982,23 @@ function showAddFriendModal(){
   </div>`;
   showModal('Add a friend',body);
 }
+async function copyUserCode(){
+  const code=state?.userCode;
+  if(!code){showToast('No code yet — please wait');return;}
+  try{
+    await navigator.clipboard.writeText(code);
+    showToast('Code copied! 📋');
+  }catch(e){
+    // Fallback for browsers that block the Clipboard API
+    const el=document.createElement('textarea');
+    el.value=code;el.style.position='fixed';el.style.opacity='0';
+    document.body.appendChild(el);el.focus();el.select();
+    try{document.execCommand('copy');showToast('Code copied! 📋');}
+    catch(e2){showToast('Your code: '+code);}
+    document.body.removeChild(el);
+  }
+}
+window.copyUserCode=copyUserCode;
 window.showAddFriendModal=showAddFriendModal;
 window.sendFriendRequest=sendFriendRequest;
 window.acceptFriendRequest=acceptFriendRequest;
@@ -2021,8 +2038,8 @@ window.showAccountModal=()=>{
   <div style="margin-bottom:4px;"><div class="form-label" style="margin-bottom:6px;">Your invite code</div>
     <div class="acc-code-row">
       <span class="acc-code-pill">${state.userCode||'------'}</span>
-      <button class="acc-icon-btn" onclick="navigator.clipboard.writeText('${state.userCode||''}').then(()=>showToast('Code copied! 📋')).catch(()=>showToast('${state.userCode||''}'))">📋</button>
-      <button class="acc-icon-btn" onclick="if(navigator.share){navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>{})}else{navigator.clipboard.writeText('${state.userCode||''}').then(()=>showToast('Code copied!'))}">🔗</button>
+      <button class="acc-icon-btn" onclick="copyUserCode()">📋</button>
+      <button class="acc-icon-btn" onclick="navigator.share?navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>copyUserCode()):copyUserCode()">🔗</button>
     </div>
     <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
   </div>`;
@@ -2368,12 +2385,15 @@ onAuthStateChanged(auth,async(user)=>{
         state.tasks.forEach(t=>{if(t.points==null)t.points=5;});
         state.tasks.forEach(t=>{if(!t.days)t.days=[0,1,2,3,4,5,6];});
         if(!state.challenges)state.challenges=[];
-        if(!state.userCode){state.userCode=generateUserCode();}
-        if(!state.displayName){state.displayName=currentUser.email.split('@')[0];}
+        let _profileDirty=false;
+        if(!state.userCode){state.userCode=generateUserCode();_profileDirty=true;}
+        if(!state.displayName){state.displayName=currentUser.email.split('@')[0];_profileDirty=true;}
         if(!state.friendIds)state.friendIds=[];
         if(!state.sentFriendRequests)state.sentFriendRequests=[];
         applyTheme(state.theme||'blush');
-        // Ensure public profile exists (idempotent)
+        // Persist newly generated fields immediately so they survive the next snapshot
+        if(_profileDirty)save();
+        // Ensure public profile exists / is up-to-date
         setDoc(doc(db,'profiles',user.uid),{uid:user.uid,displayName:state.displayName,userCode:state.userCode,createdAt:state.createdAt||new Date().toISOString()},{merge:true}).catch(console.warn);
       }else{
         state={tasks:[],rewards:DEFAULT_REWARDS,sections:[],points:100,totalSpent:0,streak:0,bestStreak:0,lastFullDay:null,completedDays:{[TODAY]:{}},history:[],challenges:[],userCode:generateUserCode(),displayName:user.email.split('@')[0],friendIds:[],sentFriendRequests:[]};
@@ -2393,6 +2413,10 @@ onAuthStateChanged(auth,async(user)=>{
             if(!state.sections)state.sections=[];
             if(!state.tasks)state.tasks=[];
             if(!state.challenges)state.challenges=[];
+            if(!state.userCode){state.userCode=generateUserCode();save();}
+            if(!state.displayName){state.displayName=currentUser?.email?.split('@')[0]||'User';}
+            if(!state.friendIds)state.friendIds=[];
+            if(!state.sentFriendRequests)state.sentFriendRequests=[];
             updateAll();
           }
         }
