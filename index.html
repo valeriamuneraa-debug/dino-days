@@ -19,17 +19,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 #loading-screen{position:fixed;inset:0;background:var(--powder);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;}
 .load-spinner{width:40px;height:40px;border-radius:50%;background:var(--almond);animation:pulse 1s ease-in-out infinite;}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.85);opacity:0.6;}}
-#loading-screen p{margin-top:16px;font-size:14px;color:var(--ink-soft);font-family:'Playfair Display',serif;}
+#loading-screen p{margin-top:16px;font-size:16px;color:var(--ink-soft);font-family:'Playfair Display',serif;}
 
 /* AUTH */
 #auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:24px;}
 .auth-card{background:var(--white);border-radius:28px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(208,184,172,0.25);}
-.auth-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;text-align:center;margin-bottom:4px;}
-.auth-sub{font-size:13px;color:var(--ink-faint);text-align:center;margin-bottom:28px;}
+.auth-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:15px;color:var(--ink-faint);text-align:center;margin-bottom:28px;}
 .auth-tabs{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin-bottom:24px;}
-.auth-tab{flex:1;padding:8px;border-radius:9px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.auth-tab{flex:1;padding:8px;border-radius:9px;border:none;background:transparent;font-size:15px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .auth-tab.active{background:var(--white);color:var(--ink);}
-.auth-msg{border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
+.auth-msg{border-radius:10px;padding:10px 14px;font-size:15px;margin-bottom:14px;display:none;}
 .auth-msg.show{display:block;}
 .auth-msg.error{background:#FCEBEB;color:#A32D2D;}
 .auth-msg.success{background:#EAF3DE;color:#3B6D11;}
@@ -41,12 +41,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
 /* HEADER */
 .header{position:sticky;top:0;z-index:100;background:var(--page-bg);border-bottom:1px solid var(--border);padding:0 20px;height:var(--header-height);display:flex;align-items:center;justify-content:space-between;}
-.header-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;}
-.header-date{font-size:12px;color:var(--ink-faint);font-weight:300;}
+.header-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+.header-date{font-size:14px;color:var(--ink-faint);font-weight:300;}
 .header-right{display:flex;gap:8px;align-items:center;}
-.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--linen);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .2s;}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--linen);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;}
 .icon-btn:hover{background:var(--powder);}
-.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--almond);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;cursor:pointer;flex-shrink:0;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--almond);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:white;cursor:pointer;flex-shrink:0;}
 
 /* PAGES */
 .page{display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--tab-height) + 32px);-webkit-overflow-scrolling:touch;}
@@ -56,23 +56,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;height:var(--tab-height);background:var(--page-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:200;padding-bottom:env(safe-area-inset-bottom,0px);isolation:isolate;overflow:hidden;}
 .tab{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 16px;border-radius:12px;transition:background .2s;flex:1;}
 .tab:hover{background:var(--linen);}
-.tab .tab-icon{font-size:20px;line-height:1;}
-.tab .tab-label{font-size:10px;color:var(--ink-faint);font-weight:500;letter-spacing:.3px;}
+.tab .tab-icon{font-size:22px;line-height:1;}
+.tab .tab-label{font-size:12px;color:var(--ink-faint);font-weight:500;letter-spacing:.3px;}
 .tab.active .tab-label{color:var(--almond);}
 
 /* TODAY */
 .today-hero{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.today-hero h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:4px;}
-.today-hero .sub{font-size:13px;color:var(--ink-soft);font-weight:300;}
+.today-hero h2{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:4px;}
+.today-hero .sub{font-size:15px;color:var(--ink-soft);font-weight:300;}
 .streak-row{display:flex;gap:10px;padding:14px 20px;background:var(--white);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
-.streak-chip{display:flex;align-items:center;gap:6px;background:var(--linen);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--ink-soft);}
-.streak-chip .num{font-size:15px;font-weight:600;color:var(--ink);}
-.sync-status{font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:4px;margin-left:auto;}
+.streak-chip{display:flex;align-items:center;gap:6px;background:var(--linen);border-radius:20px;padding:6px 12px;font-size:14px;font-weight:500;color:var(--ink-soft);}
+.streak-chip .num{font-size:17px;font-weight:600;color:var(--ink);}
+.sync-status{font-size:13px;color:var(--ink-faint);display:flex;align-items:center;gap:4px;margin-left:auto;}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--success);}
 .sync-dot.syncing{background:var(--almond);animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.section-label{padding:14px 20px 8px;font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
-.section-badge{background:var(--linen);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--ink-soft);letter-spacing:0;}
+.section-label{padding:14px 20px 8px;font-size:13px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.section-badge{background:var(--linen);border-radius:10px;padding:2px 8px;font-size:12px;color:var(--ink-soft);letter-spacing:0;}
 .task-list{padding:0 12px;}
 .task-item{display:flex;align-items:center;gap:12px;padding:14px 12px;background:var(--white);border-radius:14px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;transition:all .2s;animation:slideIn .3s ease;}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -81,19 +81,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .task-item.done .task-name{text-decoration:line-through;color:var(--ink-faint);}
 .task-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--almond);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--white);}
 .task-check.checked{background:var(--success);border-color:var(--success);}
-.task-check.checked::after{content:'✓';color:white;font-size:12px;font-weight:700;}
+.task-check.checked::after{content:'✓';color:white;font-size:14px;font-weight:700;}
 .task-content{flex:1;min-width:0;}
-.task-name{font-size:14px;font-weight:400;color:var(--ink);line-height:1.4;}
-.task-meta{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+.task-name{font-size:16px;font-weight:400;color:var(--ink);line-height:1.4;}
+.task-meta{font-size:13px;color:var(--ink-faint);margin-top:2px;}
 .task-actions{display:flex;gap:4px;opacity:0;transition:opacity .2s;}
 .task-actions.visible{opacity:1;}
-.task-action-btn{width:28px;height:28px;border-radius:8px;border:none;background:var(--linen);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.task-action-btn{width:28px;height:28px;border-radius:8px;border:none;background:var(--linen);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
 .task-action-btn:hover{background:var(--powder);}
 .progress-bar-wrap{margin:0 20px 16px;background:var(--linen);border-radius:100px;height:6px;overflow:hidden;}
 .progress-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--almond),var(--powder));transition:width .5s ease;}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--tab-height) + 16px);right:20px;width:52px;height:52px;border-radius:50%;background:var(--ink);color:white;border:none;font-size:24px;cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(29,30,30,0.25);transition:transform .2s;}
+.fab{position:fixed;bottom:calc(var(--tab-height) + 16px);right:20px;width:52px;height:52px;border-radius:50%;background:var(--ink);color:white;border:none;font-size:26px;cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(29,30,30,0.25);transition:transform .2s;}
 .fab:hover{transform:scale(1.08);}
 @media(min-width:900px){.fab{right:calc(50% - 210px + 20px);}}
 
@@ -103,22 +103,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:420px;padding:24px 20px 36px;animation:slideUp .3s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:20px;}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;cursor:grab;transition:background .15s;}
 .modal-handle.dragging{background:var(--almond);cursor:grabbing;}
 .form-group{margin-bottom:14px;}
-.form-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:6px;display:block;}
-.form-input,.form-select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink);outline:none;transition:border-color .2s;}
+.form-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:6px;display:block;}
+.form-input,.form-select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink);outline:none;transition:border-color .2s;}
 .form-input:focus,.form-select:focus{border-color:var(--almond);}
 .form-actions{display:flex;gap:10px;margin-top:20px;}
 #remember-me{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:4px;border:1.5px solid var(--almond);background:var(--white);cursor:pointer;flex-shrink:0;transition:all .2s;position:relative;}
 #remember-me:checked{background:var(--ink);border-color:var(--ink);}
-#remember-me:checked::after{content:'✓';color:white;font-size:11px;font-weight:700;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
-.remember-label{font-size:13px;color:var(--ink-soft);cursor:pointer;}
+#remember-me:checked::after{content:'✓';color:white;font-size:13px;font-weight:700;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.remember-label{font-size:15px;color:var(--ink-soft);cursor:pointer;}
 .day-picker{display:flex;gap:6px;flex-wrap:wrap;}
-.day-pill{width:36px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.day-pill{width:36px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .day-pill.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
-.btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:16px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .btn-primary{background:var(--ink);color:white;}
 .btn-primary:hover{background:#333;}
 .btn-secondary{background:var(--linen);color:var(--ink-soft);}
@@ -132,66 +132,66 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .progress-ring-track{fill:none;stroke:var(--border);stroke-width:8;}
 .progress-ring-fill{fill:none;stroke:var(--almond);stroke-width:8;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset 0.6s ease;}
 .progress-ring-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.progress-ring-pct{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
-.progress-ring-label{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+.progress-ring-pct{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-ring-label{font-size:13px;color:var(--ink-faint);margin-top:2px;}
 .progress-hero-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:24px;padding:28px;margin:16px;text-align:center;}
-.progress-streak-big{font-family:'Playfair Display',serif;font-size:42px;font-weight:600;color:var(--ink);line-height:1;}
-.progress-streak-label{font-size:14px;color:var(--ink-soft);margin-top:4px;}
-.progress-streak-msg{font-size:13px;color:var(--ink-soft);margin-top:8px;font-style:italic;}
+.progress-streak-big{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--ink);line-height:1;}
+.progress-streak-label{font-size:16px;color:var(--ink-soft);margin-top:4px;}
+.progress-streak-msg{font-size:15px;color:var(--ink-soft);margin-top:8px;font-style:italic;}
 .progress-section-row{display:flex;align-items:center;padding:10px 20px;background:var(--white);border-bottom:1px solid var(--border);}
 .progress-section-row:first-child{border-top:1px solid var(--border);}
-.progress-section-name{font-size:13px;color:var(--ink);min-width:80px;}
+.progress-section-name{font-size:15px;color:var(--ink);min-width:80px;}
 .progress-section-bar-wrap{flex:1;background:var(--linen);border-radius:100px;height:4px;margin:0 12px;overflow:hidden;}
 .progress-section-bar-fill{height:4px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
-.progress-section-frac{font-size:12px;color:var(--ink-faint);min-width:28px;text-align:right;}
+.progress-section-frac{font-size:14px;color:var(--ink-faint);min-width:28px;text-align:right;}
 .habit-streak-row{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--white);border-bottom:1px solid var(--border);}
-.habit-streak-rank{font-size:13px;color:var(--ink-faint);width:20px;flex-shrink:0;}
-.habit-streak-name{font-size:14px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.habit-streak-count{font-size:13px;font-weight:500;color:var(--almond);}
+.habit-streak-rank{font-size:15px;color:var(--ink-faint);width:20px;flex-shrink:0;}
+.habit-streak-name{font-size:16px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.habit-streak-count{font-size:15px;font-weight:500;color:var(--almond);}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px;}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
-.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:var(--ink);}
-.stat-lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--ink);}
+.stat-lbl{font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
 /* REWARDS */
 .rewards-store-wrap{position:relative;border-radius:20px;overflow:hidden;}
-.week-nav-arrow{font-size:18px;color:var(--ink-faint);cursor:pointer;padding:4px 12px;user-select:none;transition:color .15s;}
+.week-nav-arrow{font-size:20px;color:var(--ink-faint);cursor:pointer;padding:4px 12px;user-select:none;transition:color .15s;}
 .week-nav-arrow:hover{color:var(--ink);}
 .week-nav-arrow.disabled{opacity:.2;cursor:default;pointer-events:none;}
 .week-dots{display:flex;gap:8px;justify-content:center;padding:16px 0;transition:opacity .2s;}
 .week-dot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:opacity .15s;}
 .week-dot:hover{opacity:.75;}
-.week-dot-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ink-faint);}
+.week-dot-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-faint);}
 .week-dot-circle.full{background:var(--success);border-color:var(--success);color:white;}
 .week-dot-circle.partial{background:var(--powder);border-color:var(--almond);color:var(--ink-soft);}
 .week-dot-circle.today{border-color:var(--ink);color:var(--ink);font-weight:600;}
-.week-dot-day{font-size:10px;color:var(--ink-faint);}
+.week-dot-day{font-size:12px;color:var(--ink-faint);}
 
 /* REWARDS */
 .rewards-page{padding:20px;}
 .points-header{background:linear-gradient(135deg,var(--ink) 0%,#3a3530 100%);border-radius:20px;padding:20px;color:white;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
-.points-num{font-family:'Playfair Display',serif;font-size:42px;font-weight:600;line-height:1;}
-.points-label{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px;}
-.points-coin{font-size:48px;}
-.rewards-section-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:12px;margin-top:20px;}
+.points-num{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;line-height:1;}
+.points-label{font-size:14px;opacity:.7;text-transform:uppercase;letter-spacing:1px;}
+.points-coin{font-size:50px;}
+.rewards-section-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;margin-top:20px;}
 .reward-list{display:flex;flex-direction:column;gap:10px;}
 .reward-item{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s;cursor:pointer;}
-.reward-icon{font-size:24px;width:44px;height:44px;background:var(--linen);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.reward-icon{font-size:26px;width:44px;height:44px;background:var(--linen);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .reward-info{flex:1;}
-.reward-name{font-size:14px;font-weight:500;}
-.reward-cost{font-size:12px;color:var(--ink-faint);}
-.reward-buy-btn{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--linen);font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.reward-name{font-size:16px;font-weight:500;}
+.reward-cost{font-size:14px;color:var(--ink-faint);}
+.reward-buy-btn{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--linen);font-size:14px;font-weight:500;color:var(--ink-soft);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
 .reward-buy-btn:hover{background:var(--ink);color:white;border-color:var(--ink);}
 .reward-buy-btn:disabled{opacity:.4;cursor:not-allowed;}
 .reward-actions{display:flex;gap:6px;align-items:center;opacity:0;transition:opacity .2s;}
-.reward-del-btn,.reward-edit-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
+.reward-del-btn,.reward-edit-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);}
 .reward-del-btn:hover{background:var(--danger);color:white;border-color:var(--danger);}
 .reward-edit-btn:hover{background:var(--linen);border-color:var(--almond);}
 @media(hover:hover){.reward-item:hover .reward-actions{opacity:1;}.reward-item:hover{border-color:var(--almond);}}
 @media(hover:none){.reward-item.expanded .reward-actions{opacity:1;}.reward-item.expanded{border-color:var(--almond);}}
-.add-reward-btn{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:10px;transition:all .2s;}
+.add-reward-btn{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:16px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:10px;transition:all .2s;}
 .add-reward-btn:hover{background:var(--linen);}
 .history-list{display:flex;flex-direction:column;gap:6px;}
-.history-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--linen);border-radius:10px;font-size:13px;}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--linen);border-radius:10px;font-size:15px;}
 .history-item .pts{font-weight:500;}
 .history-item .pts.pos{color:var(--success);}
 .history-item .pts.neg{color:var(--danger);}
@@ -199,33 +199,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* SECTION TABS */
 .section-tabs{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;scrollbar-width:none;}
 .section-tabs::-webkit-scrollbar{display:none;}
-.section-tab{padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;background:var(--white);color:var(--ink-soft);transition:all .2s;font-family:'DM Sans',sans-serif;}
+.section-tab{padding:6px 16px;border-radius:100px;border:1px solid var(--border);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;background:var(--white);color:var(--ink-soft);transition:all .2s;font-family:'DM Sans',sans-serif;}
 .section-tab.active{background:var(--ink);color:white;border-color:var(--ink);}
 
 /* TOAST */
-.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:10px 20px;border-radius:100px;font-size:13px;z-index:500;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:10px 20px;border-radius:100px;font-size:15px;z-index:500;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;}
 
 /* UNDO SNACKBAR */
 .undo-snackbar{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-100%);width:auto;max-width:320px;background:var(--ink);border-radius:16px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,0.2);z-index:999;transition:transform .3s ease,opacity .3s ease,visibility .3s;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;}
 .undo-snackbar.show{transform:translateX(-50%) translateY(16px);opacity:1;visibility:visible;pointer-events:auto;}
-.undo-snackbar-text{font-size:13px;color:white;flex:1;overflow:hidden;text-overflow:ellipsis;}
-.undo-snackbar-countdown{font-size:12px;color:rgba(255,255,255,0.6);flex-shrink:0;}
-.undo-snackbar-btn{background:var(--almond);color:var(--ink);border:none;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;flex-shrink:0;}
+.undo-snackbar-text{font-size:15px;color:white;flex:1;overflow:hidden;text-overflow:ellipsis;}
+.undo-snackbar-countdown{font-size:14px;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.undo-snackbar-btn{background:var(--almond);color:var(--ink);border:none;border-radius:100px;padding:6px 14px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-height:44px;display:flex;align-items:center;flex-shrink:0;}
 
 /* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(29,30,30,.5);backdrop-filter:blur(4px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
 .confirm-overlay.open{display:flex;}
 .confirm-box{background:var(--white);border-radius:20px;padding:24px;width:100%;max-width:300px;text-align:center;}
-.confirm-box h4{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:8px;}
-.confirm-box p{font-size:13px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;}
+.confirm-box h4{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:8px;}
+.confirm-box p{font-size:15px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:10px;}
 
 /* TASK MANAGER */
 .tm-tabs{display:flex;background:var(--linen);border-radius:12px;padding:3px;margin-bottom:16px;}
-.tm-tab{flex:1;padding:7px 4px;border-radius:9px;border:none;background:transparent;font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tm-tab{flex:1;padding:7px 4px;border-radius:9px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .tm-tab.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px var(--shadow);}
-.tm-sec-header{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;padding:14px 0 6px;}
+.tm-sec-header{font-size:13px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;padding:14px 0 6px;}
 .tm-section-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
 .tm-section-row:last-child{border-bottom:none;}
 .tm-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);transition:transform 0.15s ease;-webkit-user-select:none;user-select:none;}
@@ -233,46 +233,46 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .tm-task-row.drop-line-above{border-top:2px solid var(--almond);}
 .tm-task-row.drop-line-below{border-bottom:2px solid var(--almond);}
 .drag-placeholder{border:2px dashed var(--border);background:var(--linen);border-radius:12px;margin-bottom:6px;pointer-events:none;}
-.tm-drag-handle{cursor:grab;color:var(--ink-faint);font-size:16px;padding:0 8px;user-select:none;touch-action:none;flex-shrink:0;}
+.tm-drag-handle{cursor:grab;color:var(--ink-faint);font-size:18px;padding:0 8px;user-select:none;touch-action:none;flex-shrink:0;}
 .tm-drag-handle:active{cursor:grabbing;}
 .tm-checkbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--almond);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--white);transition:all .15s;}
 .tm-checkbox.checked{background:var(--almond);border-color:var(--almond);}
-.tm-checkbox.checked::after{content:'✓';color:white;font-size:10px;font-weight:700;}
+.tm-checkbox.checked::after{content:'✓';color:white;font-size:12px;font-weight:700;}
 
 /* ACCOUNT MODAL */
 .modal-scroll{max-height:calc(80vh - 110px);overflow-y:auto;padding-right:2px;}
-.acc-section-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);margin-bottom:12px;}
-.acc-subtitle{font-size:11px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;margin:18px 0 10px;}
-.acc-email-field{padding:12px 14px;background:var(--linen);border-radius:12px;font-size:14px;color:var(--ink-soft);}
+.acc-section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+.acc-subtitle{font-size:13px;font-weight:500;letter-spacing:1px;color:var(--ink-faint);text-transform:uppercase;margin:18px 0 10px;}
+.acc-email-field{padding:12px 14px;background:var(--linen);border-radius:12px;font-size:16px;color:var(--ink-soft);}
 .acc-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .acc-pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0 4px;}
-.acc-pref-label{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px;}
-.acc-pref-sub{font-size:11px;color:var(--ink-faint);line-height:1.4;}
+.acc-pref-label{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.acc-pref-sub{font-size:13px;color:var(--ink-faint);line-height:1.4;}
 .acc-toggle{width:44px;height:26px;border-radius:13px;border:none;background:var(--border);cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;padding:0;}
 .acc-toggle span{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--white);transition:transform .25s;display:block;box-shadow:0 1px 3px rgba(0,0,0,.18);}
 .acc-toggle.on{background:var(--success);}
 .acc-toggle.on span{transform:translateX(18px);}
-.acc-danger-note{font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5;}
+.acc-danger-note{font-size:14px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5;}
 
 /* ONBOARDING */
 #onboarding-welcome{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 24px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
-.welcome-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:12px;color:var(--ink);}
-.welcome-sub{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-bottom:32px;max-width:300px;}
-.welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:16px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
+.welcome-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:12px;color:var(--ink);}
+.welcome-sub{font-size:17px;color:var(--ink-soft);line-height:1.6;margin-bottom:32px;max-width:300px;}
+.welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:18px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
 .welcome-cta:hover{transform:scale(1.03);}
-.welcome-skip{margin-top:14px;font-size:13px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+.welcome-skip{margin-top:14px;font-size:15px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 #tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
 #tour-tooltip{position:fixed;z-index:1000;background:var(--white);border-radius:16px;padding:16px;width:260px;max-width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(29,30,30,0.18);}
-.tour-step-ind{font-size:11px;color:var(--ink-faint);margin-bottom:8px;}
-.tour-tip-text{font-size:14px;color:var(--ink);line-height:1.5;margin-bottom:14px;}
+.tour-step-ind{font-size:13px;color:var(--ink-faint);margin-bottom:8px;}
+.tour-tip-text{font-size:16px;color:var(--ink);line-height:1.5;margin-bottom:14px;}
 .tour-actions{display:flex;align-items:center;justify-content:space-between;}
-.tour-next-btn{padding:10px 20px;border-radius:10px;background:var(--ink);color:white;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.tour-skip-link{font-size:12px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+.tour-next-btn{padding:10px 20px;border-radius:10px;background:var(--ink);color:white;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.tour-skip-link{font-size:14px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 
 /* THEME PICKER */
 #onboarding-theme{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;z-index:2000;padding:32px 20px 28px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);}
-.theme-pick-heading{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:10px;color:var(--ink);}
-.theme-pick-sub{font-size:14px;color:var(--ink-soft);line-height:1.5;margin-bottom:24px;max-width:300px;}
+.theme-pick-heading{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:10px;color:var(--ink);}
+.theme-pick-sub{font-size:16px;color:var(--ink-soft);line-height:1.5;margin-bottom:24px;max-width:300px;}
 .theme-carousel{display:flex;gap:14px;overflow-x:auto;padding:4px 4px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:100%;width:100%;justify-content:center;}
 .theme-carousel::-webkit-scrollbar{display:none;}
 .theme-card{flex-shrink:0;width:160px;height:220px;border-radius:20px;cursor:pointer;border:2px solid transparent;transition:transform .2s,border-color .2s;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
@@ -282,7 +282,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .theme-card-body{flex:1;padding:10px 12px 0;display:flex;flex-direction:column;gap:7px;}
 .theme-card-pill{height:15px;border-radius:8px;}
 .theme-card-bar{flex:0 0 22px;margin-top:auto;}
-.theme-card-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--ink);margin-top:9px;text-align:center;}
+.theme-card-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);margin-top:9px;text-align:center;}
 /* ACCOUNT APPEARANCE SWATCHES */
 .theme-swatches{display:flex;gap:12px;align-items:center;padding:4px;margin:-4px;margin-bottom:2px;overflow:visible;}
 .theme-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;padding:0;transition:box-shadow .2s;flex-shrink:0;}
@@ -293,12 +293,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:14px;}
 .goal-card{border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:white;border:1px solid var(--border);position:relative;}
 .goal-card.selected{background:var(--powder);border:1.5px solid var(--almond);}
-.goal-card-check{position:absolute;top:8px;right:10px;font-size:12px;color:var(--almond);display:none;font-weight:700;}
+.goal-card-check{position:absolute;top:8px;right:10px;font-size:14px;color:var(--almond);display:none;font-weight:700;}
 .goal-card.selected .goal-card-check{display:block;}
-.goal-card-emoji{font-size:28px;margin-bottom:8px;}
-.goal-card-name{font-size:13px;font-weight:500;color:var(--ink);}
-.goal-card-desc{font-size:11px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
-.goal-error{font-size:13px;color:var(--danger);margin-bottom:10px;min-height:18px;}
+.goal-card-emoji{font-size:30px;margin-bottom:8px;}
+.goal-card-name{font-size:15px;font-weight:500;color:var(--ink);}
+.goal-card-desc{font-size:13px;color:var(--ink-faint);margin-top:2px;line-height:1.3;}
+.goal-error{font-size:15px;color:var(--danger);margin-bottom:10px;min-height:18px;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 /* ONBOARDING STEP DOTS */
 .shake{animation:shake .4s ease;}
@@ -309,134 +309,134 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 /* Challenges */
 .challenges-page{padding:16px 16px 8px;}
 .challenges-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
-.challenges-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink);}
-.challenges-sub{font-size:13px;color:var(--ink-faint);margin-bottom:20px;}
-.new-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:13px;font-weight:500;border:none;cursor:pointer;white-space:nowrap;margin-top:4px;}
+.challenges-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--ink);}
+.challenges-sub{font-size:15px;color:var(--ink-faint);margin-bottom:20px;}
+.new-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:15px;font-weight:500;border:none;cursor:pointer;white-space:nowrap;margin-top:4px;}
 .challenges-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;}
 .challenges-empty-icon{font-size:64px;margin-bottom:16px;}
-.challenges-empty-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px;}
-.challenges-empty-sub{font-size:14px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;}
-.challenge-section-label{font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 4px 8px;}
+.challenges-empty-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.challenges-empty-sub{font-size:16px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;}
+.challenge-section-label{font-size:13px;font-weight:500;letter-spacing:1.2px;color:var(--ink-faint);text-transform:uppercase;padding:16px 4px 8px;}
 .challenge-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s;}
 .challenge-card:active{box-shadow:0 2px 12px var(--shadow);}
 .challenge-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-.challenge-card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);flex:1;padding-right:8px;}
-.challenge-status-badge{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:3px 10px;font-size:11px;white-space:nowrap;flex-shrink:0;}
+.challenge-card-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);flex:1;padding-right:8px;}
+.challenge-status-badge{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:3px 10px;font-size:13px;white-space:nowrap;flex-shrink:0;}
 .challenge-progress-bar-wrap{background:var(--linen);border-radius:100px;height:6px;margin-bottom:8px;overflow:hidden;}
 .challenge-progress-bar-fill{height:6px;background:var(--almond);border-radius:100px;transition:width 0.4s ease;}
-.challenge-progress-text{font-size:13px;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
+.challenge-progress-text{font-size:15px;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
 .challenge-stats-row{display:flex;margin-bottom:14px;}
 .challenge-mini-stat{flex:1;text-align:center;}
-.challenge-mini-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
-.challenge-mini-lbl{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
-.challenge-mark-btn{width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.challenge-mini-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
+.challenge-mini-lbl{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.challenge-mark-btn{width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .challenge-mark-btn:active{background:var(--almond);color:white;}
-.challenge-done-badge{text-align:center;font-size:13px;color:var(--success);font-weight:500;padding:6px;}
+.challenge-done-badge{text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:6px;}
 .challenge-card.completed,.challenge-card.failed{opacity:0.65;}
 .duration-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.duration-pill{flex:1;min-width:60px;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.duration-pill{flex:1;min-width:60px;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .duration-pill.selected{background:var(--ink);color:white;border-color:var(--ink);}
 .threshold-pills{display:flex;gap:8px;margin-bottom:12px;}
-.threshold-pill{flex:1;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.threshold-pill{flex:1;padding:8px 4px;border-radius:100px;border:1.5px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .threshold-pill.selected{background:var(--ink);color:white;border-color:var(--ink);}
 .habit-checklist{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;}
-.habit-check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;}
+.habit-check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:16px;}
 .habit-check-row:last-child{border-bottom:none;}
 .challenge-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:12px 0;}
 .heatmap-cell{width:100%;aspect-ratio:1;border-radius:4px;background:var(--linen);}
 .heatmap-cell.done{background:var(--almond);}
 .heatmap-cell.future{background:transparent;border:1px solid var(--border);}
 .active-challenges-banner{background:var(--linen);border-radius:12px;margin:8px 20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-.active-challenges-banner-link{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+.active-challenges-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .onb-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px;width:100%;}
 .onb-step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .2s;}
 .onb-step-dot.active{background:var(--ink);}
 .reward-flow-row{display:flex;gap:8px;margin:16px 0;}
 .reward-flow-card{background:rgba(255,255,255,0.6);border-radius:14px;padding:12px 8px;text-align:center;flex:1;}
-.reward-suggestion-chip{background:rgba(255,255,255,0.7);border:1px solid var(--border);border-radius:100px;padding:8px 14px;font-size:13px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin:4px;transition:all .2s;user-select:none;}
+.reward-suggestion-chip{background:rgba(255,255,255,0.7);border:1px solid var(--border);border-radius:100px;padding:8px 14px;font-size:15px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin:4px;transition:all .2s;user-select:none;}
 .reward-suggestion-chip.selected{background:var(--powder);border-color:var(--almond);font-weight:500;}
-.custom-reward-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.custom-reward-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:15px;}
 .habit-group{margin-bottom:18px;width:100%;}
-.habit-group-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);font-weight:500;margin-bottom:8px;}
+.habit-group-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);font-weight:500;margin-bottom:8px;}
 .habit-chips{display:flex;flex-wrap:wrap;}
-.habit-chip{background:var(--linen);border-radius:100px;padding:8px 16px;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:4px;border:1px solid var(--border);transition:all .2s;user-select:none;}
+.habit-chip{background:var(--linen);border-radius:100px;padding:8px 16px;font-size:15px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:4px;border:1px solid var(--border);transition:all .2s;user-select:none;}
 .habit-chip.selected{background:var(--powder);border-color:var(--almond);font-weight:500;}
-.custom-habit-chip{background:var(--linen);border-radius:100px;padding:6px 10px 6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin:4px;border:1px solid var(--border);}
-.custom-habit-remove{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:0;line-height:1;font-family:'DM Sans',sans-serif;}
+.custom-habit-chip{background:var(--linen);border-radius:100px;padding:6px 10px 6px 14px;font-size:15px;display:inline-flex;align-items:center;gap:6px;margin:4px;border:1px solid var(--border);}
+.custom-habit-remove{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:17px;padding:0;line-height:1;font-family:'DM Sans',sans-serif;}
 
 /* Profile & Friends */
-.acc-code-pill{background:var(--linen);border-radius:8px;padding:6px 14px;font-size:18px;font-weight:600;letter-spacing:3px;font-family:monospace;color:var(--ink);}
+.acc-code-pill{background:var(--linen);border-radius:8px;padding:6px 14px;font-size:20px;font-weight:600;letter-spacing:3px;font-family:monospace;color:var(--ink);}
 .acc-code-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
-.acc-icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:14px;cursor:pointer;color:var(--ink-soft);}
+.acc-icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:16px;cursor:pointer;color:var(--ink-soft);}
 .friend-request-card{background:var(--linen);border-radius:14px;padding:14px;margin-bottom:10px;}
-.friend-request-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;}
-.friend-request-code{font-size:11px;color:var(--ink-faint);margin-bottom:10px;}
+.friend-request-name{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.friend-request-code{font-size:13px;color:var(--ink-faint);margin-bottom:10px;}
 .friend-request-actions{display:flex;gap:8px;}
 .friend-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
 .friend-row:last-child{border-bottom:none;}
-.friend-name{flex:1;font-size:14px;color:var(--ink);}
-.friend-code-small{font-size:11px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
-.code-input-big{text-transform:uppercase;letter-spacing:4px;font-size:24px;text-align:center;font-weight:600;}
+.friend-name{flex:1;font-size:16px;color:var(--ink);}
+.friend-code-small{font-size:13px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
+.code-input-big{text-transform:uppercase;letter-spacing:4px;font-size:26px;text-align:center;font-weight:600;}
 #onboarding-displayname{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
 
 /* Friends view */
 .challenges-seg-ctrl{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin:16px 16px 0;}
-.seg-pill{flex:1;padding:8px;border-radius:9px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-align:center;background:transparent;color:var(--ink-soft);}
+.seg-pill{flex:1;padding:8px;border-radius:9px;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-align:center;background:transparent;color:var(--ink-soft);}
 .seg-pill.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
 .friends-view{padding:12px 16px 8px;}
 .friend-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:16px 20px;margin-bottom:10px;}
 .friend-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.friend-card-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);}
-.friend-card-code{font-size:11px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
+.friend-card-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.friend-card-code{font-size:13px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
 .friend-stats-row{display:flex;margin-bottom:12px;}
 .friend-mini-stat{flex:1;text-align:center;}
-.friend-mini-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
-.friend-mini-lbl{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.friend-mini-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);}
+.friend-mini-lbl{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 .friend-card-actions{display:flex;gap:8px;}
-.friend-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;border:none;cursor:pointer;flex:1;}
-.friend-remove-btn{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;border:none;cursor:pointer;}
+.friend-challenge-btn{background:var(--ink);color:white;border-radius:100px;padding:8px 16px;font-size:14px;font-weight:500;border:none;cursor:pointer;flex:1;}
+.friend-remove-btn{background:var(--linen);color:var(--ink-soft);border-radius:100px;padding:8px 16px;font-size:14px;font-weight:500;border:none;cursor:pointer;}
 .friend-stat-skeleton{background:var(--linen);border-radius:4px;height:16px;width:40px;margin:0 auto 4px;animation:pulse 1.5s ease-in-out infinite;}
-.friend-add-dashed{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px;transition:all .2s;}
+.friend-add-dashed{width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--almond);background:transparent;color:var(--almond);font-size:16px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px;transition:all .2s;}
 .friend-req-banner{background:var(--powder);border-radius:14px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
-.friend-req-banner-link{font-size:12px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+.friend-req-banner-link{font-size:14px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
 .activity-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
-.activity-avatar{width:36px;height:36px;border-radius:50%;background:var(--almond);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:white;flex-shrink:0;}
-.activity-text{font-size:13px;color:var(--ink);flex:1;line-height:1.4;}
-.activity-time{font-size:11px;color:var(--ink-faint);white-space:nowrap;}
+.activity-avatar{width:36px;height:36px;border-radius:50%;background:var(--almond);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:white;flex-shrink:0;}
+.activity-text{font-size:15px;color:var(--ink);flex:1;line-height:1.4;}
+.activity-time{font-size:13px;color:var(--ink-faint);white-space:nowrap;}
 .challenges-tab-notif{width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:2px;right:16px;display:none;}
 
 /* SOCIAL CHALLENGES */
 .incoming-challenge-card{background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);border-radius:20px;padding:20px;margin-bottom:12px;border:1.5px solid var(--almond);}
-.incoming-challenge-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px;}
-.incoming-challenge-meta{font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;}
+.incoming-challenge-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.incoming-challenge-meta{font-size:14px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;}
 .incoming-challenge-actions{display:flex;gap:8px;}
 .race-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;}
 .race-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.race-card-title{font-size:13px;font-weight:500;color:var(--ink-soft);}
-.race-card-friend{font-size:13px;font-weight:500;color:var(--ink-soft);}
+.race-card-title{font-size:15px;font-weight:500;color:var(--ink-soft);}
+.race-card-friend{font-size:15px;font-weight:500;color:var(--ink-soft);}
 .race-participant-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.race-participant-label{font-size:13px;min-width:72px;flex-shrink:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.race-participant-label{font-size:15px;min-width:72px;flex-shrink:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .race-participant-bar-wrap{flex:1;border-radius:100px;height:8px;overflow:hidden;background:var(--linen);}
 .race-participant-bar-fill{height:8px;border-radius:100px;transition:width .4s ease;}
-.race-participant-streak{font-size:12px;min-width:52px;text-align:right;flex-shrink:0;}
-.race-mark-btn{width:100%;margin-top:14px;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.race-participant-streak{font-size:14px;min-width:52px;text-align:right;flex-shrink:0;}
+.race-mark-btn{width:100%;margin-top:14px;padding:10px;border-radius:12px;border:1.5px solid var(--almond);background:transparent;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .race-mark-btn:active{background:var(--almond);color:white;}
-.race-done-badge{text-align:center;font-size:13px;color:var(--success);font-weight:500;padding:8px 0 0;}
+.race-done-badge{text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:8px 0 0;}
 #celebrate-overlay{position:fixed;inset:0;background:linear-gradient(160deg,var(--linen),var(--powder));z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;cursor:pointer;}
 #celebrate-overlay.show{display:flex;}
 .celebrate-trophy{font-size:80px;line-height:1;animation:celebBounce .6s ease-out;}
 @keyframes celebBounce{0%{transform:scale(0.5);}60%{transform:scale(1.2);}100%{transform:scale(1);}}
-.celebrate-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:var(--ink);margin:20px 0 12px;}
-.celebrate-sub{font-size:15px;color:var(--ink-soft);line-height:1.5;max-width:280px;}
-.celebrate-tap{font-size:12px;color:var(--ink-faint);margin-top:24px;}
-.bond-participant-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
+.celebrate-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--ink);margin:20px 0 12px;}
+.celebrate-sub{font-size:17px;color:var(--ink-soft);line-height:1.5;max-width:280px;}
+.celebrate-tap{font-size:14px;color:var(--ink-faint);margin-top:24px;}
+.bond-participant-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:15px;}
 .sc-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
 .sc-mode-card{background:var(--linen);border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
 .sc-mode-card.selected{background:var(--powder);border-color:var(--almond);}
-.sc-mode-icon{font-size:28px;margin-bottom:8px;display:block;}
-.sc-mode-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px;}
-.sc-mode-desc{font-size:11px;color:var(--ink-faint);line-height:1.4;}
-.mode-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:100px;background:var(--linen);color:var(--ink-soft);font-weight:500;margin-left:6px;vertical-align:middle;}
+.sc-mode-icon{font-size:30px;margin-bottom:8px;display:block;}
+.sc-mode-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.sc-mode-desc{font-size:13px;color:var(--ink-faint);line-height:1.4;}
+.mode-badge{display:inline-block;font-size:12px;padding:2px 7px;border-radius:100px;background:var(--linen);color:var(--ink-soft);font-weight:500;margin-left:6px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -462,7 +462,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="remember-me" checked/><label for="remember-me" class="remember-label">Remember me</label></div>
       <div class="form-actions"><button class="btn btn-primary" onclick="doLogin()" style="flex:1">Sign in</button></div>
-      <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--ink-faint);cursor:pointer;" onclick="doForgot()">Forgot password?</p>
+      <p style="text-align:center;margin-top:14px;font-size:14px;color:var(--ink-faint);cursor:pointer;" onclick="doForgot()">Forgot password?</p>
     </div>
     <div id="auth-form-signup" style="display:none;">
       <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="signup-email" type="email" placeholder="your@email.com"/></div>
@@ -550,7 +550,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
           <span>This week</span>
           <div style="display:flex;align-items:center;gap:4px;">
             <span class="week-nav-arrow" id="week-nav-prev" onclick="weekOffset=Math.max(weekOffset-1,-8);renderProgress()">‹</span>
-            <span id="week-label" style="font-size:12px;color:var(--ink-faint);font-weight:400;"></span>
+            <span id="week-label" style="font-size:14px;color:var(--ink-faint);font-weight:400;"></span>
             <span class="week-nav-arrow" id="week-nav-next" onclick="weekOffset=Math.min(weekOffset+1,0);renderProgress()">›</span>
           </div>
         </div>
@@ -607,7 +607,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div class="onb-steps"><span class="onb-step-dot"></span><span class="onb-step-dot active"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span><span class="onb-step-dot"></span></div>
   <div class="welcome-title" style="margin-bottom:8px;">What should we call you?</div>
   <div class="welcome-sub" style="margin-bottom:20px;text-align:center;margin-left:auto;margin-right:auto;">This is what your friends will see</div>
-  <input class="form-input" id="onb-displayname-input" placeholder="Your name or nickname" maxlength="30" style="text-align:center;max-width:280px;font-size:18px;"/>
+  <input class="form-input" id="onb-displayname-input" placeholder="Your name or nickname" maxlength="30" style="text-align:center;max-width:280px;font-size:20px;"/>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmDisplayName()">Continue →</button>
     <button class="welcome-skip" style="display:block;width:100%;text-align:center;margin-top:10px;" onclick="skipDisplayName()">Skip</button>
@@ -639,23 +639,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   <div class="welcome-title" style="margin-bottom:6px;">Your reward store</div>
   <div class="welcome-sub" style="margin-bottom:0;text-align:left;max-width:100%;">Earn points by completing your habits and spend them on things that bring you joy. You control what's in your store and what each reward costs.</div>
   <div class="reward-flow-row">
-    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">✅</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Complete habits</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">Earn points</span></div>
-    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">⭐</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Collect points</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">They add up daily</span></div>
-    <div class="reward-flow-card"><div style="font-size:20px;margin-bottom:6px;">🛍️</div><span style="font-size:11px;font-weight:500;color:var(--ink);display:block;">Buy rewards</span><span style="font-size:10px;color:var(--ink-faint);display:block;margin-top:2px;">Treat yourself</span></div>
+    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">✅</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Complete habits</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">Earn points</span></div>
+    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">⭐</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Collect points</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">They add up daily</span></div>
+    <div class="reward-flow-card"><div style="font-size:22px;margin-bottom:6px;">🛍️</div><span style="font-size:13px;font-weight:500;color:var(--ink);display:block;">Buy rewards</span><span style="font-size:12px;color:var(--ink-faint);display:block;margin-top:2px;">Treat yourself</span></div>
   </div>
-  <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Popular rewards</div>
+  <div style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Popular rewards</div>
   <div id="reward-suggestions-chips" style="display:flex;flex-wrap:wrap;width:100%;"></div>
 
-  <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Add your own</div>
+  <div style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);margin:20px 0 10px;width:100%;">Add your own</div>
   <div style="display:flex;gap:8px;width:100%;margin-bottom:8px;">
     <input class="form-input" id="cr-emoji" placeholder="🎁" maxlength="2" style="width:60px;flex-shrink:0;text-align:center;padding:10px 6px;"/>
     <input class="form-input" id="cr-name" placeholder="Reward name" style="flex:1;padding:10px 12px;" onkeydown="if(event.key==='Enter')addCustomReward()"/>
     <input class="form-input" id="cr-cost" type="number" min="1" placeholder="pts" value="30" style="width:72px;flex-shrink:0;padding:10px 8px;"/>
-    <button class="btn btn-secondary" style="flex:none;padding:10px 14px;font-size:13px;" onclick="addCustomReward()">Add +</button>
+    <button class="btn btn-secondary" style="flex:none;padding:10px 14px;font-size:15px;" onclick="addCustomReward()">Add +</button>
   </div>
   <div id="custom-rewards-list" style="width:100%;margin-bottom:8px;"></div>
 
-  <div style="font-size:12px;color:var(--ink-faint);text-align:center;padding:8px 0;width:100%;">💡 Each habit gives you 5 points by default. You can customize this later.</div>
+  <div style="font-size:14px;color:var(--ink-faint);text-align:center;padding:8px 0;width:100%;">💡 Each habit gives you 5 points by default. You can customize this later.</div>
 
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmRewards()">Continue →</button>
@@ -800,7 +800,7 @@ function renderHabitContent(){
     html+=`</div></div>`;
   }
   const secOpts=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map((g,i)=>`<option value="${g.id}"${i===0?' selected':''}>${g.emoji} ${g.secLabel}</option>`).join('');
-  html+=`<div id="custom-habit-form-area"><button class="btn btn-secondary" style="font-size:13px;padding:8px 16px;margin-bottom:16px;" onclick="showCustomHabitForm()">+ Add your own</button></div>`;
+  html+=`<div id="custom-habit-form-area"><button class="btn btn-secondary" style="font-size:15px;padding:8px 16px;margin-bottom:16px;" onclick="showCustomHabitForm()">+ Add your own</button></div>`;
   container.innerHTML=html;
   updateHabitsContinueBtn();
 }
@@ -815,7 +815,7 @@ window.toggleSuggestion=(goalId,idx)=>{
 window.showCustomHabitForm=()=>{
   const area=document.getElementById('custom-habit-form-area');if(!area)return;
   const secOpts=GOAL_OPTIONS.filter(g=>_selectedGoals.has(g.id)).map((g,i)=>`<option value="${g.id}"${i===0?' selected':''}>${g.emoji} ${g.secLabel}</option>`).join('');
-  area.innerHTML=`<div style="background:rgba(255,255,255,0.7);border-radius:16px;padding:14px;margin-bottom:16px;"><div style="display:flex;gap:8px;margin-bottom:8px;"><input class="form-input" id="ch-emoji" placeholder="✨" maxlength="2" style="width:58px;text-align:center;flex-shrink:0;padding:10px 6px;"/><input class="form-input" id="ch-name" placeholder="Habit name" style="flex:1;" onkeydown="if(event.key==='Enter')addCustomHabit()"/></div><div style="display:flex;gap:8px;"><select class="form-select" id="ch-section" style="flex:1;">${secOpts}</select><button class="btn btn-primary" style="padding:8px 14px;font-size:13px;flex-shrink:0;" onclick="addCustomHabit()">Add</button></div></div>`;
+  area.innerHTML=`<div style="background:rgba(255,255,255,0.7);border-radius:16px;padding:14px;margin-bottom:16px;"><div style="display:flex;gap:8px;margin-bottom:8px;"><input class="form-input" id="ch-emoji" placeholder="✨" maxlength="2" style="width:58px;text-align:center;flex-shrink:0;padding:10px 6px;"/><input class="form-input" id="ch-name" placeholder="Habit name" style="flex:1;" onkeydown="if(event.key==='Enter')addCustomHabit()"/></div><div style="display:flex;gap:8px;"><select class="form-select" id="ch-section" style="flex:1;">${secOpts}</select><button class="btn btn-primary" style="padding:8px 14px;font-size:15px;flex-shrink:0;" onclick="addCustomHabit()">Add</button></div></div>`;
   setTimeout(()=>document.getElementById('ch-name')?.focus(),50);
 };
 window.addCustomHabit=()=>{
@@ -916,7 +916,7 @@ function renderRewardsSetup(){
     return `<span class="reward-suggestion-chip${sel?' selected':''}" onclick="toggleRewardSuggestion(${i})">${sel?'✓ ':''}${r.icon} ${r.name} · ${r.cost} pts</span>`;
   }).join('');
   const list=document.getElementById('custom-rewards-list');
-  if(list)list.innerHTML=_customRewards.map((r,i)=>`<div class="custom-reward-row"><span style="font-size:18px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="color:var(--ink-faint);font-size:12px;">⭐${r.cost} pts</span><button onclick="removeCustomReward(${i})" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:18px;line-height:1;padding:0 2px;">×</button></div>`).join('');
+  if(list)list.innerHTML=_customRewards.map((r,i)=>`<div class="custom-reward-row"><span style="font-size:20px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="color:var(--ink-faint);font-size:14px;">⭐${r.cost} pts</span><button onclick="removeCustomReward(${i})" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:20px;line-height:1;padding:0 2px;">×</button></div>`).join('');
 }
 window.toggleRewardSuggestion=(idx)=>{
   if(_selectedRewardSuggestions.has(idx))_selectedRewardSuggestions.delete(idx);else _selectedRewardSuggestions.add(idx);
@@ -1115,8 +1115,8 @@ function renderTasks(){
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
-      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:10px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:11px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -1133,14 +1133,14 @@ function renderTasks(){
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
-      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:10px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:11px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'⭐0':'⭐'+(task.points??5)}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
   const viewAllLink=document.createElement('a');
   viewAllLink.textContent='View all my habits →';
-  viewAllLink.style.cssText='font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;padding:12px 0 4px;';
+  viewAllLink.style.cssText='font-size:14px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;padding:12px 0 4px;';
   viewAllLink.onclick=()=>window.showTaskManagerModal('allhabits');
   c.appendChild(viewAllLink);
   document.getElementById('done-count').textContent=`${td}/${ta}`;
@@ -1189,7 +1189,7 @@ function renderProgress(){
   const sl=document.getElementById('progress-sections-list');
   if(sl){
     if(!state.sections||state.sections.length===0){
-      sl.innerHTML='<p style="padding:12px 20px;font-size:13px;color:var(--ink-faint);">No sections yet — add some habits to see progress here.</p>';
+      sl.innerHTML='<p style="padding:12px 20px;font-size:15px;color:var(--ink-faint);">No sections yet — add some habits to see progress here.</p>';
     }else{
       sl.innerHTML=state.sections.map(sec=>{
         const secTasks=todayTasks.filter(t=>t.section===sec.id);
@@ -1276,7 +1276,7 @@ function renderProgress(){
       <span class="habit-streak-count">${s>0?s+' 🔥':'—'}</span>
     </div>`).join('');
   }else if(hsl){
-    hsl.innerHTML='<p style="padding:12px 20px;font-size:13px;color:var(--ink-faint);">No habits yet — add some to track streaks here.</p>';
+    hsl.innerHTML='<p style="padding:12px 20px;font-size:15px;color:var(--ink-faint);">No habits yet — add some to track streaks here.</p>';
   }
 }
 function renderHistorySection(){
@@ -1284,7 +1284,7 @@ function renderHistorySection(){
   const wrap=document.getElementById('history-more-wrap');
   if(!hist||!wrap)return;
   hist.innerHTML='';
-  if(!state.history.length){hist.innerHTML='<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">No history yet</p>';wrap.style.display='none';return;}
+  if(!state.history.length){hist.innerHTML='<p style="color:var(--ink-faint);font-size:15px;text-align:center;padding:20px 0;">No history yet</p>';wrap.style.display='none';return;}
   for(const h of state.history.slice(0,historyVisible)){const item=document.createElement('div');item.className='history-item';item.innerHTML=`<span>${h.reason}</span><span class="pts ${h.pos?'pos':'neg'}">${h.pos?'+':'-'}${h.amount}</span>`;hist.appendChild(item);}
   const remaining=state.history.length-historyVisible;
   if(remaining>0){wrap.style.display='block';wrap.innerHTML=`<button class="btn btn-secondary" style="width:100%" onclick="loadMoreHistory()">View more (${remaining} remaining)</button>`;}
@@ -1413,7 +1413,7 @@ function openChallengeDetail(id){
     else{heatmapHTML+=`<div class="heatmap-cell" title="${k}"></div>`;}
   }
   const body=`<div class="modal-scroll">
-    <p style="font-size:13px;color:var(--ink-faint);margin-bottom:16px;">${ch.description||''}</p>
+    <p style="font-size:15px;color:var(--ink-faint);margin-bottom:16px;">${ch.description||''}</p>
     <div class="challenge-progress-bar-wrap" style="margin-bottom:6px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
     <div class="challenge-progress-text">Day ${ch.currentStreak||0} of ${ch.duration}</div>
     <div class="challenge-stats-row" style="margin-bottom:20px;">
@@ -1421,7 +1421,7 @@ function openChallengeDetail(id){
       <div class="challenge-mini-stat"><div class="challenge-mini-num">${ch.bestStreak||0}</div><div class="challenge-mini-lbl">⭐ Best</div></div>
       <div class="challenge-mini-stat"><div class="challenge-mini-num">${daysLeft}</div><div class="challenge-mini-lbl">📅 Left</div></div>
     </div>
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">Progress calendar</div>
+    <div style="font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">Progress calendar</div>
     <div class="challenge-heatmap">${heatmapHTML}</div>
     ${ch.status==='active'?`<div style="margin-top:16px;">${todayDone?'<div class="challenge-done-badge">✓ Completed today</div>':`<button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}</div>`:''}
     ${ch.status==='active'?`<button class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="abandonChallenge('${ch.id}')">Abandon challenge</button>`:''}
@@ -1434,7 +1434,7 @@ let _chDuration=30,_chThreshold=100,_chHabitIds=[];
 
 function showNewChallengeModal(){
   _chDuration=30;_chThreshold=100;_chHabitIds=[];
-  const habitOptions=state.tasks.map((t,i)=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:16px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
+  const habitOptions=state.tasks.map((t,i)=>`<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
   const body=`<div class="modal-scroll">
     <div class="form-group"><label class="form-label">Challenge name *</label><input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60"/></div>
     <div class="form-group"><label class="form-label">Description (optional)</label><input class="form-input" id="ch-desc" placeholder="What's your goal?"/></div>
@@ -1455,7 +1455,7 @@ function showNewChallengeModal(){
       </div>
     </div>
     <div id="ch-habit-list" style="display:none;">
-      <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:13px;color:var(--ink-faint);">No habits yet</p>'}</div>
+      <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div>
     </div>
     <div class="form-group"><label class="form-label">Start date</label><input class="form-input" type="date" id="ch-start" value="${TODAY}"/></div>
     <div class="auth-msg" id="ch-error"></div>
@@ -1611,8 +1611,8 @@ function renderIncomingChallengeCard(ch){
     <div class="incoming-challenge-name">${creatorName} challenged you! ${modeIcon}</div>
     <div class="incoming-challenge-meta"><span class="mode-badge">${modeIcon} ${modeName}</span> ${durationLabel} · ${ch.completionThreshold??100}% of habits per day</div>
     <div class="incoming-challenge-actions">
-      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px;" onclick="acceptSocialChallenge('${ch.id}')">${acceptLabel}</button>
-      <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px;" onclick="declineSocialChallenge('${ch.id}')">Decline</button>
+      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:15px;" onclick="acceptSocialChallenge('${ch.id}')">${acceptLabel}</button>
+      <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:15px;" onclick="declineSocialChallenge('${ch.id}')">Decline</button>
     </div>
   </div>`;
 }
@@ -1647,7 +1647,7 @@ function renderActiveRaceCard(ch){
   }
   return `<div class="race-card">
     <div class="race-card-header">
-      <div><span style="font-size:15px;">🏁</span> <span class="race-card-title">Race · ${durationLabel}</span></div>
+      <div><span style="font-size:17px;">🏁</span> <span class="race-card-title">Race · ${durationLabel}</span></div>
       <div class="race-card-friend">vs ${friendName.split(' ')[0]}</div>
     </div>
     <div class="race-participant-row">
@@ -1679,20 +1679,20 @@ function renderActiveBondCard(ch){
   const friendDone=friendData?.completedDays?.[TODAY]===true;
   const hour=new Date().getHours();
   const warningHtml=iDone&&!friendDone&&hour>=20
-    ?`<div style="background:rgba(201,123,110,0.1);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--danger);margin-top:8px;">⚠️ ${friendName.split(' ')[0]} hasn't completed today yet</div>`
+    ?`<div style="background:rgba(201,123,110,0.1);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--danger);margin-top:8px;">⚠️ ${friendName.split(' ')[0]} hasn't completed today yet</div>`
     :'';
   const btn=iDone
     ?`<div class="race-done-badge">✓ Your part is done — waiting for ${friendName.split(' ')[0]}</div>`
     :`<button class="race-mark-btn" onclick="markBondToday('${ch.id}',event)">Mark my day complete ✓</button>`;
   return `<div class="race-card">
     <div class="race-card-header">
-      <div><span style="font-size:15px;">🤝</span> <span class="race-card-title">Bond · ${durationLabel}</span></div>
+      <div><span style="font-size:17px;">🤝</span> <span class="race-card-title">Bond · ${durationLabel}</span></div>
       <div class="race-card-friend">with ${friendName.split(' ')[0]}</div>
     </div>
     <div style="margin-bottom:14px;">
       <div class="challenge-progress-bar-wrap" style="margin-bottom:10px;"><div class="challenge-progress-bar-fill" style="width:${pct}%"></div></div>
-      <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--ink);text-align:center;line-height:1;">${sharedStreak}</div>
-      <div style="font-size:13px;color:var(--ink-faint);text-align:center;margin-top:4px;">shared streak · Day ${sharedStreak} of ${dur}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:38px;font-weight:600;color:var(--ink);text-align:center;line-height:1;">${sharedStreak}</div>
+      <div style="font-size:15px;color:var(--ink-faint);text-align:center;margin-top:4px;">shared streak · Day ${sharedStreak} of ${dur}</div>
     </div>
     <div class="bond-participant-status-row"><span style="font-weight:600;color:var(--ink);">You</span><span style="color:${iDone?'var(--success)':'var(--ink-faint)'};font-weight:${iDone?'500':'400'};">${iDone?'✓ Done today':'⏳ Pending'}</span></div>
     <div class="bond-participant-status-row"><span style="color:var(--ink-soft);">${friendName.split(' ')[0]}</span><span style="color:${friendDone?'var(--success)':'var(--ink-faint)'};">${friendDone?'✓ Done today':'⏳ Pending'}</span></div>
@@ -1722,10 +1722,10 @@ function renderCompletedSocialCard(ch){
   const modeIcon=isBond?'🤝':'🏁';
   return `<div class="race-card" style="opacity:0.65;">
     <div class="race-card-header">
-      <div><span style="font-size:15px;">${modeIcon}</span> <span class="race-card-title">${ch.title}</span></div>
-      <div style="font-size:16px;">${badge}</div>
+      <div><span style="font-size:17px;">${modeIcon}</span> <span class="race-card-title">${ch.title}</span></div>
+      <div style="font-size:18px;">${badge}</div>
     </div>
-    <div style="font-size:13px;color:var(--ink-soft);">${outcomeText} ${isBond?'with':'vs'} ${friendName.split(' ')[0]}</div>
+    <div style="font-size:15px;color:var(--ink-soft);">${outcomeText} ${isBond?'with':'vs'} ${friendName.split(' ')[0]}</div>
   </div>`;
 }
 
@@ -1739,7 +1739,7 @@ async function renderFriends(){
       <button class="seg-pill" onclick="switchChallengesView('challenges',this)">Challenges</button>
       <button class="seg-pill active" onclick="switchChallengesView('friends',this)">Friends</button>
     </div>
-    <div class="friends-view"><p style="text-align:center;color:var(--ink-faint);padding:24px 0;font-size:13px;">Loading friends…</p></div>`;
+    <div class="friends-view"><p style="text-align:center;color:var(--ink-faint);padding:24px 0;font-size:15px;">Loading friends…</p></div>`;
 
   const profiles=await loadFriendProfiles();
   const friendCount=profiles.length;
@@ -1749,14 +1749,14 @@ async function renderFriends(){
 
   // Pending request banner
   if(pendingCount>0){
-    html+=`<div class="friend-req-banner"><span style="font-size:13px;color:var(--ink);">📬 ${pendingCount} friend request${pendingCount!==1?'s':''} pending</span><span class="friend-req-banner-link" onclick="showAccountModal()">Review →</span></div>`;
+    html+=`<div class="friend-req-banner"><span style="font-size:15px;color:var(--ink);">📬 ${pendingCount} friend request${pendingCount!==1?'s':''} pending</span><span class="friend-req-banner-link" onclick="showAccountModal()">Review →</span></div>`;
   }
 
   if(friendCount===0){
     html+=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
       <div style="font-size:56px;margin-bottom:16px;">👥</div>
-      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px;">No friends yet</div>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;">Add friends using their invite code to see their progress and challenge each other</div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;">No friends yet</div>
+      <div style="font-size:16px;color:var(--ink-faint);margin-bottom:24px;line-height:1.5;">Add friends using their invite code to see their progress and challenge each other</div>
       <button class="btn btn-primary" style="width:100%;max-width:280px;" onclick="showAddFriendModal()">Add a friend →</button>
     </div>`;
   }else{
@@ -1792,7 +1792,7 @@ async function renderFriends(){
         <div class="activity-time">${item.time}</div>
       </div>`).join('');
     }else{
-      html+=`<p style="text-align:center;color:var(--ink-faint);font-size:13px;padding:16px 0;">No recent activity from friends</p>`;
+      html+=`<p style="text-align:center;color:var(--ink-faint);font-size:15px;padding:16px 0;">No recent activity from friends</p>`;
     }
 
     html+=`<button class="friend-add-dashed" onclick="showAddFriendModal()">+ Add a friend</button>`;
@@ -1886,7 +1886,7 @@ function setupSocialChallengeListeners(){
 
 function showSendChallengeModal(friendUid,friendName){
   _scDuration=30;_scThreshold=100;_scHabitMode='all';_scHabitIds=[];_scType='race';
-  const habitOptions=(state.tasks||[]).map(t=>`<div class="habit-check-row" id="schcrow-${t.id}" onclick="toggleSCHabit('${t.id}')"><span style="font-size:16px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="schcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
+  const habitOptions=(state.tasks||[]).map(t=>`<div class="habit-check-row" id="schcrow-${t.id}" onclick="toggleSCHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="schcc-${t.id}" style="color:var(--almond);">○</span></div>`).join('');
   const safeUid=friendUid;
   const safeName=friendName.replace(/'/g,"\\'");
   const body=`<div class="modal-scroll">
@@ -1918,7 +1918,7 @@ function showSendChallengeModal(friendUid,friendName){
         <button class="threshold-pill selected" id="sc-hab-all" onclick="setSCHabitMode('all',this)">All my habits</button>
         <button class="threshold-pill" id="sc-hab-specific" onclick="setSCHabitMode('specific',this)">Specific habits</button>
       </div>
-      <div id="sc-habit-list" style="display:none;"><div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:13px;color:var(--ink-faint);">No habits yet</p>'}</div></div>
+      <div id="sc-habit-list" style="display:none;"><div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div></div>
     </div>
     <div class="form-group"><label class="form-label">A day counts when I complete…</label>
       <div class="threshold-pills">
@@ -2416,19 +2416,19 @@ function openDayModal(k){
   document.getElementById('modal-title').textContent=`${DAY_NAMES[dow]}, ${MONTH_NAMES[m-1]} ${d}`;
   function buildBody(){
     const dc=doneCount();
-    let html=`<div class="modal-scroll"><p id="day-modal-summary" style="font-size:13px;color:var(--ink-faint);margin-bottom:12px;">${dc} of ${habits.length} habit${habits.length!==1?'s':''} completed</p>`;
-    if(isToday)html+=`<p style="font-size:12px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">You can also edit today's habits directly from the Today tab</p>`;
-    if(isFuture)html+=`<p style="font-size:12px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">This day hasn't arrived yet</p>`;
+    let html=`<div class="modal-scroll"><p id="day-modal-summary" style="font-size:15px;color:var(--ink-faint);margin-bottom:12px;">${dc} of ${habits.length} habit${habits.length!==1?'s':''} completed</p>`;
+    if(isToday)html+=`<p style="font-size:14px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">You can also edit today's habits directly from the Today tab</p>`;
+    if(isFuture)html+=`<p style="font-size:14px;color:var(--ink-faint);background:var(--linen);border-radius:10px;padding:8px 12px;margin-bottom:12px;">This day hasn't arrived yet</p>`;
     html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">`;
     for(const t of habits){
       const done=!!dayEditState.completions[t.id];
       const later=isHabitAddedAfter(t,k);
       html+=`<div class="task-item${done?' done':''}" style="cursor:${isFuture?'default':'pointer'};margin:0;" id="dme-${t.id}" ${isFuture?'':` onclick="toggleDayHabit('${k}','${t.id}')"`}>`;
       html+=`<div class="task-check${done?' checked':''}" id="dmc-${t.id}"></div>`;
-      html+=`<div class="task-content"><div class="task-name">${t.emoji?t.emoji+' ':''}${t.name}${later?` <span style="font-size:10px;color:var(--ink-faint)">(added later)</span>`:''}</div>`;
+      html+=`<div class="task-content"><div class="task-name">${t.emoji?t.emoji+' ':''}${t.name}${later?` <span style="font-size:12px;color:var(--ink-faint)">(added later)</span>`:''}</div>`;
       html+=`<div class="task-meta">⭐${t.points??5}</div></div></div>`;
     }
-    if(!habits.length)html+=`<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:12px 0;">No habits scheduled for this day</p>`;
+    if(!habits.length)html+=`<p style="color:var(--ink-faint);font-size:15px;text-align:center;padding:12px 0;">No habits scheduled for this day</p>`;
     html+=`</div><div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveDayModal()">Save &amp; close</button></div></div>`;
     return html;
   }
@@ -2582,7 +2582,7 @@ window.showTaskManagerModal=(defaultTab)=>{
         row.draggable=true;
         row.dataset.id=task.id;
         row.dataset.section=sec.id;
-        row.innerHTML=`<span class="tm-drag-handle">⠿</span><span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0">${sec.label}</span>`;
+        row.innerHTML=`<span class="tm-drag-handle">⠿</span><span style="flex:1;font-size:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:13px;color:var(--ink-faint);flex-shrink:0">${sec.label}</span>`;
         c.appendChild(row);
         rowEls.push({el:row,taskId:task.id,sectionId:sec.id});
       }
@@ -2657,14 +2657,14 @@ window.showTaskManagerModal=(defaultTab)=>{
     const allIds=state.tasks.map(t=>t.id);const allSel=allIds.length>0&&allIds.every(id=>selected.has(id));
     c.innerHTML='';
     const hdr=document.createElement('div');
-    hdr.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;border-bottom:1px solid var(--border)"><div class="tm-checkbox${allSel?' checked':''}" onclick="window._tmToggleAll(${allSel})"></div><span style="font-size:13px;font-weight:500">Select all (${selected.size}/${allIds.length})</span></div>`;
+    hdr.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;border-bottom:1px solid var(--border)"><div class="tm-checkbox${allSel?' checked':''}" onclick="window._tmToggleAll(${allSel})"></div><span style="font-size:15px;font-weight:500">Select all (${selected.size}/${allIds.length})</span></div>`;
     c.appendChild(hdr);
     for(const sec of state.sections){
       const tasks=state.tasks.filter(t=>t.section===sec.id);if(!tasks.length)continue;
       const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.paddingTop='12px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
       for(const task of tasks){
         const row=document.createElement('div');row.className='tm-task-row';row.style.cursor='pointer';
-        row.innerHTML=`<div class="tm-checkbox${selected.has(task.id)?' checked':''}" onclick="window._tmToggle('${task.id}')"></div><span style="flex:1;font-size:14px">${task.emoji?task.emoji+' ':''}${task.name}</span>`;
+        row.innerHTML=`<div class="tm-checkbox${selected.has(task.id)?' checked':''}" onclick="window._tmToggle('${task.id}')"></div><span style="flex:1;font-size:16px">${task.emoji?task.emoji+' ':''}${task.name}</span>`;
         c.appendChild(row);
       }
     }
@@ -2700,7 +2700,7 @@ window.showTaskManagerModal=(defaultTab)=>{
         const tDays=task.days??ALL_DAYS;
         const daysLabel=tDays.length===7?'All days':tDays.map(d=>DAY_ABBR[d]).join(' ');
         const row=document.createElement('div');row.className='tm-task-row';
-        row.innerHTML=`<span style="flex:1;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:10px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button>`;
+        row.innerHTML=`<span style="flex:1;font-size:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:13px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:12px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button>`;
         c.appendChild(row);
       }
     }
@@ -2863,7 +2863,7 @@ async function updateDisplayName(newName){
 
 function showAddFriendModal(){
   const body=`<div class="modal-scroll">
-    <p style="font-size:13px;color:var(--ink-faint);margin-bottom:20px;">Enter your friend's 6-character invite code to send them a request.</p>
+    <p style="font-size:15px;color:var(--ink-faint);margin-bottom:20px;">Enter your friend's 6-character invite code to send them a request.</p>
     <input class="form-input code-input-big" id="friend-code-input" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
     <div class="auth-msg" id="friend-req-error"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="sendFriendRequest(document.getElementById('friend-code-input').value)">Send request</button>
@@ -2908,19 +2908,19 @@ window.showAccountModal=async()=>{
   </div>`).join('');
   const friendProfiles=await loadFriendProfiles();
   const friendsListHTML=friendProfiles.length>0
-    ? friendProfiles.map(p=>`<div class="friend-row"><div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--ink);">${p.displayName||'Unknown user'}</div><div style="font-size:11px;color:var(--ink-faint);letter-spacing:1px;font-family:monospace;">${p.userCode||'------'}</div></div><button class="acc-icon-btn" onclick="removeFriend('${p.uid}')">🗑️</button></div>`).join('')
-    : '<p style="font-size:13px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
+    ? friendProfiles.map(p=>`<div class="friend-row"><div style="flex:1;"><div style="font-size:16px;font-weight:500;color:var(--ink);">${p.displayName||'Unknown user'}</div><div style="font-size:13px;color:var(--ink-faint);letter-spacing:1px;font-family:monospace;">${p.userCode||'------'}</div></div><button class="acc-icon-btn" onclick="removeFriend('${p.uid}')">🗑️</button></div>`).join('')
+    : '<p style="font-size:15px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
   const profileSection=`
   <div class="acc-subtitle">Profile</div>
   <div style="margin-bottom:12px;">
     <div class="form-label" style="margin-bottom:4px;">Display name</div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <span id="acc-dname-display" style="font-size:14px;color:var(--ink);flex:1;">${state.displayName||''}</span>
+      <span id="acc-dname-display" style="font-size:16px;color:var(--ink);flex:1;">${state.displayName||''}</span>
       <button class="acc-icon-btn" onclick="document.getElementById('acc-dname-display').style.display='none';document.getElementById('acc-dname-edit-wrap').style.display='flex';">✏️</button>
     </div>
     <div id="acc-dname-edit-wrap" style="display:none;gap:8px;align-items:center;margin-top:6px;">
       <input class="form-input" id="acc-dname-input" value="${state.displayName||''}" style="flex:1;" maxlength="30"/>
-      <button class="btn btn-primary" style="padding:8px 14px;font-size:13px;" onclick="updateDisplayName(document.getElementById('acc-dname-input').value);document.getElementById('acc-dname-display').textContent=document.getElementById('acc-dname-input').value;document.getElementById('acc-dname-display').style.display='';document.getElementById('acc-dname-edit-wrap').style.display='none';">Save</button>
+      <button class="btn btn-primary" style="padding:8px 14px;font-size:15px;" onclick="updateDisplayName(document.getElementById('acc-dname-input').value);document.getElementById('acc-dname-display').textContent=document.getElementById('acc-dname-input').value;document.getElementById('acc-dname-display').style.display='';document.getElementById('acc-dname-edit-wrap').style.display='none';">Save</button>
     </div>
   </div>
   <div style="margin-bottom:4px;"><div class="form-label" style="margin-bottom:6px;">Your invite code</div>
@@ -2929,7 +2929,7 @@ window.showAccountModal=async()=>{
       <button class="acc-icon-btn" onclick="copyUserCode()">📋</button>
       <button class="acc-icon-btn" onclick="navigator.share?navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>copyUserCode()):copyUserCode()">🔗</button>
     </div>
-    <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
+    <div style="font-size:13px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
   </div>`;
   const friendsSection=`
   <div class="acc-subtitle">Friends <span style="font-weight:400;color:var(--ink-faint);">(${friendCount})</span></div>
@@ -2993,7 +2993,7 @@ window.showAccountModal=async()=>{
     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
     <button class="btn btn-secondary" onclick="doSignOut()">Sign out</button>
   </div>
-  <a onclick="restartTour()" style="font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
+  <a onclick="restartTour()" style="font-size:14px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
 
 </div>`;
   openModal();
