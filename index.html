@@ -1778,6 +1778,26 @@ function renderSectionTabs(){
 
 function makeChallengeId(){return 'ch'+Date.now()+Math.random().toString(36).slice(2,6);}
 
+function recalcChallengeStreak(ch){
+  if(!ch||!ch.completedDays)return;
+  let streak=0;
+  const checkD=new Date();
+  const startD=new Date(ch.startDate);
+  for(let i=0;i<ch.duration+1;i++){
+    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+    if(checkD<startD)break;
+    if(ch.completedDays[k]===true){streak++;checkD.setDate(checkD.getDate()-1);}
+    else if(ch.completedDays[k]===false){break;}
+    else{
+      // undefined — not yet evaluated
+      if(k>=TODAY){checkD.setDate(checkD.getDate()-1);continue;}
+      break; // past day with no record = missed
+    }
+  }
+  ch.currentStreak=streak;
+  if(streak>(ch.bestStreak||0))ch.bestStreak=streak;
+}
+
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
   const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
@@ -1785,7 +1805,8 @@ function evaluateChallenges(){
   let changed=false;
   for(const ch of state.challenges){
     if(ch.status!=='active')continue;
-    if(ch.lastEvaluatedDay===yKey)continue;
+    // Skip only if we already have a recorded result for this day — allows retroactive re-evaluation
+    if(ch.completedDays&&ch.completedDays[yKey]!==undefined)continue;
     const habitPool=ch.habitIds&&ch.habitIds.length>0
       ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
       :state.tasks;
@@ -1844,16 +1865,9 @@ function markChallengeToday(id,e){
   ch.completedDays=ch.completedDays||{};
   if(ch.completedDays[TODAY]){showToast('Already marked today ✓');return;}
   ch.completedDays[TODAY]=true;
-  let streak=0;
-  const checkD=new Date();
-  while(streak<ch.duration+1){
-    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
-    if(ch.completedDays[k]){streak++;checkD.setDate(checkD.getDate()-1);}
-    else break;
-  }
-  ch.currentStreak=streak;
-  if(streak>=(ch.bestStreak||0))ch.bestStreak=streak;
   ch.lastCompletedDay=TODAY;
+  recalcChallengeStreak(ch);
+  const streak=ch.currentStreak;
 
   if(ch.type==='custom'){
     ch.completedDaysTotal=(ch.completedDaysTotal||0)+1;
@@ -1895,6 +1909,39 @@ function abandonChallenge(id){
 }
 window.abandonChallenge=abandonChallenge;
 window.markChallengeToday=markChallengeToday;
+
+function manualRecalcChallenge(id){
+  const ch=state.challenges.find(c=>c.id===id);
+  if(!ch)return;
+  const startD=new Date(ch.startDate);
+  const today=new Date();
+  ch.completedDays=ch.completedDays||{};
+  const habitPool=ch.habitIds&&ch.habitIds.length>0
+    ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
+    :state.tasks;
+  // Walk from challenge start to yesterday, filling in any days that have
+  // habit completion data but no recorded challenge result
+  const cursor=new Date(startD);
+  const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+  while(cursor<=yesterday){
+    const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+    if(ch.completedDays[k]===undefined&&state.completedDays[k]){
+      const dayDone=state.completedDays[k];
+      const doneCount=habitPool.filter(t=>dayDone[t.id]).length;
+      const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+      const threshold=ch.completionThreshold??100;
+      ch.completedDays[k]=pct>=threshold;
+    }
+    cursor.setDate(cursor.getDate()+1);
+  }
+  recalcChallengeStreak(ch);
+  ch.lastEvaluatedDay=null; // clear guard so evaluateChallenges can re-run tomorrow
+  save();
+  closeModal();
+  renderChallenges();
+  showToast(`Streak recalculated — ${ch.currentStreak} day${ch.currentStreak!==1?'s':''} ✓`);
+}
+window.manualRecalcChallenge=manualRecalcChallenge;
 
 function openChallengeDetail(id){
   const ch=state.challenges.find(c=>c.id===id);
@@ -1975,6 +2022,7 @@ function openChallengeDetail(id){
           ?`<div style="text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:10px 0;">Completed today ✓</div>`
           :`<button class="btn btn-primary" style="width:100%;" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}
       </div>
+      <button onclick="manualRecalcChallenge('${ch.id}')" style="background:none;border:none;color:var(--ink-faint);font-size:13px;text-decoration:underline;cursor:pointer;padding:4px 0;margin-top:8px;display:block;width:100%;text-align:center;">Recalculate streak from history</button>
       <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
       <span onclick="abandonChallenge('${ch.id}')" style="font-size:13px;color:var(--danger);cursor:pointer;text-align:center;display:block;padding:8px;">Abandon challenge</span>
     `:''}
