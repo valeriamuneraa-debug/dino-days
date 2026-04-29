@@ -624,13 +624,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* PAGES */
   .page { padding-bottom: 40px !important; }
 
-  /* TODAY PAGE */
-  .today-hero { margin: 20px 32px; border-radius: 20px; padding: 24px 28px; }
+  /* TODAY PAGE — single container padding, all children flush */
+  #page-today { padding-left: 32px; padding-right: 32px; }
+  .today-hero { margin: 20px 0; border-radius: 20px; padding: 24px 28px; width: 100%; box-sizing: border-box; }
   .today-hero h2 { font-size: 26px; }
-  .streak-row { padding: 12px 32px; }
-  .progress-bar-wrap { margin: 0 32px 16px; }
-  .section-label { padding: 14px 32px 8px; }
-  .task-list { padding: 0 20px; }
+  .streak-row { padding: 12px 0; margin: 0; width: 100%; box-sizing: border-box; }
+  .progress-bar-wrap { margin: 0 0 16px; width: 100%; box-sizing: border-box; }
+  .active-challenges-banner { margin: 8px 0; width: 100%; box-sizing: border-box; }
+  .section-tabs { padding: 12px 0; margin: 0; }
+  .section-label { padding: 14px 0 8px; }
+  .task-list { padding: 0; }
+  #tasks-container { padding: 0; margin: 0; }
 
   /* PROGRESS PAGE */
   .progress-page { padding: 0 32px; }
