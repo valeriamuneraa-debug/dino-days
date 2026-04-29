@@ -740,8 +740,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   }
   /* Goal grid — 3 columns */
   #onboarding-overlay .goal-grid { grid-template-columns: repeat(3, 1fr) !important; }
-  /* Theme carousel — centered */
-  #onboarding-overlay .theme-carousel { justify-content: center; }
+  /* Theme carousel — centered, all cards fully visible, no scroll clipping */
+  #onboarding-overlay .theme-carousel {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    overflow: visible !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    scroll-snap-type: none !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  #onboarding-overlay .theme-carousel .theme-card {
+    flex-shrink: 0 !important;
+    width: 140px !important;
+    scroll-snap-align: none !important;
+  }
   /* Step dots — centered */
   #onboarding-overlay .onb-steps { justify-content: center; }
   /* Drag handles: hide in overlay */
