@@ -395,6 +395,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .friend-name{flex:1;font-size:16px;color:var(--ink);}
 .friend-code-small{font-size:13px;color:var(--ink-faint);font-family:monospace;letter-spacing:1px;}
 .code-input-big{text-transform:uppercase;letter-spacing:4px;font-size:26px;text-align:center;font-weight:600;}
+/* SETTINGS PAGE */
+#page-settings{display:none;position:fixed;inset:0;z-index:150;background:var(--page-bg);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.settings-header{position:sticky;top:0;background:var(--page-bg);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 4px;z-index:10;}
+.settings-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;}
+.settings-back-btn{background:none;border:none;cursor:pointer;padding:8px 12px;color:var(--ink);display:flex;align-items:center;z-index:1;}
+.settings-section-label{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-faint);padding:20px 20px 8px;display:block;}
+.settings-card{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:8px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row-label{font-size:16px;color:var(--ink);}
+.settings-row-value{font-size:15px;color:var(--ink-faint);display:flex;align-items:center;gap:8px;}
+.settings-chevron{color:var(--ink-faint);font-size:18px;line-height:1;}
+.settings-inline-expand{padding:4px 20px 16px;border-top:1px solid var(--border);display:none;}
+.settings-inline-expand.open{display:block;}
 #onboarding-displayname{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:flex-start;z-index:2000;padding:44px 24px 36px;text-align:center;background:linear-gradient(160deg,var(--linen) 0%,var(--powder) 100%);overflow-y:auto;}
 
 /* Friends view */
@@ -501,14 +515,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <!-- APP -->
 <div id="app-screen">
   <div id="app">
-    <div class="header">
+    <div class="header" id="app-header">
       <div>
         <div class="header-title">Ritual</div>
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
         <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()">✏️</button>
-        <div style="position:relative;display:inline-block;cursor:pointer;" onclick="showAccountModal()">
+        <div style="position:relative;display:inline-block;cursor:pointer;" onclick="openSettings()">
           <div class="user-avatar" id="user-avatar">?</div>
           <div id="friend-notif-dot" style="display:none;width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:0;right:0;"></div>
         </div>
@@ -609,6 +623,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
     <div class="page" id="page-challenges">
       <div class="challenges-page" id="challenges-inner"></div>
+    </div>
+
+    <div id="page-settings">
+      <div class="settings-header">
+        <button class="settings-back-btn" onclick="closeSettings()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+        <span class="settings-title">Settings</span>
+        <div style="width:46px;"></div>
+      </div>
+      <div id="settings-content" style="padding-bottom:60px;"></div>
     </div>
 
     <div class="tab-bar">
@@ -2244,7 +2267,7 @@ async function renderFriends(){
 
   // Pending request banner
   if(pendingCount>0){
-    html+=`<div class="friend-req-banner"><span style="font-size:15px;color:var(--ink);">📬 ${pendingCount} friend request${pendingCount!==1?'s':''} pending</span><span class="friend-req-banner-link" onclick="showAccountModal()">Review →</span></div>`;
+    html+=`<div class="friend-req-banner"><span style="font-size:15px;color:var(--ink);">📬 ${pendingCount} friend request${pendingCount!==1?'s':''} pending</span><span class="friend-req-banner-link" onclick="openSettings()">Review →</span></div>`;
   }
 
   if(friendCount===0){
@@ -3566,7 +3589,7 @@ async function acceptFriendRequest(reqDocId,fromUid){
     updateFriendNotificationBadge();
     save();
     showToast('Friend added! 🎉');
-    showAccountModal();
+    showFriendsSheet();
   }catch(e){
     console.error('Accept friend request error:',e);
     if(e.code==='permission-denied'){
@@ -3582,7 +3605,7 @@ async function declineFriendRequest(reqDocId){
     await updateDoc(doc(db,'friendRequests',reqDocId),{status:'declined',respondedAt:new Date().toISOString()});
     _pendingIncomingRequests=_pendingIncomingRequests.filter(r=>r.docId!==reqDocId);
     updateFriendNotificationBadge();
-    showAccountModal();
+    showFriendsSheet();
   }catch(e){console.error(e);showToast('Error declining request.');}
 }
 
@@ -3602,7 +3625,7 @@ async function removeFriend(uid){
       }
     }catch(e){console.warn('Could not update their friendIds:',e);}
     showToast('Friend removed');
-    showAccountModal();
+    showFriendsSheet();
   };
   document.getElementById('confirm-title').textContent='Remove friend?';
   document.getElementById('confirm-msg').textContent='You will no longer be connected.';
@@ -3653,10 +3676,140 @@ window.declineFriendRequest=declineFriendRequest;
 window.removeFriend=removeFriend;
 window.updateDisplayName=updateDisplayName;
 
-window.showAccountModal=async()=>{
+window.openSettings=async function(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab-bar').style.display='none';
+  document.querySelector('.fab').style.display='none';
+  document.getElementById('app-header').style.display='none';
+  document.getElementById('page-settings').style.display='block';
+  await renderSettingsContent();
+};
+
+window.closeSettings=function(){
+  document.getElementById('page-settings').style.display='none';
+  document.getElementById('app-header').style.display='flex';
+  document.querySelector('.tab-bar').style.display='flex';
+  restoreActiveTab();
+  updateFAB(currentTab);
+};
+
+async function renderSettingsContent(){
   const notifOn=state?.preferences?.notifications??false;
   const friendCount=(state.friendIds||[]).length;
-  const incomingHTML=_pendingIncomingRequests.map(r=>`
+  const pendingCount=(_pendingIncomingRequests||[]).length;
+  const themeSwatches=Object.keys(THEMES).map(key=>{const t=THEMES[key];const active=(state?.theme||'blush')===key;return`<button class="theme-swatch" id="tswatch-${key}" onclick="applyAccountTheme('${key}')" title="${THEME_LABELS[key]}" aria-label="${THEME_LABELS[key]}" style="background:${t.powder};border:2px solid ${t.almond};box-shadow:${active?`0 0 0 3px ${t.almond}`:'none'};"></button>`;}).join('');
+  document.getElementById('settings-content').innerHTML=`
+    <span class="settings-section-label">Profile</span>
+    <div class="settings-card">
+      <div class="settings-row" style="cursor:pointer;" onclick="toggleSettingsNameEdit()">
+        <span class="settings-row-label">Name</span>
+        <span class="settings-row-value"><span id="sett-dname-val">${state.displayName||''}</span><span class="settings-chevron">›</span></span>
+      </div>
+      <div id="sett-name-expand" class="settings-inline-expand">
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+          <input class="form-input" id="sett-dname-input" value="${state.displayName||''}" maxlength="30" style="flex:1;"/>
+          <button class="btn btn-primary" style="padding:8px 14px;font-size:15px;white-space:nowrap;" onclick="saveSettingsName()">Save</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-label">Email</span>
+        <span class="settings-row-value" style="font-size:14px;">${currentUser?.email||''}</span>
+      </div>
+      <div class="settings-row" style="cursor:pointer;" onclick="copyUserCode()">
+        <span class="settings-row-label">Invite code</span>
+        <span class="settings-row-value"><span style="font-family:monospace;letter-spacing:2px;font-size:14px;">${state.userCode||'------'}</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+      </div>
+    </div>
+
+    <span class="settings-section-label">Social</span>
+    <div class="settings-card">
+      <div class="settings-row" style="cursor:pointer;" onclick="showFriendsSheet()">
+        <span class="settings-row-label">Friends${pendingCount>0?` <span style="background:var(--danger);color:white;border-radius:100px;padding:1px 7px;font-size:12px;margin-left:6px;">${pendingCount}</span>`:''}
+        </span>
+        <span class="settings-row-value">${friendCount}<span class="settings-chevron">›</span></span>
+      </div>
+      <div class="settings-row" style="cursor:pointer;" onclick="showAddFriendModal()">
+        <span class="settings-row-label">Add a friend</span>
+        <span class="settings-row-value"><span class="settings-chevron">›</span></span>
+      </div>
+    </div>
+
+    <span class="settings-section-label">Security</span>
+    <div class="settings-card">
+      <div class="settings-row" style="cursor:pointer;" onclick="toggleSettingsPwChange()">
+        <span class="settings-row-label">Change password</span>
+        <span class="settings-row-value"><span class="settings-chevron">›</span></span>
+      </div>
+      <div id="sett-pw-expand" class="settings-inline-expand">
+        <div class="form-group" style="margin-top:12px;"><label class="form-label">Current password</label><input class="form-input" id="acc-curr-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+        <div class="form-group"><label class="form-label">New password</label><input class="form-input" id="acc-new-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+        <div class="form-group"><label class="form-label">Confirm new password</label><input class="form-input" id="acc-conf-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+        <div class="auth-msg" id="acc-pw-msg"></div>
+        <button class="btn btn-primary" style="width:100%" id="acc-pw-btn" onclick="doChangePassword()">Save password</button>
+      </div>
+    </div>
+
+    <span class="settings-section-label">Appearance</span>
+    <div class="settings-card">
+      <div class="settings-row">
+        <span class="settings-row-label">Theme</span>
+        <span class="settings-row-value"><div class="theme-swatches" style="margin:0;padding:0;">${themeSwatches}</div></span>
+      </div>
+    </div>
+
+    <span class="settings-section-label">Preferences</span>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Daily reminders</div>
+          <div style="font-size:13px;color:var(--ink-faint);margin-top:2px;">Get notified to complete your habits</div>
+        </div>
+        <button class="acc-toggle${notifOn?' on':''}" id="notif-toggle" onclick="doToggleNotifications()" aria-label="Toggle daily reminders"><span></span></button>
+      </div>
+    </div>
+
+    <span class="settings-section-label">Account</span>
+    <div class="settings-card">
+      <div class="settings-row" style="cursor:pointer;" onclick="doSignOut()">
+        <span class="settings-row-label">Sign out</span>
+      </div>
+      <div class="settings-row" style="cursor:pointer;" onclick="triggerDeleteAccount()">
+        <span class="settings-row-label" style="color:var(--danger);">Delete my account</span>
+      </div>
+    </div>
+
+    <a onclick="restartTour()" style="font-size:13px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;padding:20px;">Restart onboarding tour</a>
+  `;
+}
+
+window.toggleSettingsNameEdit=function(){
+  const el=document.getElementById('sett-name-expand');
+  if(!el)return;
+  el.classList.toggle('open');
+  if(el.classList.contains('open'))document.getElementById('sett-dname-input')?.focus();
+};
+
+window.saveSettingsName=function(){
+  const input=document.getElementById('sett-dname-input');
+  if(!input)return;
+  const name=input.value.trim();
+  if(!name)return;
+  updateDisplayName(name);
+  const valEl=document.getElementById('sett-dname-val');
+  if(valEl)valEl.textContent=name;
+  document.getElementById('sett-name-expand')?.classList.remove('open');
+  showToast('Name updated');
+};
+
+window.toggleSettingsPwChange=function(){
+  const el=document.getElementById('sett-pw-expand');
+  if(!el)return;
+  el.classList.toggle('open');
+  if(el.classList.contains('open'))document.getElementById('acc-curr-pw')?.focus();
+};
+
+window.showFriendsSheet=async function(){
+  const incomingHTML=(_pendingIncomingRequests||[]).map(r=>`
   <div class="friend-request-card">
     <div class="friend-request-name">${r.fromDisplayName||'Someone'} wants to be your friend</div>
     <div class="friend-request-code">Code: ${r.fromCode||''}</div>
@@ -3667,95 +3820,27 @@ window.showAccountModal=async()=>{
   </div>`).join('');
   const friendProfiles=await loadFriendProfiles();
   const friendsListHTML=friendProfiles.length>0
-    ? friendProfiles.map(p=>`<div class="friend-row"><div style="flex:1;"><div style="font-size:16px;font-weight:500;color:var(--ink);">${p.displayName||'Unknown user'}</div><div style="font-size:13px;color:var(--ink-faint);letter-spacing:1px;font-family:monospace;">${p.userCode||'------'}</div></div><button class="acc-icon-btn" onclick="removeFriend('${p.uid}')">🗑️</button></div>`).join('')
-    : '<p style="font-size:15px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
-  const profileSection=`
-  <div class="acc-subtitle">Profile</div>
-  <div style="margin-bottom:12px;">
-    <div class="form-label" style="margin-bottom:4px;">Display name</div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span id="acc-dname-display" style="font-size:16px;color:var(--ink);flex:1;">${state.displayName||''}</span>
-      <button class="acc-icon-btn" onclick="document.getElementById('acc-dname-display').style.display='none';document.getElementById('acc-dname-edit-wrap').style.display='flex';">✏️</button>
-    </div>
-    <div id="acc-dname-edit-wrap" style="display:none;gap:8px;align-items:center;margin-top:6px;">
-      <input class="form-input" id="acc-dname-input" value="${state.displayName||''}" style="flex:1;" maxlength="30"/>
-      <button class="btn btn-primary" style="padding:8px 14px;font-size:15px;" onclick="updateDisplayName(document.getElementById('acc-dname-input').value);document.getElementById('acc-dname-display').textContent=document.getElementById('acc-dname-input').value;document.getElementById('acc-dname-display').style.display='';document.getElementById('acc-dname-edit-wrap').style.display='none';">Save</button>
-    </div>
-  </div>
-  <div style="margin-bottom:4px;"><div class="form-label" style="margin-bottom:6px;">Your invite code</div>
-    <div class="acc-code-row">
-      <span class="acc-code-pill">${state.userCode||'------'}</span>
-      <button class="acc-icon-btn" onclick="copyUserCode()" title="Copy code"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
-      <button class="acc-icon-btn" onclick="navigator.share?navigator.share({title:'Join me on Ritual',text:'Add me on Ritual! My code is ${state.userCode||''}',url:window.location.href}).catch(()=>copyUserCode()):copyUserCode()" title="Share code"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-    </div>
-    <div style="font-size:13px;color:var(--ink-faint);margin-top:4px;">Share this code with friends to connect</div>
+    ?friendProfiles.map(p=>`<div class="friend-row"><div style="flex:1;"><div style="font-size:16px;font-weight:500;color:var(--ink);">${p.displayName||'Unknown user'}</div><div style="font-size:13px;color:var(--ink-faint);letter-spacing:1px;font-family:monospace;">${p.userCode||'------'}</div></div><button class="acc-icon-btn" onclick="removeFriend('${p.uid}')">🗑️</button></div>`).join('')
+    :'<p style="font-size:15px;color:var(--ink-faint);padding:8px 0;">No friends yet. Add one with their invite code!</p>';
+  const body=`<div class="modal-scroll">
+    ${incomingHTML}
+    <div style="margin-bottom:12px;">${friendsListHTML}</div>
+    <button class="btn btn-secondary" style="width:100%;margin-top:4px;" onclick="showAddFriendModal()">+ Add a friend</button>
   </div>`;
-  const friendsSection=`
-  <div class="acc-subtitle">Friends <span style="font-weight:400;color:var(--ink-faint);">(${friendCount})</span></div>
-  ${incomingHTML}
-  <div style="margin-bottom:12px;">${friendsListHTML}</div>
-  <button class="btn btn-secondary" style="width:100%;margin-bottom:4px;" onclick="showAddFriendModal()">+ Add a friend</button>`;
-  document.getElementById('modal-title').textContent='Account & settings';
-  document.getElementById('modal-body').innerHTML=`
-<div class="modal-scroll">
+  showModal('Friends',body);
+};
 
-  <div class="acc-section-title">Profile</div>
-  <div class="form-group">
-    <label class="form-label">Email</label>
-    <div class="acc-email-field">${currentUser?.email||''}</div>
-  </div>
-  ${profileSection}
-  ${friendsSection}
-
-  <div class="acc-divider"></div>
-
-  <div class="acc-subtitle">Change password</div>
-  <div class="form-group"><label class="form-label">Current password</label><input class="form-input" id="acc-curr-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
-  <div class="form-group"><label class="form-label">New password</label><input class="form-input" id="acc-new-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
-  <div class="form-group"><label class="form-label">Confirm new password</label><input class="form-input" id="acc-conf-pw" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
-  <div class="auth-msg" id="acc-pw-msg"></div>
-  <button class="btn btn-primary" style="width:100%" id="acc-pw-btn" onclick="doChangePassword()">Save password</button>
-
-  <div class="acc-divider"></div>
-
-  <div class="acc-section-title">Appearance</div>
-  <div class="theme-swatches">${Object.keys(THEMES).map(key=>{const t=THEMES[key];const active=(state?.theme||'blush')===key;return`<button class="theme-swatch" id="tswatch-${key}" onclick="applyAccountTheme('${key}')" title="${THEME_LABELS[key]}" aria-label="${THEME_LABELS[key]}" style="background:${t.powder};border:2px solid ${t.almond};box-shadow:${active?`0 0 0 3px ${t.almond}`:'none'};"></button>`;}).join('')}</div>
-
-  <div class="acc-divider"></div>
-
-  <div class="acc-section-title">Preferences</div>
-  <div class="acc-pref-row">
-    <div>
-      <div class="acc-pref-label">Daily reminders</div>
-      <div class="acc-pref-sub">Get notified to complete your habits</div>
-    </div>
-    <button class="acc-toggle${notifOn?' on':''}" id="notif-toggle" onclick="doToggleNotifications()" aria-label="Toggle daily reminders"><span></span></button>
-  </div>
-
-  <div class="acc-divider"></div>
-
-  <div class="acc-section-title" style="color:var(--danger)">Danger zone</div>
-  <p class="acc-danger-note">Deleting your account is permanent and removes all your data. This cannot be undone.</p>
-  <button class="btn btn-danger" style="width:100%" id="acc-delete-btn" onclick="doDeleteAccount()">Delete my account</button>
-  <div id="acc-delete-zone" style="display:none;margin-top:14px;">
+window.triggerDeleteAccount=function(){
+  const body=`<div class="modal-scroll">
+    <p style="font-size:14px;color:var(--ink-soft);margin-bottom:20px;line-height:1.5;">Deleting your account is permanent and removes all your data. This cannot be undone.</p>
     <div class="form-group"><label class="form-label">Enter your password to confirm</label><input class="form-input" id="acc-delete-pw" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
     <div class="auth-msg" id="acc-delete-msg"></div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="cancelDeleteAccount()">Cancel</button>
-      <button class="btn btn-danger" id="acc-delete-confirm-btn" onclick="confirmDeleteAccount()">Confirm delete</button>
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="acc-delete-confirm-btn" onclick="confirmDeleteAccount()">Delete account</button>
     </div>
-  </div>
-
-  <div class="acc-divider"></div>
-
-  <div class="form-actions">
-    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-    <button class="btn btn-secondary" onclick="doSignOut()">Sign out</button>
-  </div>
-  <a onclick="restartTour()" style="font-size:14px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;text-align:center;display:block;margin-top:16px;">Restart onboarding tour</a>
-
-</div>`;
-  openModal();
+  </div>`;
+  showModal('Delete account',body);
 };
 
 window.doChangePassword=async()=>{
@@ -3788,18 +3873,6 @@ window.doToggleNotifications=()=>{
   if(btn)btn.className='acc-toggle'+(state.preferences.notifications?' on':'');
   save();
   showToast(state.preferences.notifications?'Reminders on 🔔':'Reminders off');
-};
-
-window.doDeleteAccount=()=>{
-  document.getElementById('acc-delete-zone').style.display='block';
-  document.getElementById('acc-delete-btn').style.display='none';
-  setTimeout(()=>{const el=document.getElementById('acc-delete-pw');if(el)el.focus();},80);
-};
-
-window.cancelDeleteAccount=()=>{
-  document.getElementById('acc-delete-zone').style.display='none';
-  document.getElementById('acc-delete-btn').style.display='';
-  const msg=document.getElementById('acc-delete-msg');if(msg)msg.className='auth-msg';
 };
 
 window.confirmDeleteAccount=async()=>{
@@ -3876,7 +3949,8 @@ window.doSignOut=async()=>{
   cleanupSocialChallengeListeners();
   socialChallengesCache=[];
   localStorage.removeItem('streaks-theme');
-  await signOut(auth);closeModal();
+  document.getElementById('page-settings').style.display='none';
+  await signOut(auth);
 };
 
 // ONBOARDING TOUR
