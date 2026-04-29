@@ -2273,6 +2273,7 @@ function renderTodayBanner(){
 }
 
 function renderChallenges(){
+  window.__ch0=state.challenges[0];
   if(!state)return;
   const inner=document.getElementById('challenges-inner');
   if(!inner)return;
