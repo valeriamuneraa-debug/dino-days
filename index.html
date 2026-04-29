@@ -680,22 +680,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* Section labels sit inside the padded wrapper, so 0 horizontal padding */
   #challenges-inner .challenge-section-label { padding: 16px 0 8px; }
 
-  /* ── FIX 3: ONBOARDING — centred fixed card on desktop ── */
+  /* ── FIX 3: ONBOARDING — full-screen takeover, sidebar collapsed ── */
+  /* Collapse sidebar when onboarding is active */
+  #app.onboarding-active {
+    grid-template-columns: 0px 1fr;
+  }
+  #app.onboarding-active #desktop-sidebar {
+    display: none !important;
+  }
+  /* Warm gradient fills the right column during onboarding */
+  #app.onboarding-active #desktop-main {
+    background: linear-gradient(160deg, var(--linen) 0%, var(--powder) 100%);
+  }
+  /* Reset centered-card overrides — screens are full-screen again */
   #onboarding-theme,
   #onboarding-displayname,
   #onboarding-goals,
   #onboarding-habits,
   #onboarding-rewards,
   #onboarding-welcome {
-    left: 50%;
-    right: auto;
-    top: 24px;
-    bottom: auto;
-    transform: translateX(-50%);
-    max-width: 640px;
-    min-height: calc(100vh - 48px);
-    border-radius: 20px;
-    padding: 40px 32px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    transform: none;
+    max-width: none;
+    min-height: 100vh;
+    border-radius: 0;
+    padding: 48px 40px;
     overflow-y: auto;
   }
   /* Goal grid — 3 columns */
@@ -707,14 +719,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-right: auto !important;
     display: block !important;
   }
-  /* Back arrows — repositioned for wider card */
+  /* Back arrows */
   #onboarding-displayname > button:first-child,
   #onboarding-goals > button:first-child,
   #onboarding-habits > button:first-child,
   #onboarding-rewards > button:first-child,
   #onboarding-welcome > button:first-child {
     top: 24px !important;
-    left: 32px !important;
+    left: 40px !important;
   }
   /* Continue / CTA buttons — not full width */
   #onboarding-displayname .btn-primary,
@@ -730,6 +742,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-right: auto !important;
     flex: none !important;
   }
+  /* Drag handles: hide on desktop during onboarding */
+  #onboarding-theme .modal-handle,
+  #onboarding-displayname .modal-handle,
+  #onboarding-goals .modal-handle,
+  #onboarding-habits .modal-handle,
+  #onboarding-rewards .modal-handle,
+  #onboarding-welcome .modal-handle { display: none; }
 
   /* ── FIX 2: Consistent page width inside #desktop-main ── */
   #desktop-main {
@@ -1267,6 +1286,7 @@ window.confirmHabits=()=>{
 
 function showThemePicker(){
   _onbStep=1;_selectedTheme=state?.theme||'blush';
+  if(window.innerWidth>=900)document.getElementById('app').classList.add('onboarding-active');
   document.getElementById('theme-carousel').innerHTML=Object.keys(THEMES).map(key=>{
     const t=THEMES[key];const sel=_selectedTheme===key;
     return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><div style="width:48px;height:48px;border-radius:50%;background:${t.almond};"></div></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
@@ -1459,7 +1479,13 @@ async function saveFS(){
   setSyncing(false);
 }
 window.saveFS=saveFS;
-window.restartTour=async function(){state.onboardingComplete=false;await setDoc(doc(db,'users',currentUser.uid),state);location.reload();};
+window.restartTour=async function(){
+  closeSettings();
+  const todayBtn=document.querySelector('[data-tab="today"]');
+  if(todayBtn)switchTab('today',todayBtn);
+  await new Promise(r=>setTimeout(r,300));
+  showWelcome();
+};
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
 
 function showToast(msg,dur=2200,type=''){const t=document.getElementById('toast');t.textContent=msg;t.style.background=type==='danger'?'var(--danger)':'';t.classList.add('show');setTimeout(()=>{t.classList.remove('show');t.style.background='';},dur);}
@@ -4352,7 +4378,7 @@ const TOUR_STEPS=[
   {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                         lift:null,       setPos:true},
 ];
 
-function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';}
+function showWelcome(){_onbStep=6;if(window.innerWidth>=900)document.getElementById('app').classList.add('onboarding-active');document.getElementById('onboarding-welcome').style.display='flex';}
 
 function clearTourHighlight(){
   if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
@@ -4407,38 +4433,45 @@ function showTourStep(step){
   const tooltip=document.getElementById('tour-tooltip');
   tooltip.style.display='block';
 
-  // Position tooltip near element
+  // Position tooltip
   requestAnimationFrame(()=>{
-    const rect=el.getBoundingClientRect();
-    const tw=Math.min(280,window.innerWidth-40);
-    tooltip.style.width=tw+'px';
-    const th=tooltip.offsetHeight||140;
     const vw=window.innerWidth,vh=window.innerHeight,gap=16;
-
-    let top,left;
-    if(isDesktop&&step<4){
-      // Desktop: position tooltip to the RIGHT of the sidebar item, vertically centered
-      left=rect.right+gap;
-      // If tooltip would overflow right edge, position to the left instead
-      if(left+tw>vw-16)left=rect.left-tw-gap;
-      left=Math.max(16,left);
-      top=rect.top+rect.height/2-th/2;
-      top=Math.max(80,Math.min(top,vh-th-16));
+    if(isDesktop){
+      // Desktop: center the tooltip on screen
+      const tw=Math.min(360,vw-40);
+      tooltip.style.width=tw+'px';
+      tooltip.style.position='fixed';
+      tooltip.style.top='50%';
+      tooltip.style.left='50%';
+      tooltip.style.transform='translate(-50%,-50%)';
     }else{
-      // Mobile: original positioning logic
+      // Mobile: original anchor-to-element logic
+      tooltip.style.transform='';
+      const rect=el.getBoundingClientRect();
+      const tw=Math.min(280,vw-40);
+      tooltip.style.width=tw+'px';
+      const th=tooltip.offsetHeight||140;
+      let top,left;
       if(cfg.lift==='.header'){top=rect.bottom+gap;}
       else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;}
       else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
       top=Math.max(80,Math.min(top,vh-th-16));
       left=rect.left+rect.width/2-tw/2;
       left=Math.max(16,Math.min(left,vw-tw-16));
+      tooltip.style.top=top+'px';tooltip.style.left=left+'px';
     }
-    tooltip.style.top=top+'px';tooltip.style.left=left+'px';
   });
 }
 
-window.startTour=()=>{
+window.startTour=async()=>{
   document.getElementById('onboarding-welcome').style.display='none';
+  if(window.innerWidth>=900){
+    const sp=document.getElementById('page-settings');
+    if(sp&&sp.style.display!=='none')sp.style.display='none';
+    const todayBtn=document.querySelector('[data-tab="today"]');
+    if(todayBtn)switchTab('today',todayBtn);
+    await new Promise(r=>setTimeout(r,300));
+  }
   document.getElementById('tour-overlay').style.display='block';
   tourStep=0;showTourStep(0);
 };
@@ -4449,6 +4482,8 @@ function endTour(){
   document.getElementById('onboarding-welcome').style.display='none';
   document.getElementById('tour-overlay').style.display='none';
   document.getElementById('tour-tooltip').style.display='none';
+  document.getElementById('app').classList.remove('onboarding-active');
+  if(window.innerWidth>=900){const sb=document.getElementById('desktop-sidebar');if(sb)sb.style.display='flex';}
   if(state&&!state.onboardingComplete){state.onboardingComplete=true;save();}
   updateAll();
 }
