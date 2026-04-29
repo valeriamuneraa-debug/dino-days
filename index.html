@@ -1819,16 +1819,20 @@ function recalcChallengeStreak(ch){
   // Pass 2: count consecutive streak backwards from today
   let streak=0;
   const checkD=new Date();
-  const todayD=new Date();todayD.setHours(0,0,0,0);
-  for(let i=0;i<ch.duration+1;i++){
+  checkD.setHours(0,0,0,0);
+  const todayD=new Date();
+  todayD.setHours(0,0,0,0);
+  const startD2=new Date(ch.startDate);
+  startD2.setHours(0,0,0,0);
+  for(let i=0;i<=ch.duration+1;i++){
     const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
-    if(checkD<startD)break;
+    if(checkD<startD2)break;
     if(ch.completedDays[k]===true){streak++;checkD.setDate(checkD.getDate()-1);}
     else if(ch.completedDays[k]===false){break;}
     else{
-      // undefined — skip future/today, break on past (unresolved = miss)
-      const cmp=new Date(checkD);cmp.setHours(0,0,0,0);
-      if(cmp>=todayD){checkD.setDate(checkD.getDate()-1);continue;}
+      // undefined — today or future: skip and keep counting backwards
+      if(checkD.getTime()>=todayD.getTime()){checkD.setDate(checkD.getDate()-1);continue;}
+      // past day with no record — treat as miss, break
       break;
     }
   }
@@ -2273,7 +2277,7 @@ function renderTodayBanner(){
 }
 
 function renderChallenges(){
-  window.__chDebug={count:(state.challenges||[]).length,all:state.challenges};
+
   if(!state)return;
   const inner=document.getElementById('challenges-inner');
   if(!inner)return;
