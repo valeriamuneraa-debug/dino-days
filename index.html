@@ -1842,97 +1842,64 @@ function recalcChallengeStreak(ch){
 
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const yKey=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
   let changed=false;
   for(const ch of state.challenges){
     if(ch.status!=='active')continue;
-    // Skip only if we already have a recorded result for this day — allows retroactive re-evaluation
-    if(ch.completedDays&&ch.completedDays[yKey]!==undefined)continue;
+    if(ch.type==='bond'||ch.type==='race')continue; // social challenges handled separately
     const habitPool=ch.habitIds&&ch.habitIds.length>0
       ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
       :state.tasks;
-    if(!habitPool.length){ch.lastEvaluatedDay=yKey;changed=true;continue;}
-    const yDone=state.completedDays[yKey]||{};
-    const doneCount=habitPool.filter(t=>yDone[t.id]).length;
-    const pct=Math.round(doneCount/habitPool.length*100);
+    if(!habitPool.length)continue;
     const threshold=ch.completionThreshold??100;
-    const dayMet=pct>=threshold;
-
-    // ── Custom evaluation ────────────────────────────────────────
+    const startD=new Date(ch.startDate);startD.setHours(0,0,0,0);
+    const today=new Date();today.setHours(0,0,0,0);
+    const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+    ch.completedDays=ch.completedDays||{};
+    // Walk every day from startDate to yesterday, fill in any unrecorded day
+    const cursor=new Date(startD);
+    while(cursor<=yesterday){
+      const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+      if(ch.completedDays[k]===undefined){
+        const dayData=state.completedDays[k];
+        if(dayData){
+          const doneCount=habitPool.filter(t=>dayData[t.id]).length;
+          const pct=Math.round(doneCount/habitPool.length*100);
+          ch.completedDays[k]=pct>=threshold;
+        }else{
+          const daysSinceStart=Math.floor((cursor-startD)/(1000*60*60*24));
+          if(daysSinceStart>0)ch.completedDays[k]=false;
+        }
+        changed=true;
+      }
+      cursor.setDate(cursor.getDate()+1);
+    }
+    // Also check today if habits are already logged
+    const todayKey=TODAY;
+    if(ch.completedDays[todayKey]===undefined&&state.completedDays[todayKey]){
+      const dayData=state.completedDays[todayKey];
+      const doneCount=habitPool.filter(t=>dayData[t.id]).length;
+      const pct=Math.round(doneCount/habitPool.length*100);
+      if(pct>=threshold){ch.completedDays[todayKey]=true;changed=true;}
+    }
+    // Rebuild streak from complete history
+    const prevStreak=ch.currentStreak;
+    recalcChallengeStreak(ch);
+    // Handle custom challenge total count
     if(ch.type==='custom'){
-      ch.completedDays=ch.completedDays||{};
-      if(dayMet){
-        ch.completedDays[yKey]=true;
-        ch.completedDaysTotal=(ch.completedDaysTotal||0)+1;
-        ch.currentStreak=(ch.currentStreak||0)+1;
-        if(ch.currentStreak>=(ch.bestStreak||0))ch.bestStreak=ch.currentStreak;
-        ch.lastCompletedDay=yKey;
-        const won=ch.victoryCondition==='total'
-          ?(ch.completedDaysTotal>=(ch.totalTarget||ch.duration))
-          :(ch.currentStreak>=(ch.streakRequired||ch.duration));
-        if(won){ch.status='completed';showToast('🏆 Custom challenge complete! You did it!');}
-      }else{
-        ch.completedDays[yKey]=false;
-        if(!ch.allowMisses&&yKey>ch.startDate){ch.currentStreak=0;}
-      }
-      ch.lastEvaluatedDay=yKey;changed=true;
-      continue;
+      ch.completedDaysTotal=Object.values(ch.completedDays).filter(v=>v===true).length;
     }
-
-    // ── Standard / solo evaluation ───────────────────────────────
-    if(dayMet){
-      ch.completedDays=ch.completedDays||{};
-      ch.completedDays[yKey]=true;
-      ch.currentStreak=(ch.currentStreak||0)+1;
-      if(ch.currentStreak>=(ch.bestStreak||0))ch.bestStreak=ch.currentStreak;
-      ch.lastCompletedDay=yKey;
-      if(ch.currentStreak>=ch.duration){
-        ch.status='completed';
-        showToast('🏆 Challenge complete! You did it!');
-      }
+    // Check win condition
+    if(ch.type==='custom'){
+      const won=ch.victoryCondition==='total'
+        ?ch.completedDaysTotal>=(ch.totalTarget||ch.duration)
+        :ch.currentStreak>=(ch.streakRequired||ch.duration);
+      if(won){ch.status='completed';showToast('🏆 Custom challenge complete!');changed=true;}
     }else{
-      if(yKey>ch.startDate){ch.currentStreak=0;}
+      if(ch.currentStreak>=ch.duration){ch.status='completed';showToast('🏆 Challenge complete! You did it!');changed=true;}
     }
-    ch.lastEvaluatedDay=yKey;
-    changed=true;
+    if(ch.currentStreak!==prevStreak)changed=true;
   }
   if(changed)save();
-}
-
-function markChallengeToday(id,e){
-  if(e)e.stopPropagation();
-  const ch=state.challenges.find(c=>c.id===id);
-  if(!ch||ch.status!=='active')return;
-  ch.completedDays=ch.completedDays||{};
-  if(ch.completedDays[TODAY]){showToast('Already marked today ✓');return;}
-  ch.completedDays[TODAY]=true;
-  ch.lastCompletedDay=TODAY;
-  recalcChallengeStreak(ch);
-  const streak=ch.currentStreak;
-
-  if(ch.type==='custom'){
-    ch.completedDaysTotal=(ch.completedDaysTotal||0)+1;
-    const won=ch.victoryCondition==='total'
-      ?(ch.completedDaysTotal>=(ch.totalTarget||ch.duration))
-      :(streak>=(ch.streakRequired||ch.duration));
-    if(won){
-      ch.status='completed';
-      showToast('🏆 Custom challenge complete! Incredible!');
-    }else{
-      const target=ch.victoryCondition==='total'?ch.totalTarget||ch.duration:ch.streakRequired||ch.duration;
-      const progress=ch.victoryCondition==='total'?ch.completedDaysTotal:streak;
-      showToast(`${progress}/${target} — keep going! ⚙️`);
-    }
-  }else if(streak>=ch.duration){
-    ch.status='completed';
-    showToast('🏆 Challenge complete! Incredible!');
-  }else{
-    showToast(`Day ${streak} of ${ch.duration} complete! Keep going 🔥`);
-  }
-  save();
-  renderChallenges();
-  renderTodayBanner();
 }
 
 function abandonChallenge(id){
@@ -1950,24 +1917,6 @@ function abandonChallenge(id){
   document.getElementById('confirm-overlay').classList.add('open');
 }
 window.abandonChallenge=abandonChallenge;
-window.markChallengeToday=markChallengeToday;
-
-function manualRecalcChallenge(id){
-  const ch=state.challenges.find(c=>c.id===id);
-  if(!ch||ch.status!=='active')return;
-  // recalcChallengeStreak now handles the fill-in pass itself
-  recalcChallengeStreak(ch);
-  // For custom challenges, recount total completed days from the filled record
-  if(ch.type==='custom'){
-    ch.completedDaysTotal=Object.values(ch.completedDays||{}).filter(v=>v===true).length;
-  }
-  ch.lastEvaluatedDay=null; // clear guard so evaluateChallenges can re-run tonight
-  save();
-  closeModal();
-  renderChallenges();
-  showToast(`Streak recalculated — ${ch.currentStreak} day${ch.currentStreak!==1?'s':''} ✓`);
-}
-window.manualRecalcChallenge=manualRecalcChallenge;
 
 function openChallengeDetail(id){
   const ch=state.challenges.find(c=>c.id===id);
@@ -2043,12 +1992,15 @@ function openChallengeDetail(id){
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">${dayLabels}</div>
     <div class="challenge-heatmap">${heatmapHTML}</div>
     ${ch.status==='active'?`
-      <div style="margin-top:20px;">
-        ${todayDone
-          ?`<div style="text-align:center;font-size:15px;color:var(--success);font-weight:500;padding:10px 0;">Completed today ✓</div>`
-          :`<button class="btn btn-primary" style="width:100%;" onclick="markChallengeToday('${ch.id}',event);closeModal();">Mark today complete ✓</button>`}
-      </div>
-      <button onclick="manualRecalcChallenge('${ch.id}')" style="background:none;border:none;color:var(--ink-faint);font-size:13px;text-decoration:underline;cursor:pointer;padding:4px 0;margin-top:8px;display:block;width:100%;text-align:center;">Recalculate streak from history</button>
+      ${(()=>{
+        const tdDone=ch.completedDays&&ch.completedDays[TODAY]===true;
+        const tdPending=!ch.completedDays||ch.completedDays[TODAY]===undefined;
+        return tdDone
+          ?`<p style="text-align:center;color:var(--success);font-size:14px;margin:12px 0">✓ Today counted</p>`
+          :tdPending
+          ?`<p style="text-align:center;color:var(--ink-faint);font-size:13px;margin:12px 0">Complete your habits today to count this day</p>`
+          :`<p style="text-align:center;color:var(--danger);font-size:13px;margin:12px 0">Today not counted</p>`;
+      })()}
       <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
       <span onclick="abandonChallenge('${ch.id}')" style="font-size:13px;color:var(--danger);cursor:pointer;text-align:center;display:block;padding:8px;">Abandon challenge</span>
     `:''}
@@ -3534,9 +3486,7 @@ function renderChallengeCard(ch){
     :`Day ${ch.currentStreak||0} of ${ch.duration}`;
   let bottomRow='';
   if(ch.status==='active'){
-    bottomRow=todayDone
-      ?`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><span class="challenge-done-badge">Completed today ✓</span></div>`
-      :`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="challenge-mark-btn" onclick="markChallengeToday('${ch.id}',event)">Mark today ✓</button></div>`;
+    bottomRow=`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><span style="font-size:13px;color:${todayDone?'var(--success)':'var(--ink-faint)'}">${todayDone?'✓ Today counted':'Complete habits to count today'}</span></div>`;
   }
   return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
     <div class="challenge-card-title">${ch.title}</div>
