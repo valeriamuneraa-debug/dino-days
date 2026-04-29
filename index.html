@@ -1751,7 +1751,7 @@ function renderTasks(){
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
       const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${sec.charAt(0).toUpperCase()+sec.slice(1)} &nbsp;·&nbsp; <span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta"><span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
@@ -1769,7 +1769,7 @@ function renderTasks(){
       item.onclick=(e)=>window.expandTask(task.id,e);
       const tDays=task.days??ALL_DAYS;
       const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
-      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta">${task.section||'Other'}&nbsp;·&nbsp;<span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
+      item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta"><span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
