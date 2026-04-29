@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="40" fill="#E8C4B8"/>
-  <text x="96" y="120" font-size="80" text-anchor="middle" font-family="serif">R</text>
+  <rect width="192" height="192" rx="40" fill="#F3D8C7"/>
+  <text
+    x="96"
+    y="108"
+    dominant-baseline="middle"
+    text-anchor="middle"
+    font-family="Georgia, serif"
+    font-size="110"
+    font-weight="700"
+    fill="#1d1e1e"
+  >R</text>
 </svg>

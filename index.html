@@ -16,7 +16,7 @@
 body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink);min-height:100vh;overflow-x:hidden;}
 
 /* LOADING */
-#loading-screen{position:fixed;inset:0;background:var(--powder);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;}
+#loading-screen{position:fixed;inset:0;background:var(--linen);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;}
 .loading-logo{width:80px;height:80px;margin:0 auto 24px;animation:logoBounce 1.2s ease-in-out infinite;}
 @keyframes logoBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
 #loading-screen p{margin-top:16px;font-size:16px;color:var(--ink-soft);font-family:'Fraunces', serif;}
@@ -802,7 +802,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <div id="loading-screen">
   <div class="loading-logo">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
-      <rect width="80" height="80" rx="20" fill="var(--almond)"/>
+      <rect width="80" height="80" rx="20" fill="var(--powder)"/>
       <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="'Fraunces', Georgia, serif" font-size="44" font-weight="700" fill="var(--ink)">R</text>
     </svg>
   </div>
@@ -1305,9 +1305,10 @@ window.confirmHabits=()=>{
 
 function showThemePicker(){
   _onbStep=1;_selectedTheme=state?.theme||'blush';
+  const THEME_LOGO_FILL={blush:'#F3D8C7',lavender:'#D8D0F3',mist:'#C8D8E0',sage:'#C8D8C8'};
   document.getElementById('theme-carousel').innerHTML=Object.keys(THEMES).map(key=>{
-    const t=THEMES[key];const sel=_selectedTheme===key;
-    return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="36" height="36" style="flex-shrink:0"><rect width="40" height="40" rx="10" fill="${t.almond}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="'Fraunces', Georgia, serif" font-size="22" font-weight="700" fill="#1d1e1e">R</text></svg></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
+    const t=THEMES[key];const sel=_selectedTheme===key;const lf=THEME_LOGO_FILL[key]||t.powder;
+    return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="36" height="36" style="flex-shrink:0"><rect width="40" height="40" rx="10" fill="${lf}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="'Fraunces', Georgia, serif" font-size="22" font-weight="700" fill="#1d1e1e">R</text></svg></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
   }).join('');
   document.getElementById('onboarding-theme').style.display='flex';
   openOnboardingOverlay('onboarding-theme');
