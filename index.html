@@ -4618,6 +4618,9 @@ const TOUR_STEPS=[
 function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';openOnboardingOverlay('onboarding-welcome');}
 
 function clearTourHighlight(){
+  // Remove pencil clone if present
+  const clone=document.getElementById('tour-pencil-clone');
+  if(clone)clone.remove();
   // Clean class-based highlights (desktop)
   document.querySelectorAll('.tour-highlighted').forEach(e=>{
     e.classList.remove('tour-highlighted');
@@ -4659,6 +4662,34 @@ function highlightTourElement(el){
   el.style.boxShadow='0 0 0 4px var(--powder), 0 0 0 7px var(--almond)';
   el.style.borderRadius='12px';
   el.style.pointerEvents='none';
+  // Special case: pencil button is inside #desktop-main whose stacking context
+  // caps z-index. Break it out with a fixed-position clone at body level.
+  if(window.innerWidth>=900&&el.id==='tour-pencil-btn'){
+    const rect=el.getBoundingClientRect();
+    const existingClone=document.getElementById('tour-pencil-clone');
+    if(existingClone)existingClone.remove();
+    const clone=el.cloneNode(true);
+    clone.id='tour-pencil-clone';
+    clone.style.cssText=`
+      position:fixed;
+      top:${rect.top}px;
+      left:${rect.left}px;
+      width:${rect.width}px;
+      height:${rect.height}px;
+      z-index:901;
+      pointer-events:none;
+      box-shadow:0 0 0 4px var(--powder),0 0 0 7px var(--almond);
+      border-radius:12px;
+      background:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      margin:0;
+    `;
+    document.body.appendChild(clone);
+    return; // skip the parent-lift logic — clone handles the highlight
+  }
   // Lift the parent stacking context above the tour overlay (z-index:900)
   // #desktop-sidebar uses position:sticky which creates its own stacking context,
   // isolating its children from competing against viewport-level z-indices.
@@ -4687,7 +4718,7 @@ function getTourTargetEl(step){
   if(window.innerWidth>=900){
     const desktopTargets=[
       '#tasks-container',
-      'button.icon-btn',
+      '#tour-pencil-btn',
       '.sidebar-nav-item[data-tab="progress"]',
       '.sidebar-nav-item[data-tab="challenges"]',
       '.sidebar-nav-item[data-tab="rewards"]',
@@ -4704,12 +4735,22 @@ function getTourTargetEl(step){
 
 function positionTourTooltip(tooltipEl,targetEl){
   if(window.innerWidth>=900&&targetEl){
-    const rect=targetEl.getBoundingClientRect();
+    // Use clone rect if present (pencil button uses a body-level clone)
+    const cloneEl=document.getElementById('tour-pencil-clone');
+    const rectSource=cloneEl||targetEl;
+    const rect=rectSource.getBoundingClientRect();
     const tipW=300;
     const tipH=tooltipEl.offsetHeight||160;
-    let left=rect.right+20;
-    let top=rect.top;
-    if(left+tipW>window.innerWidth-20)left=rect.left-tipW-20;
+    let left,top;
+    if(cloneEl){
+      // Pencil is top-right — force tooltip to the left
+      left=rect.left-tipW-16;
+      top=rect.top;
+    }else{
+      left=rect.right+20;
+      top=rect.top;
+      if(left+tipW>window.innerWidth-20)left=rect.left-tipW-20;
+    }
     if(left<20)left=20;
     if(top+tipH>window.innerHeight-20)top=window.innerHeight-tipH-20;
     if(top<20)top=20;
