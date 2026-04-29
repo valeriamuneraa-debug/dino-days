@@ -731,6 +731,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     flex: none !important;
   }
 
+  /* ── FIX 2: Consistent page width inside #desktop-main ── */
+  #desktop-main {
+    width: 100%;
+    overflow-y: auto;
+    height: calc(100vh - 32px);
+  }
+  #desktop-main .page,
+  #desktop-main #page-settings {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #page-settings {
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* ── FIX 3: Wider app container ── */
+  body {
+    padding: 16px;
+  }
+  #app {
+    grid-template-columns: 280px 1fr;
+    max-width: 1200px;
+    width: calc(100vw - 32px);
+    min-height: calc(100vh - 32px);
+  }
+  #desktop-sidebar {
+    width: 280px;
+    height: calc(100vh - 32px);
+    top: 16px;
+  }
+
+  /* ── FIX 4: Hide mobile drag handle in Settings on desktop ── */
+  #page-settings .modal-handle { display: none; }
+
 }
 </style>
 </head>
@@ -3608,6 +3643,11 @@ window.addEventListener('resize',()=>{
 // ─────────────────────────────────────────────────────────────────────
 
 window.switchTab=(name,btn)=>{
+  // Close settings page if open on desktop
+  const settingsPage=document.getElementById('page-settings');
+  if(settingsPage&&settingsPage.style.display!=='none'&&window.innerWidth>=900){
+    settingsPage.style.display='none';
+  }
   if(currentTab==='challenges'&&name!=='challenges'){cleanupFriendListeners();}
   currentTab=name;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -4032,10 +4072,14 @@ window.openSettings=async function(){
 
 window.closeSettings=function(){
   document.getElementById('page-settings').style.display='none';
-  document.getElementById('app-header').style.display='flex';
-  document.querySelector('.tab-bar').style.display='flex';
-  restoreActiveTab();
-  updateFAB(currentTab);
+  if(window.innerWidth>=900){
+    restoreActiveTab();
+  }else{
+    document.getElementById('app-header').style.display='flex';
+    document.querySelector('.tab-bar').style.display='flex';
+    restoreActiveTab();
+    updateFAB(currentTab);
+  }
 };
 
 async function renderSettingsContent(){
