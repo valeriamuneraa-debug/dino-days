@@ -477,6 +477,178 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .sc-mode-title{font-size:16px;font-weight:500;color:var(--ink);margin-bottom:4px;}
 .sc-mode-desc{font-size:13px;color:var(--ink-faint);line-height:1.4;}
 .mode-badge{display:inline-block;font-size:12px;padding:2px 7px;border-radius:100px;background:var(--linen);color:var(--ink-soft);font-weight:500;margin-left:6px;vertical-align:middle;}
+
+/* ── DESKTOP LAYOUT ─────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+
+  /* BODY & APP SHELL */
+  body {
+    background: var(--linen);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  #app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 1fr;
+    max-width: 1100px;
+    width: 100%;
+    min-height: calc(100vh - 48px);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 60px rgba(208,184,172,0.25);
+    background: var(--page-bg);
+    position: relative;
+    flex-direction: unset;
+  }
+
+  /* HIDE MOBILE-ONLY ELEMENTS */
+  .tab-bar { display: none !important; }
+  .header  { display: none !important; }
+  .fab     { display: none !important; }
+
+  /* DESKTOP SIDEBAR */
+  #desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    height: calc(100vh - 48px);
+    position: sticky;
+    top: 24px;
+    overflow-y: auto;
+    padding: 28px 0;
+    grid-column: 1;
+    grid-row: 1 / -1;
+  }
+  .sidebar-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--ink-faint);
+    padding: 16px 24px 6px;
+    display: block;
+  }
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 15px;
+    color: var(--ink-soft);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .sidebar-nav-item:hover { background: var(--linen); color: var(--ink); }
+  .sidebar-nav-item.active { background: var(--linen); color: var(--ink); font-weight: 500; }
+  .sidebar-nav-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--ink-faint); }
+  .sidebar-nav-item.active .sidebar-nav-icon { color: var(--almond); }
+  .sidebar-stats {
+    margin: 8px 16px;
+    background: linear-gradient(160deg, var(--linen) 0%, var(--powder) 100%);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .sidebar-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .sidebar-stat-row:not(:last-child) { border-bottom: 1px solid rgba(208,184,172,0.3); }
+  .sidebar-stat-value { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: var(--ink); }
+  .sidebar-account { margin-top: auto; padding: 16px 24px 0; border-top: 1px solid var(--border); }
+  .sidebar-account-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
+  .sidebar-account-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--almond); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+  .sidebar-account-name { font-size: 14px; font-weight: 500; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar-account-settings { font-size: 12px; color: var(--ink-faint); text-decoration: underline; }
+
+  /* DESKTOP MAIN */
+  #desktop-main {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: calc(100vh - 48px);
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* DESKTOP PAGE HEADERS */
+  .desktop-page-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 32px 0;
+    margin-bottom: 4px;
+  }
+  .desktop-page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .desktop-add-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .desktop-add-btn:hover { background: #333; }
+
+  /* PAGES */
+  .page { padding-bottom: 40px !important; }
+
+  /* TODAY PAGE */
+  .today-hero { margin: 20px 32px; border-radius: 20px; padding: 24px 28px; }
+  .today-hero h2 { font-size: 26px; }
+  .streak-row { padding: 12px 32px; }
+  .progress-bar-wrap { margin: 0 32px 16px; }
+  .section-label { padding: 14px 32px 8px; }
+  .task-list { padding: 0 20px; }
+
+  /* PROGRESS PAGE */
+  .progress-page { padding: 0 32px; }
+
+  /* REWARDS PAGE */
+  .rewards-page { padding: 24px 32px; }
+
+  /* CHALLENGES PAGE */
+  #challenges-inner > div { padding-left: 32px; padding-right: 32px; }
+
+  /* MODAL — center on desktop */
+  .modal-overlay.open { align-items: center; }
+  .modal { border-radius: 24px !important; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+
+  /* SETTINGS PAGE */
+  #page-settings { max-width: 100%; }
+
+}
 </style>
 </head>
 <body>
@@ -515,6 +687,47 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <!-- APP -->
 <div id="app-screen">
   <div id="app">
+
+    <!-- DESKTOP SIDEBAR (hidden on mobile via CSS) -->
+    <div id="desktop-sidebar" style="display:none;">
+      <div class="sidebar-logo">Ritual</div>
+      <span class="sidebar-section-label">Menu</span>
+      <button class="sidebar-nav-item active" data-tab="today" onclick="switchTab('today',this);updateSidebarActive(this)">
+        <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>
+        Today
+      </button>
+      <button class="sidebar-nav-item" data-tab="challenges" onclick="switchTab('challenges',this);updateSidebarActive(this)">
+        <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Challenges
+      </button>
+      <button class="sidebar-nav-item" data-tab="progress" onclick="switchTab('progress',this);updateSidebarActive(this)">
+        <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Progress
+      </button>
+      <button class="sidebar-nav-item" data-tab="rewards" onclick="switchTab('rewards',this);updateSidebarActive(this)">
+        <svg class="sidebar-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Rewards
+      </button>
+      <span class="sidebar-section-label">Overview</span>
+      <div class="sidebar-stats" id="sidebar-stats">
+        <div class="sidebar-stat-row"><span>Streak</span><span class="sidebar-stat-value" id="sidebar-streak">0</span></div>
+        <div class="sidebar-stat-row"><span>Points</span><span class="sidebar-stat-value" id="sidebar-points">0</span></div>
+        <div class="sidebar-stat-row"><span>Today</span><span class="sidebar-stat-value" id="sidebar-done">0/0</span></div>
+      </div>
+      <div class="sidebar-account">
+        <div class="sidebar-account-row" onclick="openSettings()">
+          <div class="sidebar-account-avatar" id="sidebar-avatar">?</div>
+          <div>
+            <div class="sidebar-account-name" id="sidebar-name">Loading…</div>
+            <div class="sidebar-account-settings">Account &amp; settings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP MAIN WRAPPER -->
+    <div id="desktop-main">
+
     <div class="header" id="app-header">
       <div>
         <div class="header-title">Ritual</div>
@@ -530,6 +743,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="page active" id="page-today">
+      <div class="desktop-page-header" style="display:none;">
+        <span class="desktop-page-title">Today</span>
+        <button class="desktop-add-btn" onclick="showAddTaskModal()">+ Add habit</button>
+      </div>
       <div class="today-hero">
         <div class="today-hero-left">
           <h2 id="hero-greeting">Good morning</h2>
@@ -555,6 +772,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="page" id="page-progress">
+      <div class="desktop-page-header" style="display:none;">
+        <span class="desktop-page-title">Progress</span>
+      </div>
       <div class="progress-page">
         <!-- Hero card -->
         <div class="progress-hero-card">
@@ -605,6 +825,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="page" id="page-rewards">
+      <div class="desktop-page-header" style="display:none;">
+        <span class="desktop-page-title">Rewards</span>
+        <button class="desktop-add-btn" onclick="showAddRewardModal()">+ Add reward</button>
+      </div>
       <div class="rewards-page">
         <div class="points-header">
           <div><div class="points-num" id="reward-points">0</div><div class="points-label">points available</div></div>
@@ -622,6 +846,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     </div>
 
     <div class="page" id="page-challenges">
+      <div class="desktop-page-header" style="display:none;">
+        <span class="desktop-page-title">Challenges</span>
+        <button class="desktop-add-btn" onclick="showNewChallengeModal()">+ New challenge</button>
+      </div>
       <div class="challenges-page" id="challenges-inner"></div>
     </div>
 
@@ -633,6 +861,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
       </div>
       <div id="settings-content" style="padding-bottom:60px;"></div>
     </div>
+
+    </div><!-- /desktop-main -->
 
     <div class="tab-bar">
       <div class="tab active" data-tab="today" onclick="switchTab('today',this)"><div class="tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tab-label">Today</div></div>
@@ -3122,7 +3352,7 @@ async function updatePublicProfile(){
     },{merge:true});
   }catch(e){console.warn('Could not update public profile:',e);}
 }
-function updateAll(){evaluateChallenges();evaluateSocialChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();}
+function updateAll(){evaluateChallenges();evaluateSocialChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();updateSidebarStats();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
@@ -3266,6 +3496,34 @@ function updateFAB(tabName){
       fab.onclick=()=>showAddTaskModal();
   }
 }
+// ── DESKTOP SIDEBAR ──────────────────────────────────────────────────
+function initDesktop(){
+  const sidebar=document.getElementById('desktop-sidebar');
+  if(sidebar)sidebar.style.display=window.innerWidth>=900?'flex':'none';
+}
+window.updateSidebarActive=function(clickedBtn){
+  document.querySelectorAll('.sidebar-nav-item').forEach(b=>b.classList.remove('active'));
+  clickedBtn.classList.add('active');
+};
+function updateSidebarStats(){
+  if(window.innerWidth<900)return;
+  const ss=document.getElementById('sidebar-streak');
+  const sp=document.getElementById('sidebar-points');
+  const sd=document.getElementById('sidebar-done');
+  const sav=document.getElementById('sidebar-avatar');
+  const sn=document.getElementById('sidebar-name');
+  if(ss&&state)ss.textContent=state.streak||0;
+  if(sp&&state)sp.textContent=state.points||0;
+  if(sd){const dc=document.getElementById('done-count');if(dc)sd.textContent=dc.textContent;}
+  if(sav&&state)sav.textContent=(state.displayName||'?')[0].toUpperCase();
+  if(sn&&state)sn.textContent=state.displayName||'Account';
+}
+window.addEventListener('resize',()=>{
+  const sidebar=document.getElementById('desktop-sidebar');
+  if(sidebar)sidebar.style.display=window.innerWidth>=900?'flex':'none';
+});
+// ─────────────────────────────────────────────────────────────────────
+
 window.switchTab=(name,btn)=>{
   if(currentTab==='challenges'&&name!=='challenges'){cleanupFriendListeners();}
   currentTab=name;
@@ -3276,6 +3534,10 @@ window.switchTab=(name,btn)=>{
   if(name==='progress'){weekOffset=0;renderProgress();}
   if(name==='challenges'){_challengesSubview==='friends'?renderFriends():renderChallenges();}
   updateFAB(name);
+  if(window.innerWidth>=900){
+    document.querySelectorAll('.sidebar-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+    updateSidebarStats();
+  }
 };
 function restoreActiveTab(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const pg=document.getElementById('page-'+currentTab);if(pg)pg.classList.add('active');const tb=document.querySelector(`.tab[data-tab="${currentTab}"]`);if(tb)tb.classList.add('active');}
 window.restoreActiveTab=restoreActiveTab;
@@ -4162,7 +4424,7 @@ onAuthStateChanged(auth,async(user)=>{
       document.getElementById('loading-screen').style.display='none';
       document.getElementById('auth-screen').style.display='none';
       document.getElementById('app-screen').style.display='block';
-      currentTab='today';restoreActiveTab();updateFAB('today');
+      currentTab='today';restoreActiveTab();updateFAB('today');initDesktop();
       document.getElementById('header-date').textContent=formatDate(new Date());
       const[g,s]=getGreeting();
       document.getElementById('hero-greeting').textContent=g;
