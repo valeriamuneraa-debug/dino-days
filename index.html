@@ -645,8 +645,91 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   .modal-overlay.open { align-items: center; }
   .modal { border-radius: 24px !important; max-width: 480px; max-height: 85vh; overflow-y: auto; }
 
-  /* SETTINGS PAGE */
-  #page-settings { max-width: 100%; }
+  /* ── FIX 1: SETTINGS PAGE — in-flow inside #desktop-main ── */
+  #page-settings {
+    position: static !important;
+    inset: unset;
+    z-index: auto;
+    height: auto;
+    overflow-y: visible;
+    width: 100%;
+    max-width: 100%;
+    display: none; /* JS still toggles inline display */
+  }
+  .settings-header {
+    position: sticky;
+    top: 0;
+    padding: 24px 32px;
+    height: auto;
+    justify-content: flex-start;
+    gap: 16px;
+    z-index: 10;
+  }
+  .settings-title {
+    position: static;
+    transform: none;
+    left: unset;
+    font-size: 24px;
+    pointer-events: auto;
+  }
+
+  /* ── FIX 2: CHALLENGES PAGE ── */
+  /* Override inline padding on the two dynamic children of #challenges-inner */
+  #challenges-inner > div:first-child  { padding: 12px 32px 4px !important; }
+  #challenges-inner > div:nth-child(2) { padding: 0 32px !important; }
+  /* Section labels sit inside the padded wrapper, so 0 horizontal padding */
+  #challenges-inner .challenge-section-label { padding: 16px 0 8px; }
+
+  /* ── FIX 3: ONBOARDING — centred fixed card on desktop ── */
+  #onboarding-theme,
+  #onboarding-displayname,
+  #onboarding-goals,
+  #onboarding-habits,
+  #onboarding-rewards,
+  #onboarding-welcome {
+    left: 50%;
+    right: auto;
+    top: 24px;
+    bottom: auto;
+    transform: translateX(-50%);
+    max-width: 640px;
+    min-height: calc(100vh - 48px);
+    border-radius: 20px;
+    padding: 40px 32px;
+    overflow-y: auto;
+  }
+  /* Goal grid — 3 columns */
+  .goal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  /* Name input — constrained */
+  #onb-displayname-input {
+    max-width: 360px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+  }
+  /* Back arrows — repositioned for wider card */
+  #onboarding-displayname > button:first-child,
+  #onboarding-goals > button:first-child,
+  #onboarding-habits > button:first-child,
+  #onboarding-rewards > button:first-child,
+  #onboarding-welcome > button:first-child {
+    top: 24px !important;
+    left: 32px !important;
+  }
+  /* Continue / CTA buttons — not full width */
+  #onboarding-displayname .btn-primary,
+  #goals-continue-btn,
+  #habits-continue-btn,
+  #onboarding-rewards > div:last-child .btn-primary,
+  .welcome-cta {
+    width: auto !important;
+    min-width: 220px;
+    padding: 14px 40px !important;
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    flex: none !important;
+  }
 
 }
 </style>
@@ -4239,18 +4322,35 @@ function clearTourHighlight(){
 function showTourStep(step){
   clearTourHighlight();
   const cfg=TOUR_STEPS[step];
-  const el=document.getElementById(cfg.id);if(!el)return;
+  const isDesktop=window.innerWidth>=900;
+
+  // On desktop, steps 0-3 spotlight sidebar nav items instead of hidden mobile elements
+  // Sidebar nav item order: 0=Today, 1=Challenges, 2=Progress, 3=Rewards
+  const SIDEBAR_STEP_MAP=[0,2,1,3]; // maps tour step index → sidebar nav item index
+  let el;
+  if(isDesktop&&step<4){
+    const sidebarItems=document.querySelectorAll('.sidebar-nav-item');
+    el=sidebarItems[SIDEBAR_STEP_MAP[step]]||null;
+  }
+  if(!el)el=document.getElementById(cfg.id);
+  if(!el)return;
 
   // Save + apply glow ring
   tourGlowEl=el;
   tourGlowOrigProps={boxShadow:el.style.boxShadow};
-  if(cfg.setPos){tourGlowOrigProps.position=el.style.position;el.style.position='relative';}
+  if(cfg.setPos&&!isDesktop){tourGlowOrigProps.position=el.style.position;el.style.position='relative';}
   el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
 
-  // Lift stacking ancestor (or element itself) above overlay
-  const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
-  tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;
-  liftTarget.style.zIndex='999';
+  // Lift element above overlay
+  if(isDesktop&&step<4){
+    // On desktop: lift the sidebar item itself (no stacking ancestor needed)
+    tourLiftedEl=el;tourLiftedOrigZ=el.style.zIndex;
+    el.style.zIndex='999';
+  }else{
+    const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
+    tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;
+    liftTarget.style.zIndex='999';
+  }
 
   el.scrollIntoView({block:'nearest',behavior:'smooth'});
 
@@ -4270,14 +4370,25 @@ function showTourStep(step){
     tooltip.style.width=tw+'px';
     const th=tooltip.offsetHeight||140;
     const vw=window.innerWidth,vh=window.innerHeight,gap=16;
-    // Force direction for elements in fixed bars
-    let top;
-    if(cfg.lift==='.header'){top=rect.bottom+gap;}       // header → always below
-    else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;} // tab bar → always above
-    else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
-    top=Math.max(80,Math.min(top,vh-th-16));
-    let left=rect.left+rect.width/2-tw/2;
-    left=Math.max(16,Math.min(left,vw-tw-16));
+
+    let top,left;
+    if(isDesktop&&step<4){
+      // Desktop: position tooltip to the RIGHT of the sidebar item, vertically centered
+      left=rect.right+gap;
+      // If tooltip would overflow right edge, position to the left instead
+      if(left+tw>vw-16)left=rect.left-tw-gap;
+      left=Math.max(16,left);
+      top=rect.top+rect.height/2-th/2;
+      top=Math.max(80,Math.min(top,vh-th-16));
+    }else{
+      // Mobile: original positioning logic
+      if(cfg.lift==='.header'){top=rect.bottom+gap;}
+      else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;}
+      else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
+      top=Math.max(80,Math.min(top,vh-th-16));
+      left=rect.left+rect.width/2-tw/2;
+      left=Math.max(16,Math.min(left,vw-tw-16));
+    }
     tooltip.style.top=top+'px';tooltip.style.left=left+'px';
   });
 }
