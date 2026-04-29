@@ -74,6 +74,48 @@ The three panels share a single `state` object. Every user action in one panel i
 
 [View full system diagram](docs/system-diagram.md)
 
+### Architecture Overview
+
+```mermaid
+flowchart TD
+    subgraph STATE["☁️ state — Single Source of Truth (Firestore)"]
+        S["tasks[ ] · sections[ ] · completedDays{ }
+        rewards[ ] · points · streak · challenges[ ]"]
+    end
+
+    subgraph BROWSER["📋 Browser — Today Screen"]
+        B1["Reads: state.tasks, state.completedDays
+        Writes: toggleTask() → state.completedDays
+        Filter: state.sections → section tabs"]
+    end
+
+    subgraph DETAIL["📊 Detail View — Progress Screen"]
+        D1["Reads ONLY: state.streak, state.completedDays
+        state.tasks, state.points, state.bestStreak
+        Never writes to state"]
+    end
+
+    subgraph CONTROLLER["⚙️ Controller — Task Manager + Rewards"]
+        C1["Reads + Writes:
+        editTask/addTask → state.tasks
+        buyReward → state.points, state.history
+        evaluateChallenges → state.challenges"]
+    end
+
+    STATE -->|"props down — data flows to all panels"| BROWSER
+    STATE -->|"props down — read only"| DETAIL
+    STATE -->|"props down — current values"| CONTROLLER
+
+    BROWSER -->|"user completes habit → save() → updateAll()"| STATE
+    CONTROLLER -->|"user edits/adds/buys → save() → updateAll()"| STATE
+
+    STATE -->|"updateAll() re-renders all three panels simultaneously"| BROWSER
+    STATE -->|"updateAll() re-renders all three panels simultaneously"| DETAIL
+    STATE -->|"updateAll() re-renders all three panels simultaneously"| CONTROLLER
+```
+
+### Detailed System Flow
+
 ```mermaid
 flowchart TD
     subgraph STATE["☁️ Single Source of Truth — state (Firestore)"]
