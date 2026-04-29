@@ -696,6 +696,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     /* JS sets display:flex to show */
   }
   /* Screens inside overlay: reset mobile position:fixed, center content */
+  /* NOTE: no display:flex here — JS controls visibility via inline style so only one shows at a time */
   #onboarding-overlay > [id^="onboarding-"] {
     position: relative !important;
     inset: unset !important;
@@ -708,7 +709,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     overflow-y: visible !important;
     padding: 0 !important;
     background: transparent !important;
-    display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
@@ -3666,9 +3666,11 @@ function openOnboardingOverlay(screenId){
   if(window.innerWidth<900)return;
   const overlay=document.getElementById('onboarding-overlay');
   if(!overlay)return;
+  // Hide ALL screens already in the overlay — prevents stacking when advancing steps
+  overlay.querySelectorAll('[id^="onboarding-"]').forEach(el=>{el.style.display='none';});
   const screen=document.getElementById(screenId);
   if(screen){
-    screen.style.display='none'; // hide before moving to prevent position:fixed flash
+    screen.style.display='none'; // ensure hidden before DOM move to prevent position:fixed flash
     if(screen.parentElement!==overlay)overlay.appendChild(screen);
     screen.style.display='flex'; // now shows with position:relative CSS override active
   }
