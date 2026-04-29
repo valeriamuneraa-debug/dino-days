@@ -680,14 +680,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* Section labels sit inside the padded wrapper, so 0 horizontal padding */
   #challenges-inner .challenge-section-label { padding: 16px 0 8px; }
 
-  /* ── FIX 3: ONBOARDING — full-app overlay inside #app ── */
+  /* ── ONBOARDING OVERLAY — covers full #app rectangle ── */
   #app { position: relative; }
   #onboarding-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(160deg, var(--linen) 0%, var(--powder) 100%);
     z-index: 500;
-    border-radius: 20px;
+    border-radius: inherit; /* match #app's border-radius exactly */
     overflow-y: auto;
     flex-direction: column;
     align-items: center;
@@ -695,7 +695,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     padding: 48px 40px 80px;
     /* JS sets display:flex to show */
   }
-  /* Screens inside overlay: reset their mobile position:fixed */
+  /* Screens inside overlay: reset mobile position:fixed, center content */
   #onboarding-overlay > [id^="onboarding-"] {
     position: relative !important;
     inset: unset !important;
@@ -708,21 +708,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     overflow-y: visible !important;
     padding: 0 !important;
     background: transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: auto !important;
   }
-  /* Goal grid — 3 columns */
-  .goal-grid { grid-template-columns: repeat(3, 1fr) !important; }
-  /* Name input — constrained */
+  /* Name input — constrained and centered */
   #onb-displayname-input {
     max-width: 360px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     display: block !important;
+    text-align: center;
   }
   /* Buttons inside overlay — not full width */
-  #onboarding-overlay #onboarding-displayname .btn-primary,
-  #onboarding-overlay #goals-continue-btn,
-  #onboarding-overlay #habits-continue-btn,
-  #onboarding-overlay #onboarding-rewards > div:last-child .btn-primary,
+  #onboarding-overlay .btn-primary,
   #onboarding-overlay .welcome-cta {
     width: auto !important;
     min-width: 220px;
@@ -732,11 +733,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-right: auto !important;
     flex: none !important;
   }
+  /* Goal grid — 3 columns */
+  #onboarding-overlay .goal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  /* Theme carousel — centered */
+  #onboarding-overlay .theme-carousel { justify-content: center; }
+  /* Step dots — centered */
+  #onboarding-overlay .onb-steps { justify-content: center; }
   /* Drag handles: hide in overlay */
   #onboarding-overlay .modal-handle { display: none !important; }
 
-  /* ── FIX 4: TOUR — z-index scheme and highlight on desktop ── */
-  #tour-overlay { z-index: 900 !important; background: rgba(0,0,0,0.55) !important; }
+  /* ── SPOTLIGHT TOUR — z-index scheme on desktop ── */
+  #tour-overlay {
+    z-index: 900 !important;
+    background: rgba(0,0,0,0.55) !important;
+    pointer-events: all;
+  }
   #tour-tooltip { z-index: 902 !important; }
   .tour-highlighted {
     position: relative !important;
@@ -3658,6 +3669,11 @@ function openOnboardingOverlay(screenId){
   const screen=document.getElementById(screenId);
   if(screen&&screen.parentElement!==overlay)overlay.appendChild(screen);
   overlay.style.display='flex';
+  // Lock desktop-main scroll so settings below don't bleed through
+  if(window.innerWidth>=900){
+    const dm=document.getElementById('desktop-main');
+    if(dm)dm.style.overflow='hidden';
+  }
 }
 window.updateSidebarActive=function(clickedBtn){
   document.querySelectorAll('.sidebar-nav-item').forEach(b=>b.classList.remove('active'));
@@ -4385,11 +4401,11 @@ window.doSignOut=async()=>{
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
 const TOUR_STEPS=[
-  {id:'tour-pencil-btn',      title:'Manage your habits',   tip:'Add, reorder, or edit your habits and categories here.',                        lift:'.header',  setPos:false},
-  {id:'tour-tab-progress',    title:'Track your progress',  tip:'See your streaks, stats, and weekly completion history.',                        lift:'.tab-bar', setPos:false},
-  {id:'tour-tab-challenges',  title:'Set challenges',       tip:'Create time-bound goals and compete or bond with friends.',                      lift:'.tab-bar', setPos:false},
-  {id:'tour-tab-rewards',     title:'Your reward store',    tip:'Earn points by completing habits. Spend them on things you love.',               lift:'.tab-bar', setPos:false},
-  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                         lift:null,       setPos:true},
+  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                                                                                                     lift:null,       setPos:true},
+  {id:'tour-pencil-btn',      title:'Manage your habits',   tip:'Add, reorder, or edit your habits and categories here. Use the pencil icon to manage existing habits, or "+ Add habit" in the top right to create a new one.', lift:'.header',  setPos:false},
+  {id:'tour-tab-progress',    title:'Track your progress',  tip:'See your streaks, stats, and weekly completion history.',                                                                                                     lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-challenges',  title:'Set challenges',       tip:'Create time-bound goals and compete or bond with friends.',                                                                                                   lift:'.tab-bar', setPos:false},
+  {id:'tour-tab-rewards',     title:'Your reward store',    tip:'Earn points by completing habits. Spend them on things you love.',                                                                                            lift:'.tab-bar', setPos:false},
 ];
 
 function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';openOnboardingOverlay('onboarding-welcome');}
@@ -4456,6 +4472,26 @@ function getTourTargetEl(step){
   return getMobileTourTarget(step);
 }
 
+function positionTourTooltip(tooltipEl,targetEl){
+  if(window.innerWidth>=900&&targetEl){
+    const rect=targetEl.getBoundingClientRect();
+    const tipW=300;
+    const tipH=tooltipEl.offsetHeight||160;
+    let left=rect.right+20;
+    let top=rect.top;
+    if(left+tipW>window.innerWidth-20)left=rect.left-tipW-20;
+    if(left<20)left=20;
+    if(top+tipH>window.innerHeight-20)top=window.innerHeight-tipH-20;
+    if(top<20)top=20;
+    tooltipEl.style.position='fixed';
+    tooltipEl.style.left=left+'px';
+    tooltipEl.style.top=top+'px';
+    tooltipEl.style.transform='none';
+    tooltipEl.style.zIndex='902';
+  }
+  // else: mobile positioning handled below — do not change
+}
+
 function showTourStep(step){
   clearTourHighlight();
   const cfg=TOUR_STEPS[step];
@@ -4487,26 +4523,17 @@ function showTourStep(step){
   tooltip.style.display='block';
 
   requestAnimationFrame(()=>{
-    const vw=window.innerWidth,vh=window.innerHeight;
-    tooltip.style.transform='';
-    tooltip.style.position='fixed';
-    tooltip.style.zIndex='902';
-
-    if(isDesktop&&el){
+    if(isDesktop){
+      positionTourTooltip(tooltip,el);
+    }else if(el){
+      // Mobile: anchor tooltip above/below element
       const rect=el.getBoundingClientRect();
-      const tw=tooltip.offsetWidth||280;
-      const th=tooltip.offsetHeight||160;
-      let left=rect.right+20;
-      let top=rect.top+(rect.height/2)-(th/2);
-      if(left+tw>vw-20)left=rect.left-tw-20;
-      if(left<20)left=20;
-      top=Math.max(20,Math.min(top,vh-th-20));
-      tooltip.style.left=left+'px';
-      tooltip.style.top=top+'px';
-    }else if(!isDesktop&&el){
-      const rect=el.getBoundingClientRect();
+      const vw=window.innerWidth,vh=window.innerHeight;
       const tw=Math.min(280,vw-40);
       tooltip.style.width=tw+'px';
+      tooltip.style.position='fixed';
+      tooltip.style.zIndex='902';
+      tooltip.style.transform='';
       const th=tooltip.offsetHeight||140;
       const gap=16;
       let top,left;
@@ -4519,26 +4546,28 @@ function showTourStep(step){
       tooltip.style.top=top+'px';
       tooltip.style.left=left+'px';
     }else{
-      // Fallback: center tooltip
+      tooltip.style.position='fixed';
       tooltip.style.top='50%';
       tooltip.style.left='50%';
       tooltip.style.transform='translate(-50%,-50%)';
+      tooltip.style.zIndex='902';
     }
   });
 }
 
 window.startTour=async()=>{
   document.getElementById('onboarding-welcome').style.display='none';
-  // Hide onboarding overlay (desktop) before starting tour
+  // Hide onboarding overlay and restore desktop-main scroll before tour starts
   const ov=document.getElementById('onboarding-overlay');
   if(ov)ov.style.display='none';
-  // Navigate to Today tab so tour targets are visible
   if(window.innerWidth>=900){
+    const dm=document.getElementById('desktop-main');
+    if(dm)dm.style.overflow='';
+    // Close settings if open, navigate to Today so tour targets are visible
+    if(typeof closeSettings==='function')closeSettings();
     const todayBtn=document.querySelector('.sidebar-nav-item[data-tab="today"]');
     if(todayBtn){switchTab('today',todayBtn);updateSidebarActive(todayBtn);}
-    const sp=document.getElementById('page-settings');
-    if(sp&&sp.style.display!=='none')sp.style.display='none';
-    await new Promise(r=>setTimeout(r,200));
+    await new Promise(r=>setTimeout(r,300));
   }
   document.getElementById('tour-overlay').style.display='block';
   tourStep=0;showTourStep(0);
@@ -4550,6 +4579,11 @@ function endTour(){
   document.getElementById('onboarding-welcome').style.display='none';
   document.getElementById('tour-overlay').style.display='none';
   document.getElementById('tour-tooltip').style.display='none';
+  // Restore desktop-main scrolling (safety belt for skip scenarios)
+  if(window.innerWidth>=900){
+    const dm=document.getElementById('desktop-main');
+    if(dm)dm.style.overflow='';
+  }
   if(state&&!state.onboardingComplete){state.onboardingComplete=true;save();}
   updateAll();
 }
