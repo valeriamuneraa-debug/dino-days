@@ -680,35 +680,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* Section labels sit inside the padded wrapper, so 0 horizontal padding */
   #challenges-inner .challenge-section-label { padding: 16px 0 8px; }
 
-  /* ── FIX 3: ONBOARDING — full-screen takeover, sidebar collapsed ── */
-  /* Collapse sidebar when onboarding is active */
-  #app.onboarding-active {
-    grid-template-columns: 0px 1fr;
-  }
-  #app.onboarding-active #desktop-sidebar {
-    display: none !important;
-  }
-  /* Warm gradient fills the right column during onboarding */
-  #app.onboarding-active #desktop-main {
-    background: linear-gradient(160deg, var(--linen) 0%, var(--powder) 100%);
-  }
-  /* Reset centered-card overrides — screens are full-screen again */
+  /* ── FIX 3: ONBOARDING — absolute overlay inside #desktop-main ── */
+  /* Establish positioning context so absolute children are clipped to app rectangle */
+  #desktop-main { position: relative; }
+  /* Onboarding screens fill the right column — moved into #desktop-main by JS */
   #onboarding-theme,
   #onboarding-displayname,
   #onboarding-goals,
   #onboarding-habits,
   #onboarding-rewards,
   #onboarding-welcome {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    transform: none;
-    max-width: none;
-    min-height: 100vh;
-    border-radius: 0;
-    padding: 48px 40px;
-    overflow-y: auto;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 10 !important;
+    transform: none !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+    /* Horizontal padding centers content at ~560px max */
+    padding: 40px max(40px, calc(50% - 280px)) 80px !important;
   }
   /* Goal grid — 3 columns */
   .goal-grid { grid-template-columns: repeat(3, 1fr) !important; }
@@ -719,14 +710,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-right: auto !important;
     display: block !important;
   }
-  /* Back arrows */
+  /* Back arrows — relative to the onboarding screen */
   #onboarding-displayname > button:first-child,
   #onboarding-goals > button:first-child,
   #onboarding-habits > button:first-child,
   #onboarding-rewards > button:first-child,
   #onboarding-welcome > button:first-child {
-    top: 24px !important;
-    left: 40px !important;
+    top: 16px !important;
+    left: max(16px, calc(50% - 280px)) !important;
   }
   /* Continue / CTA buttons — not full width */
   #onboarding-displayname .btn-primary,
@@ -742,7 +733,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-right: auto !important;
     flex: none !important;
   }
-  /* Drag handles: hide on desktop during onboarding */
+  /* Drag handles: hide on desktop */
   #onboarding-theme .modal-handle,
   #onboarding-displayname .modal-handle,
   #onboarding-goals .modal-handle,
@@ -1286,7 +1277,6 @@ window.confirmHabits=()=>{
 
 function showThemePicker(){
   _onbStep=1;_selectedTheme=state?.theme||'blush';
-  if(window.innerWidth>=900)document.getElementById('app').classList.add('onboarding-active');
   document.getElementById('theme-carousel').innerHTML=Object.keys(THEMES).map(key=>{
     const t=THEMES[key];const sel=_selectedTheme===key;
     return `<div><div class="theme-card${sel?' selected':''}" id="tcard-${key}" style="background:${t.porcelain};border-color:${sel?t.almond:'transparent'};" onclick="pickTheme('${key}')"><div class="theme-card-hero" style="background:${t.powder}"><div class="theme-card-circle" style="background:${t.almond}"></div><div style="width:48px;height:48px;border-radius:50%;background:${t.almond};"></div></div><div class="theme-card-body" style="background:${t.porcelain}"><div class="theme-card-pill" style="background:${t.linen}"></div><div class="theme-card-pill" style="background:${t.linen}"></div></div><div class="theme-card-bar" style="background:${t.linen};border-top:1px solid ${t.border}"></div></div><div class="theme-card-name">${THEME_LABELS[key]}</div></div>`;
@@ -3644,6 +3634,18 @@ function updateFAB(tabName){
 function initDesktop(){
   const sidebar=document.getElementById('desktop-sidebar');
   if(sidebar)sidebar.style.display=window.innerWidth>=900?'flex':'none';
+  if(window.innerWidth>=900){
+    // Move onboarding screens into #desktop-main so they render as
+    // absolute overlays within the app rectangle (not full-viewport)
+    const main=document.getElementById('desktop-main');
+    if(main){
+      ['onboarding-theme','onboarding-displayname','onboarding-goals',
+       'onboarding-habits','onboarding-rewards','onboarding-welcome'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el&&el.parentNode!==main)main.appendChild(el);
+      });
+    }
+  }
 }
 window.updateSidebarActive=function(clickedBtn){
   document.querySelectorAll('.sidebar-nav-item').forEach(b=>b.classList.remove('active'));
@@ -4378,7 +4380,7 @@ const TOUR_STEPS=[
   {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                         lift:null,       setPos:true},
 ];
 
-function showWelcome(){_onbStep=6;if(window.innerWidth>=900)document.getElementById('app').classList.add('onboarding-active');document.getElementById('onboarding-welcome').style.display='flex';}
+function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';}
 
 function clearTourHighlight(){
   if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
@@ -4389,20 +4391,29 @@ function clearTourHighlight(){
   }
 }
 
+function getTourTarget(step){
+  const isDesktop=window.innerWidth>=900;
+  if(isDesktop){
+    const desktop={
+      0:'#tasks-container',
+      1:'.sidebar-nav-item[data-tab="today"]',
+      2:'.sidebar-nav-item[data-tab="progress"]',
+      3:'.sidebar-nav-item[data-tab="challenges"]',
+      4:'.sidebar-nav-item[data-tab="rewards"]'
+    };
+    if(desktop[step]){const el=document.querySelector(desktop[step]);if(el)return el;}
+  }
+  // Mobile fallback — use original TOUR_STEPS id or tab selectors
+  const mobile=['#tasks-container','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
+  return mobile[step]?document.querySelector(mobile[step]):null;
+}
+
 function showTourStep(step){
   clearTourHighlight();
   const cfg=TOUR_STEPS[step];
   const isDesktop=window.innerWidth>=900;
 
-  // On desktop, steps 0-3 spotlight sidebar nav items instead of hidden mobile elements
-  // Sidebar nav item order: 0=Today, 1=Challenges, 2=Progress, 3=Rewards
-  const SIDEBAR_STEP_MAP=[0,2,1,3]; // maps tour step index → sidebar nav item index
-  let el;
-  if(isDesktop&&step<4){
-    const sidebarItems=document.querySelectorAll('.sidebar-nav-item');
-    el=sidebarItems[SIDEBAR_STEP_MAP[step]]||null;
-  }
-  if(!el)el=document.getElementById(cfg.id);
+  const el=getTourTarget(step);
   if(!el)return;
 
   // Save + apply glow ring
@@ -4412,8 +4423,7 @@ function showTourStep(step){
   el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
 
   // Lift element above overlay
-  if(isDesktop&&step<4){
-    // On desktop: lift the sidebar item itself (no stacking ancestor needed)
+  if(isDesktop){
     tourLiftedEl=el;tourLiftedOrigZ=el.style.zIndex;
     el.style.zIndex='999';
   }else{
@@ -4435,22 +4445,29 @@ function showTourStep(step){
 
   // Position tooltip
   requestAnimationFrame(()=>{
-    const vw=window.innerWidth,vh=window.innerHeight,gap=16;
+    const rect=el.getBoundingClientRect();
+    const vw=window.innerWidth,vh=window.innerHeight;
+    tooltip.style.transform='';
+    tooltip.style.position='fixed';
+
     if(isDesktop){
-      // Desktop: center the tooltip on screen
-      const tw=Math.min(360,vw-40);
-      tooltip.style.width=tw+'px';
-      tooltip.style.position='fixed';
-      tooltip.style.top='50%';
-      tooltip.style.left='50%';
-      tooltip.style.transform='translate(-50%,-50%)';
-    }else{
-      // Mobile: original anchor-to-element logic
-      tooltip.style.transform='';
-      const rect=el.getBoundingClientRect();
       const tw=Math.min(280,vw-40);
       tooltip.style.width=tw+'px';
       const th=tooltip.offsetHeight||140;
+      // Anchor to the right of the element; fall back to left if no space
+      let left=rect.right+20;
+      let top=rect.top;
+      if(left+tw>vw-20)left=rect.left-tw-20;
+      left=Math.max(16,left);
+      if(top+th>vh-20)top=vh-th-20;
+      top=Math.max(16,top);
+      tooltip.style.top=top+'px';
+      tooltip.style.left=left+'px';
+    }else{
+      const tw=Math.min(280,vw-40);
+      tooltip.style.width=tw+'px';
+      const th=tooltip.offsetHeight||140;
+      const gap=16;
       let top,left;
       if(cfg.lift==='.header'){top=rect.bottom+gap;}
       else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;}
@@ -4458,18 +4475,20 @@ function showTourStep(step){
       top=Math.max(80,Math.min(top,vh-th-16));
       left=rect.left+rect.width/2-tw/2;
       left=Math.max(16,Math.min(left,vw-tw-16));
-      tooltip.style.top=top+'px';tooltip.style.left=left+'px';
+      tooltip.style.top=top+'px';
+      tooltip.style.left=left+'px';
     }
   });
 }
 
 window.startTour=async()=>{
   document.getElementById('onboarding-welcome').style.display='none';
+  // Always start on Today tab
+  const todayBtn=document.querySelector('.sidebar-nav-item[data-tab="today"]')||document.querySelector('[data-tab="today"]');
+  if(todayBtn)switchTab('today',todayBtn);
   if(window.innerWidth>=900){
     const sp=document.getElementById('page-settings');
     if(sp&&sp.style.display!=='none')sp.style.display='none';
-    const todayBtn=document.querySelector('[data-tab="today"]');
-    if(todayBtn)switchTab('today',todayBtn);
     await new Promise(r=>setTimeout(r,300));
   }
   document.getElementById('tour-overlay').style.display='block';
@@ -4482,8 +4501,6 @@ function endTour(){
   document.getElementById('onboarding-welcome').style.display='none';
   document.getElementById('tour-overlay').style.display='none';
   document.getElementById('tour-tooltip').style.display='none';
-  document.getElementById('app').classList.remove('onboarding-active');
-  if(window.innerWidth>=900){const sb=document.getElementById('desktop-sidebar');if(sb)sb.style.display='flex';}
   if(state&&!state.onboardingComplete){state.onboardingComplete=true;save();}
   updateAll();
 }
