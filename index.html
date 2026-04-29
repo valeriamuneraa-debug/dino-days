@@ -1050,7 +1050,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
         <div class="header-date" id="header-date"></div>
       </div>
       <div class="header-right">
-        <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()">✏️</button>
+        <button class="icon-btn" onclick="showTaskManagerModal()">✏️</button>
         <div style="position:relative;display:inline-block;cursor:pointer;" onclick="openSettings()">
           <div class="user-avatar" id="user-avatar">?</div>
           <div id="friend-notif-dot" style="display:none;width:8px;height:8px;background:var(--danger);border-radius:50%;position:absolute;top:0;right:0;"></div>
@@ -1061,7 +1061,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <div class="page active" id="page-today">
       <div class="desktop-page-header" style="display:none;">
         <span class="desktop-page-title">Today</span>
-        <button class="desktop-add-btn" onclick="showAddTaskModal()">+ Add habit</button>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="icon-btn" id="tour-pencil-btn" onclick="showTaskManagerModal()" title="Manage habits">✏️</button>
+          <button class="desktop-add-btn" onclick="showAddTaskModal()">+ Add habit</button>
+        </div>
       </div>
       <div class="today-hero">
         <div class="today-hero-left">
