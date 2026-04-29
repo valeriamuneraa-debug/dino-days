@@ -793,6 +793,151 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* ── FIX 4: Hide mobile drag handle in Settings on desktop ── */
   #page-settings .modal-handle { display: none; }
 
+  /* ── VISUAL HIERARCHY — sidebar stats ── */
+  .sidebar-stats {
+    background: transparent;
+    border: none;
+    padding: 8px 0;
+    margin-top: 8px;
+  }
+  .sidebar-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: none;
+    font-size: 12px;
+  }
+  .sidebar-stat-row:not(:last-child) { border-bottom: none; }
+  .sidebar-stat-row span:first-child {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .sidebar-stat-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── VISUAL HIERARCHY — page titles ── */
+  .desktop-page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  /* ── VISUAL HIERARCHY — progress stat grid ── */
+  .stat-card:nth-child(1) .stat-num,
+  .stat-card:nth-child(2) .stat-num {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .stat-card:nth-child(3) .stat-num,
+  .stat-card:nth-child(4) .stat-num {
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .stat-card:nth-child(3),
+  .stat-card:nth-child(4) {
+    background: transparent;
+    border-color: var(--border);
+  }
+  .stat-lbl {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  /* ── VISUAL HIERARCHY — section labels ── */
+  .section-label,
+  [class*="section-label"],
+  [class*="sec-header"],
+  .progress-section-title,
+  .ch-section-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── VISUAL HIERARCHY — habit list items ── */
+  .task-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .task-meta {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+  .task-item.done .task-name {
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  /* ── VISUAL HIERARCHY — rewards ── */
+  .reward-item { opacity: 1; }
+  .reward-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .reward-cost {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .reward-item.unaffordable .reward-name {
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+  .reward-item.unaffordable .reward-cost { color: var(--ink-faint); }
+  .reward-item:not(.unaffordable) .reward-buy-btn {
+    background: var(--ink);
+    color: white;
+    font-weight: 500;
+  }
+  .reward-item.unaffordable .reward-buy-btn {
+    background: transparent;
+    color: var(--ink-faint);
+    border: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  /* ── VISUAL HIERARCHY — progress hero ── */
+  .progress-streak-big {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .progress-streak-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+  .progress-streak-msg {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
 }
 </style>
 </head>
@@ -1765,7 +1910,7 @@ function renderRewards(){
   for(const r of state.rewards){
     const can=state.points>=r.cost;
     const item=document.createElement('div');
-    item.className='reward-item'+(r.id===expandedRewardId?' expanded':'');
+    item.className='reward-item'+(r.id===expandedRewardId?' expanded':'')+(can?'':' unaffordable');
     item.onclick=(e)=>{expandedRewardId=expandedRewardId===r.id?null:r.id;renderRewards();};
     item.innerHTML=`<div class="reward-icon">${r.icon}</div><div class="reward-info"><div class="reward-name">${r.name}</div><div class="reward-cost">⭐ ${r.cost} points</div></div><div class="reward-actions"><button class="reward-edit-btn" onclick="event.stopPropagation();editReward('${r.id}')">✏️</button><button class="reward-del-btn" onclick="event.stopPropagation();deleteReward('${r.id}')">🗑️</button></div><button class="reward-buy-btn" ${!can?'disabled':''} onclick="event.stopPropagation();buyReward('${r.id}')">${can?'Redeem':`Need ${r.cost-state.points} more`}</button>`;
     list.appendChild(item);
