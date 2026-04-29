@@ -3667,7 +3667,11 @@ function openOnboardingOverlay(screenId){
   const overlay=document.getElementById('onboarding-overlay');
   if(!overlay)return;
   const screen=document.getElementById(screenId);
-  if(screen&&screen.parentElement!==overlay)overlay.appendChild(screen);
+  if(screen){
+    screen.style.display='none'; // hide before moving to prevent position:fixed flash
+    if(screen.parentElement!==overlay)overlay.appendChild(screen);
+    screen.style.display='flex'; // now shows with position:relative CSS override active
+  }
   overlay.style.display='flex';
   // Lock desktop-main scroll so settings below don't bleed through
   if(window.innerWidth>=900){
@@ -4416,11 +4420,13 @@ function clearTourHighlight(){
     e.classList.remove('tour-highlighted');
     e.style.removeProperty('position');
     e.style.removeProperty('z-index');
+    e.style.removeProperty('opacity');
+    e.style.removeProperty('filter');
     e.style.removeProperty('box-shadow');
     e.style.removeProperty('border-radius');
     e.style.removeProperty('pointer-events');
   });
-  // Clean inline-style highlights (mobile)
+  // Restore lifted parent stacking context (desktop)
   if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
   if(tourGlowEl){
     tourGlowEl.style.boxShadow=tourGlowOrigProps.boxShadow??'';
@@ -4435,6 +4441,8 @@ function highlightTourElement(el){
     e.classList.remove('tour-highlighted');
     e.style.removeProperty('position');
     e.style.removeProperty('z-index');
+    e.style.removeProperty('opacity');
+    e.style.removeProperty('filter');
     e.style.removeProperty('box-shadow');
     e.style.removeProperty('border-radius');
     e.style.removeProperty('pointer-events');
@@ -4443,9 +4451,28 @@ function highlightTourElement(el){
   el.classList.add('tour-highlighted');
   el.style.position='relative';
   el.style.zIndex='901';
+  el.style.opacity='1';
+  el.style.filter='none';
   el.style.boxShadow='0 0 0 4px var(--powder), 0 0 0 7px var(--almond)';
   el.style.borderRadius='12px';
   el.style.pointerEvents='none';
+  // Lift the parent stacking context above the tour overlay (z-index:900)
+  // #desktop-sidebar uses position:sticky which creates its own stacking context,
+  // isolating its children from competing against viewport-level z-indices.
+  // We must lift the container itself to z-index:901.
+  if(window.innerWidth>=900){
+    const sidebar=document.getElementById('desktop-sidebar');
+    const main=document.getElementById('desktop-main');
+    if(sidebar&&sidebar.contains(el)){
+      tourLiftedEl=sidebar;
+      tourLiftedOrigZ=sidebar.style.zIndex;
+      sidebar.style.zIndex='901';
+    } else if(main&&main.contains(el)){
+      tourLiftedEl=main;
+      tourLiftedOrigZ=main.style.zIndex;
+      main.style.zIndex='901';
+    }
+  }
 }
 
 function getMobileTourTarget(step){
