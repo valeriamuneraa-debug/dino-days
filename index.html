@@ -4610,7 +4610,7 @@ window.doSignOut=async()=>{
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
 const TOUR_STEPS=[
-  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                                                                                                     lift:null,       setPos:true},
+  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                                                                                                     lift:'.header',  setPos:true},
   {id:'tour-pencil-btn',      title:'Manage your habits',   tip:'Add, reorder, or edit your habits and categories here. Use the pencil icon to manage existing habits, or "+ Add habit" in the top right to create a new one.', lift:'.header',  setPos:false},
   {id:'tour-tab-progress',    title:'Track your progress',  tip:'See your streaks, stats, and weekly completion history.',                                                                                                     lift:'.tab-bar', setPos:false},
   {id:'tour-tab-challenges',  title:'Set challenges',       tip:'Create time-bound goals and compete or bond with friends.',                                                                                                   lift:'.tab-bar', setPos:false},
@@ -4684,7 +4684,7 @@ function highlightTourElement(el){
 }
 
 function getMobileTourTarget(step){
-  const selectors=['#tasks-container','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
+  const selectors=['#tour-streak-chip','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
   return selectors[step]?document.querySelector(selectors[step]):null;
 }
 
@@ -4709,13 +4709,25 @@ function getTourTargetEl(step){
 
 function positionTourTooltip(tooltipEl,targetEl){
   if(window.innerWidth>=900&&targetEl){
-    // Pencil is top-right — tooltip must go to its left
+    // Step 0: tasks-container is full-width — position tooltip top-right of main panel
+    if(targetEl.id==='tasks-container'){
+      const rect=targetEl.getBoundingClientRect();
+      const tipW=300;
+      tooltipEl.style.position='fixed';
+      tooltipEl.style.left=Math.min(rect.right-tipW-20,window.innerWidth-tipW-20)+'px';
+      tooltipEl.style.top=(rect.top+20)+'px';
+      tooltipEl.style.transform='none';
+      tooltipEl.style.zIndex='902';
+      return;
+    }
+    // Step 1: pencil is top-right — tooltip must go to its left
     if(targetEl.id==='tour-pencil-btn'){
       const rect=targetEl.getBoundingClientRect();
-      const tipW=tooltipEl.offsetWidth||280;
+      const tipW=280;
+      tooltipEl.style.width=tipW+'px';
       tooltipEl.style.position='fixed';
-      tooltipEl.style.left=(rect.left-tipW-16)+'px';
-      tooltipEl.style.top=(rect.bottom+8)+'px';
+      tooltipEl.style.left=Math.max(16,rect.left-tipW-16)+'px';
+      tooltipEl.style.top=Math.max(16,rect.top)+'px';
       tooltipEl.style.transform='none';
       tooltipEl.style.zIndex='902';
       return;
