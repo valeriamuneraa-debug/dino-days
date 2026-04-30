@@ -262,9 +262,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:18px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
 .welcome-cta:hover{transform:scale(1.03);}
 .welcome-skip{margin-top:14px;font-size:15px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
-#tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
-#tour-tooltip{position:fixed;z-index:1000;max-width:min(280px,calc(100vw - 40px));}
-.tour-card{background:var(--white);border-radius:20px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+#tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;pointer-events:all;display:none;}
+#tour-overlay.active{display:block;}
+#tour-tooltip{position:fixed;left:16px;right:16px;bottom:90px;width:auto;max-width:none;z-index:902;background:white;border-radius:20px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.tour-highlighted{position:relative !important;z-index:901 !important;box-shadow:0 0 0 4px rgba(243,216,199,0.8),0 0 0 7px rgba(208,184,172,0.6) !important;border-radius:12px !important;pointer-events:none !important;opacity:1 !important;filter:none !important;}
+.tour-card{background:none;border-radius:0;padding:0;box-shadow:none;}
 .tour-tip-title{font-family:'Fraunces', serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px;}
 .tour-tip-text{font-size:14px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px;}
 .tour-actions{display:flex;align-items:center;}
