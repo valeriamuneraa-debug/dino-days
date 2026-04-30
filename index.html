@@ -4609,7 +4609,7 @@ window.doSignOut=async()=>{
 // ONBOARDING TOUR
 let tourStep=0,tourLiftedEl=null,tourLiftedOrigZ='',tourGlowEl=null,tourGlowOrigProps={};
 const TOUR_STEPS=[
-  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                                                                                                     lift:'.header',  setPos:true},
+  {id:'tour-streak-chip',     title:'Your daily rituals',   tip:'Your habits live here. Tap the circle to complete one.',                                                                                                     lift:null,       setPos:true},
   {id:'tour-pencil-btn',      title:'Manage your habits',   tip:'Add, reorder, or edit your habits and categories here. Use the pencil icon to manage existing habits, or "+ Add habit" in the top right to create a new one.', lift:'.header',  setPos:false},
   {id:'tour-tab-progress',    title:'Track your progress',  tip:'See your streaks, stats, and weekly completion history.',                                                                                                     lift:'.tab-bar', setPos:false},
   {id:'tour-tab-challenges',  title:'Set challenges',       tip:'Create time-bound goals and compete or bond with friends.',                                                                                                   lift:'.tab-bar', setPos:false},
@@ -4680,7 +4680,13 @@ function highlightTourElement(el){
 }
 
 function getMobileTourTarget(step){
-  const selectors=['#tasks-container','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
+  const selectors=[
+    '#tasks-container',        // step 0 — habit list area
+    '.icon-btn',               // step 1 — pencil
+    '#tour-tab-progress',      // step 2 — progress tab
+    '#tour-tab-challenges',    // step 3 — challenges tab
+    '#tour-tab-rewards',       // step 4 — rewards tab
+  ];
   return selectors[step]?document.querySelector(selectors[step]):null;
 }
 
@@ -4803,16 +4809,25 @@ function showTourStep(step){
       const tw=Math.min(280,vw-40);
       tooltip.style.width=tw+'px';
       tooltip.style.position='fixed';
-      tooltip.style.zIndex='902';
+      tooltip.style.zIndex='999';
       tooltip.style.transform='';
       const th=tooltip.offsetHeight||140;
       const gap=16;
       let top,left;
-      if(cfg.lift==='.header'){top=rect.bottom+gap;}
-      else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;}
-      else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
-      top=Math.max(80,Math.min(top,vh-th-16));
-      left=rect.left+rect.width/2-tw/2;
+      if(cfg.lift==='.tab-bar'){
+        // Tab bar steps — tooltip sits just above the tab bar
+        const tabBar=document.querySelector('.tab-bar');
+        const tabTop=tabBar?tabBar.getBoundingClientRect().top:vh-83;
+        top=tabTop-th-gap;
+      }else if(el.id==='tasks-container'){
+        // Step 0 — habit list — tooltip in lower third of screen
+        top=vh*0.55;
+      }else{
+        // Step 1 pencil — below the header element
+        top=rect.bottom+gap;
+      }
+      top=Math.max(80,Math.min(top,vh-th-100));
+      left=vw/2-tw/2;
       left=Math.max(16,Math.min(left,vw-tw-16));
       tooltip.style.top=top+'px';
       tooltip.style.left=left+'px';
@@ -4821,7 +4836,7 @@ function showTourStep(step){
       tooltip.style.top='50%';
       tooltip.style.left='50%';
       tooltip.style.transform='translate(-50%,-50%)';
-      tooltip.style.zIndex='902';
+      tooltip.style.zIndex='999';
     }
   });
 }
