@@ -262,9 +262,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .welcome-cta{padding:16px 32px;border-radius:16px;background:var(--ink);color:white;border:none;font-size:18px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s;}
 .welcome-cta:hover{transform:scale(1.03);}
 .welcome-skip{margin-top:14px;font-size:15px;color:var(--ink-faint);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
-#tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;pointer-events:all;display:none;}
-#tour-overlay.active{display:block;}
-#tour-tooltip{position:fixed;z-index:902;background:white;border-radius:20px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.18);height:auto;min-height:0;overflow:visible;}
+#tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:998;pointer-events:all;}
+#tour-tooltip{position:fixed;z-index:999;background:white;border-radius:20px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.18);height:auto;min-height:0;overflow:visible;}
 .tour-highlighted{position:relative !important;z-index:901 !important;box-shadow:0 0 0 4px rgba(243,216,199,0.8),0 0 0 7px rgba(208,184,172,0.6) !important;border-radius:12px !important;pointer-events:none !important;opacity:1 !important;filter:none !important;}
 .tour-card{background:none;border-radius:0;padding:0;box-shadow:none;}
 .tour-tip-title{font-family:'Fraunces', serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px;}
@@ -4620,10 +4619,8 @@ const TOUR_STEPS=[
 function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').style.display='flex';openOnboardingOverlay('onboarding-welcome');}
 
 function clearTourHighlight(){
-  // Reset overlay z-index and mask
   const overlay=document.getElementById('tour-overlay');
-  if(overlay){overlay.style.zIndex='';overlay.style.webkitMaskImage='none';overlay.style.maskImage='none';}
-  // Clean class-based highlights (desktop)
+  if(overlay){overlay.style.webkitMaskImage='none';overlay.style.maskImage='none';}
   document.querySelectorAll('.tour-highlighted').forEach(e=>{
     e.classList.remove('tour-highlighted');
     e.style.removeProperty('position');
@@ -4634,12 +4631,10 @@ function clearTourHighlight(){
     e.style.removeProperty('border-radius');
     e.style.removeProperty('pointer-events');
   });
-  // Restore lifted parent stacking context (desktop)
   if(tourLiftedEl){tourLiftedEl.style.zIndex=tourLiftedOrigZ;tourLiftedEl=null;}
   if(tourGlowEl){
     tourGlowEl.style.boxShadow=tourGlowOrigProps.boxShadow??'';
     if(tourGlowOrigProps.hasOwnProperty('position'))tourGlowEl.style.position=tourGlowOrigProps.position??'';
-    if(tourGlowOrigProps.hasOwnProperty('zIndex'))tourGlowEl.style.zIndex=tourGlowOrigProps.zIndex??'';
     tourGlowEl=null;tourGlowOrigProps={};
   }
 }
@@ -4685,7 +4680,7 @@ function highlightTourElement(el){
 }
 
 function getMobileTourTarget(step){
-  const selectors=['#tour-streak-chip','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
+  const selectors=['#tasks-container','.icon-btn','[data-tab="progress"]','[data-tab="challenges"]','[data-tab="rewards"]'];
   return selectors[step]?document.querySelector(selectors[step]):null;
 }
 
@@ -4779,15 +4774,13 @@ function showTourStep(step){
     applyTourOverlayWithCutout(el);
     highlightTourElement(el);
   }else{
-    // Mobile: lower overlay so tab bar and header naturally sit above it
-    const mOverlay=document.getElementById('tour-overlay');
-    if(mOverlay)mOverlay.style.zIndex='150';
     if(el){
       tourGlowEl=el;
-      tourGlowOrigProps={boxShadow:el.style.boxShadow,zIndex:el.style.zIndex,position:el.style.position};
-      el.style.position='relative';
-      el.style.zIndex='160';
-      el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 7px var(--almond)';
+      tourGlowOrigProps={boxShadow:el.style.boxShadow};
+      if(cfg.setPos){tourGlowOrigProps.position=el.style.position;el.style.position='relative';}
+      el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
+      const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
+      if(liftTarget){tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;liftTarget.style.zIndex='999';}
       el.scrollIntoView({block:'nearest',behavior:'smooth'});
     }
   }
@@ -4805,39 +4798,30 @@ function showTourStep(step){
     if(isDesktop){
       positionTourTooltip(tooltip,el);
     }else if(el){
-      // Mobile: anchor tooltip near highlighted element
       const rect=el.getBoundingClientRect();
       const vw=window.innerWidth,vh=window.innerHeight;
-      const tw=Math.min(300,vw-32);
+      const tw=Math.min(280,vw-40);
       tooltip.style.width=tw+'px';
       tooltip.style.position='fixed';
-      tooltip.style.zIndex='160';
+      tooltip.style.zIndex='902';
       tooltip.style.transform='';
-      const th=tooltip.offsetHeight||160;
-      const gap=12;
+      const th=tooltip.offsetHeight||140;
+      const gap=16;
       let top,left;
-      if(cfg.lift==='.tab-bar'){
-        // Tab bar steps — tooltip just above the tab bar
-        const tabBar=document.querySelector('.tab-bar');
-        const tabBarTop=tabBar?tabBar.getBoundingClientRect().top:vh-80;
-        top=tabBarTop-th-gap;
-      }else if(cfg.lift==='.header'){
-        // Header steps — tooltip just below the element
-        top=rect.bottom+gap;
-      }else{
-        top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;
-      }
-      top=Math.max(80,Math.min(top,vh-th-80));
-      left=vw/2-tw/2;
+      if(cfg.lift==='.header'){top=rect.bottom+gap;}
+      else if(cfg.lift==='.tab-bar'){top=rect.top-th-gap;}
+      else{top=rect.top>vh/2?rect.top-th-gap:rect.bottom+gap;}
+      top=Math.max(80,Math.min(top,vh-th-16));
+      left=rect.left+rect.width/2-tw/2;
       left=Math.max(16,Math.min(left,vw-tw-16));
       tooltip.style.top=top+'px';
       tooltip.style.left=left+'px';
     }else{
       tooltip.style.position='fixed';
-      tooltip.style.top='40%';
+      tooltip.style.top='50%';
       tooltip.style.left='50%';
       tooltip.style.transform='translate(-50%,-50%)';
-      tooltip.style.zIndex='160';
+      tooltip.style.zIndex='902';
     }
   });
 }
