@@ -1257,7 +1257,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     <button class="btn btn-secondary" style="flex:none;padding:10px 14px;font-size:15px;" onclick="addCustomReward()">Add +</button>
   </div>
   <div id="custom-rewards-list" style="width:100%;margin-bottom:8px;"></div>
-  <div style="font-size:13px;color:var(--ink-faint);text-align:center;padding:8px 20px;width:100%;">⚠️ Miss too many days and your store locks until you're back on track.</div>
   <div style="width:100%;margin-top:auto;padding:20px 0 0;background:transparent;">
     <button class="btn btn-primary" style="width:100%;flex:none;" onclick="confirmRewards()">Continue →</button>
     <a onclick="skipRewardsSetup()" style="display:block;text-align:center;margin-top:12px;font-size:14px;color:var(--ink-faint);cursor:pointer;text-decoration:none;padding:8px;">Customize later</a>
@@ -1520,14 +1519,10 @@ window.skipDisplayName=()=>{
 };
 
 const REWARD_SUGGESTIONS_DATA=[
-  {icon:'🍜',name:'Takeout',cost:50},
-  {icon:'🎬',name:'Movie night',cost:30},
-  {icon:'✨',name:'Night out',cost:80},
-  {icon:'🥐',name:'Bakery treat',cost:20},
-  {icon:'💆',name:'Spa day',cost:120},
-  {icon:'🛍️',name:'Shopping trip',cost:100},
-  {icon:'🍕',name:'Pizza night',cost:40},
-  {icon:'☕',name:'Fancy coffee',cost:15},
+  {icon:'',name:'Takeout',cost:50},
+  {icon:'',name:'Movie night',cost:30},
+  {icon:'',name:'Spa day',cost:120},
+  {icon:'',name:'Fancy coffee',cost:15},
 ];
 let _selectedRewardSuggestions=new Set();
 let _customRewards=[];
