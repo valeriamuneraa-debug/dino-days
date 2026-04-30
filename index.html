@@ -4620,7 +4620,7 @@ function showWelcome(){_onbStep=6;document.getElementById('onboarding-welcome').
 
 function clearTourHighlight(){
   const overlay=document.getElementById('tour-overlay');
-  if(overlay){overlay.style.webkitMaskImage='none';overlay.style.maskImage='none';}
+  if(overlay){overlay.style.display='block';overlay.style.webkitMaskImage='none';overlay.style.maskImage='none';}
   document.querySelectorAll('.tour-highlighted').forEach(e=>{
     e.classList.remove('tour-highlighted');
     e.style.removeProperty('position');
@@ -4784,9 +4784,18 @@ function showTourStep(step){
       tourGlowEl=el;
       tourGlowOrigProps={boxShadow:el.style.boxShadow};
       if(cfg.setPos){tourGlowOrigProps.position=el.style.position;el.style.position='relative';}
-      el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
-      const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
-      if(liftTarget){tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;liftTarget.style.zIndex='999';}
+      // Step 0: tasks-container is transparent — hide overlay entirely
+      // so the habit list is fully visible. No glow ring needed since
+      // the whole point is "look at your habits"
+      const overlay=document.getElementById('tour-overlay');
+      if(el.id==='tasks-container'){
+        if(overlay)overlay.style.display='none';
+      }else{
+        if(overlay)overlay.style.display='block';
+        el.style.boxShadow='0 0 0 4px var(--powder),0 0 0 6px var(--almond)';
+        const liftTarget=cfg.lift?document.querySelector(cfg.lift):el;
+        if(liftTarget){tourLiftedEl=liftTarget;tourLiftedOrigZ=liftTarget.style.zIndex;liftTarget.style.zIndex='999';}
+      }
       el.scrollIntoView({block:'nearest',behavior:'smooth'});
     }
   }
