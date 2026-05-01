@@ -2009,19 +2009,26 @@ function recalcChallengeStreak(ch){
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
   let changed=false;
+
   for(const ch of state.challenges){
     if(ch.status!=='active')continue;
-    if(ch.type==='bond'||ch.type==='race')continue; // social challenges handled separately
+    if(ch.type==='bond'||ch.type==='race')continue;
+
     const habitPool=ch.habitIds&&ch.habitIds.length>0
       ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
       :state.tasks;
     if(!habitPool.length)continue;
+
     const threshold=ch.completionThreshold??100;
     const startD=new Date(ch.startDate);startD.setHours(0,0,0,0);
     const today=new Date();today.setHours(0,0,0,0);
     const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+
     ch.completedDays=ch.completedDays||{};
-    // Walk every day from startDate to yesterday, fill in any unrecorded day
+
+    // Walk every day from startDate through yesterday.
+    // Re-evaluate any day where ch.completedDays[k] is undefined
+    // but state.completedDays[k] has habit data — handles retroactive logging.
     const cursor=new Date(startD);
     while(cursor<=yesterday){
       const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
@@ -2032,39 +2039,55 @@ function evaluateChallenges(){
           const pct=Math.round(doneCount/habitPool.length*100);
           ch.completedDays[k]=pct>=threshold;
         }else{
-          const daysSinceStart=Math.floor((cursor-startD)/(1000*60*60*24));
+          const daysSinceStart=Math.floor((cursor-startD)/86400000);
           if(daysSinceStart>0)ch.completedDays[k]=false;
         }
         changed=true;
       }
       cursor.setDate(cursor.getDate()+1);
     }
-    // Also check today if habits are already logged
-    const todayKey=TODAY;
-    if(ch.completedDays[todayKey]===undefined&&state.completedDays[todayKey]){
-      const dayData=state.completedDays[todayKey];
+
+    // Also evaluate today if habits are already logged
+    if(ch.completedDays[TODAY]===undefined&&state.completedDays[TODAY]){
+      const dayData=state.completedDays[TODAY];
       const doneCount=habitPool.filter(t=>dayData[t.id]).length;
       const pct=Math.round(doneCount/habitPool.length*100);
-      if(pct>=threshold){ch.completedDays[todayKey]=true;changed=true;}
+      if(pct>=threshold){ch.completedDays[TODAY]=true;changed=true;}
     }
-    // Rebuild streak from complete history
-    const prevStreak=ch.currentStreak;
-    recalcChallengeStreak(ch);
-    // Handle custom challenge total count
+
+    // Rebuild streak from complete history by walking backwards from today
+    let streak=0;
+    const walkD=new Date(today);
+    for(let i=0;i<=ch.duration+1;i++){
+      const k=`${walkD.getFullYear()}-${String(walkD.getMonth()+1).padStart(2,'0')}-${String(walkD.getDate()).padStart(2,'0')}`;
+      if(walkD<startD)break;
+      if(ch.completedDays[k]===true){streak++;walkD.setDate(walkD.getDate()-1);}
+      else if(ch.completedDays[k]===false){break;}
+      else{
+        // undefined on a past day = no data = treat as miss only if before today
+        if(k<TODAY)break;
+        walkD.setDate(walkD.getDate()-1);
+      }
+    }
+    ch.currentStreak=streak;
+    if(streak>(ch.bestStreak||0))ch.bestStreak=streak;
+
+    // Custom challenge total count
     if(ch.type==='custom'){
       ch.completedDaysTotal=Object.values(ch.completedDays).filter(v=>v===true).length;
     }
-    // Check win condition
+
+    // Win condition check
     if(ch.type==='custom'){
       const won=ch.victoryCondition==='total'
         ?ch.completedDaysTotal>=(ch.totalTarget||ch.duration)
         :ch.currentStreak>=(ch.streakRequired||ch.duration);
-      if(won){ch.status='completed';showToast('🏆 Custom challenge complete!');changed=true;}
+      if(won){ch.status='completed';showToast('🏆 Custom challenge complete! You did it!');}
     }else{
-      if(ch.currentStreak>=ch.duration){ch.status='completed';showToast('🏆 Challenge complete! You did it!');changed=true;}
+      if(ch.currentStreak>=ch.duration){ch.status='completed';showToast('🏆 Challenge complete! You did it!');}
     }
-    if(ch.currentStreak!==prevStreak)changed=true;
   }
+
   if(changed)save();
 }
 
