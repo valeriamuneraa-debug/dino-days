@@ -955,6 +955,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-top: 8px;
   }
 
+  /* Auth screen — match the desktop app shell container */
+  #auth-screen {
+    align-items: center;
+    justify-content: center;
+    background: var(--linen);
+    padding: 16px;
+  }
+
+  /* Auth card — wider on desktop, matches app shell aesthetic */
+  #auth-screen .auth-card {
+    width: 100%;
+    max-width: 1200px;
+    min-height: calc(100vh - 32px);
+    border-radius: 20px;
+    box-shadow: 0 8px 60px rgba(208, 184, 172, 0.25);
+    background: var(--page-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    box-sizing: border-box;
+  }
+
+  /* Auth form fields — constrained to a readable width inside the wide card */
+  #auth-screen .auth-card > *:not(.auth-title):not(.auth-sub) {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  #auth-screen .auth-title {
+    font-size: 36px;
+  }
+
 }
 </style>
 </head>
