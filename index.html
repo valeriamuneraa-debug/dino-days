@@ -966,35 +966,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     margin-top: 8px;
   }
 
-  /* Auth screen — match the desktop app shell container */
+  /* ── AUTH DESKTOP SPLIT PANEL ── */
   #auth-screen {
-    align-items: center;
-    justify-content: center;
     background: #FFFFFF;
     padding: 16px;
-    min-height: 100vh;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* ── AUTH DESKTOP SPLIT PANEL ── */
   #auth-screen .auth-card {
     width: 100%;
     max-width: 1200px;
     min-height: calc(100vh - 32px);
     border-radius: 20px;
-    box-shadow: 0 8px 60px rgba(208, 184, 172, 0.25);
-    background: #EFE5DC;
+    box-shadow: 0 8px 60px rgba(208,184,172,0.25);
     display: grid;
     grid-template-columns: 1fr 1fr;
     overflow: hidden;
     padding: 0;
     box-sizing: border-box;
+    background: #EFE5DC;
+    flex-direction: unset;
+    gap: 0;
   }
 
-  /* LEFT — Brand panel */
-  .auth-brand-panel { display: flex; background: #EFE5DC; }
+  .auth-brand-panel {
+    display: flex;
+    background: #EFE5DC;
+  }
 
-  /* RIGHT — Form panel */
   .auth-form-panel {
     display: flex;
     flex-direction: column;
@@ -1003,11 +1003,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     padding: 60px 52px;
     background: #FBFEFB;
     overflow-y: auto;
-  }
-
-  .auth-form-panel > * {
-    width: 100%;
-    max-width: 380px;
   }
 
 }
