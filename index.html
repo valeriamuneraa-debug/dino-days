@@ -2032,7 +2032,9 @@ function evaluateChallenges(){
     const cursor=new Date(startD);
     while(cursor<=yesterday){
       const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-      if(ch.completedDays[k]===undefined){
+      // Re-evaluate if: never recorded (undefined), OR recorded as false but habit data now exists
+      const alreadyTrue=ch.completedDays[k]===true;
+      if(!alreadyTrue){
         const dayData=state.completedDays[k];
         if(dayData){
           const doneCount=habitPool.filter(t=>dayData[t.id]).length;
@@ -2040,7 +2042,10 @@ function evaluateChallenges(){
           ch.completedDays[k]=pct>=threshold;
         }else{
           const daysSinceStart=Math.floor((cursor-startD)/86400000);
-          if(daysSinceStart>0)ch.completedDays[k]=false;
+          if(daysSinceStart>0&&ch.completedDays[k]===undefined){
+            ch.completedDays[k]=false;
+          }
+          // If already false and no habit data, leave it — don't overwrite
         }
         changed=true;
       }
