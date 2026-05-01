@@ -856,20 +856,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 
   /* ── VISUAL HIERARCHY — progress stat grid ── */
   .stat-card:nth-child(1) .stat-num,
-  .stat-card:nth-child(2) .stat-num {
-    font-size: 36px;
-    font-weight: 600;
-    color: var(--ink);
-  }
+  .stat-card:nth-child(2) .stat-num,
   .stat-card:nth-child(3) .stat-num,
   .stat-card:nth-child(4) .stat-num {
-    font-size: 28px;
     font-weight: 400;
-    color: var(--ink-soft);
+    color: var(--ink);
   }
   .stat-card:nth-child(3),
   .stat-card:nth-child(4) {
-    background: transparent;
+    background: var(--white);
     border-color: var(--border);
   }
   .stat-lbl {
