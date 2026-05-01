@@ -3680,7 +3680,7 @@ function renderChallengeCard(ch){
     :`Day ${ch.currentStreak||0} of ${ch.duration}`;
   let bottomRow='';
   if(ch.status==='active'){
-    bottomRow=`<div style="display:flex;justify-content:flex-end;margin-top:14px;"><span style="font-size:13px;color:${todayDone?'var(--success)':'var(--ink-faint)'}">${todayDone?'✓ Today counted':'Complete habits to count today'}</span></div>`;
+    bottomRow=`<div style="display:flex;justify-content:center;margin-top:14px;"><span style="font-size:13px;color:${todayDone?'var(--success)':'var(--ink-faint)'}">${todayDone?'✓ Today counted':'Complete habits to count today'}</span></div>`;
   }
   return `<div class="challenge-card ${ch.status}" onclick="openChallengeDetail('${ch.id}')">
     <div class="challenge-card-title">${ch.title}</div>
