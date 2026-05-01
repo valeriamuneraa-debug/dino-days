@@ -971,7 +971,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     align-items: center;
     justify-content: center;
     background: #FFFFFF;
-    padding: 0;
+    padding: 16px;
     min-height: 100vh;
     width: 100%;
   }
@@ -979,22 +979,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   /* ── AUTH DESKTOP SPLIT PANEL ── */
   #auth-screen .auth-card {
     width: 100%;
-    max-width: 100%;
-    min-height: 100vh;
-    border-radius: 0;
-    box-shadow: none;
+    max-width: 1200px;
+    min-height: calc(100vh - 32px);
+    border-radius: 20px;
+    box-shadow: 0 8px 60px rgba(208, 184, 172, 0.25);
     background: #EFE5DC;
     display: grid;
     grid-template-columns: 1fr 1fr;
     overflow: hidden;
     padding: 0;
     box-sizing: border-box;
-    flex-direction: unset;
-    gap: 0;
   }
 
   /* LEFT — Brand panel */
-  .auth-brand-panel { display: flex; }
+  .auth-brand-panel { display: flex; background: #EFE5DC; }
 
   /* RIGHT — Form panel */
   .auth-form-panel {
