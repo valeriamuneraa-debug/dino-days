@@ -26,6 +26,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .auth-card{background:var(--white);border-radius:28px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(208,184,172,0.25);}
 .auth-title{font-family:'Fraunces', serif;font-size:28px;font-weight:700;text-align:center;margin-bottom:4px;}
 .auth-sub{font-size:15px;color:var(--ink-faint);text-align:center;margin-bottom:28px;}
+/* Auth brand panel — hidden on mobile, shown on desktop via media query */
+.auth-brand-panel{display:none;background:linear-gradient(160deg,#2d2118 0%,#1a130d 100%);align-items:center;justify-content:center;padding:60px 52px;position:relative;overflow:hidden;}
+.auth-brand-panel::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(208,184,172,0.08);top:-100px;right:-200px;pointer-events:none;}
+.auth-brand-panel::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;border:1px solid rgba(208,184,172,0.06);bottom:-80px;left:-100px;pointer-events:none;}
+.auth-brand-inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:0;}
+.auth-brand-logo{font-family:'Fraunces',serif;font-size:32px;font-weight:700;color:var(--powder);margin-bottom:24px;letter-spacing:-0.5px;}
+.auth-brand-divider{width:40px;height:2px;background:var(--almond);border-radius:2px;margin-bottom:28px;}
+.auth-brand-heading{font-family:'Fraunces',serif;font-size:40px;font-weight:700;color:#fff;line-height:1.15;margin:0 0 20px;letter-spacing:-0.5px;}
+.auth-brand-body{font-family:'DM Sans',sans-serif;font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin:0 0 32px;max-width:360px;}
+.auth-brand-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:48px;}
+.auth-brand-pill{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--powder);background:rgba(208,184,172,0.1);border:1px solid rgba(208,184,172,0.18);border-radius:100px;padding:6px 14px;}
+.auth-brand-footer{font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(255,255,255,0.25);}
+.auth-form-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .auth-tabs{display:flex;background:var(--linen);border-radius:12px;padding:4px;margin-bottom:24px;}
 .auth-tab{flex:1;padding:8px;border-radius:9px;border:none;background:transparent;font-size:15px;font-weight:500;color:var(--ink-soft);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .auth-tab.active{background:var(--white);color:var(--ink);}
@@ -963,7 +976,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     padding: 16px;
   }
 
-  /* Auth card — wider on desktop, matches app shell aesthetic */
+  /* ── AUTH DESKTOP SPLIT PANEL ── */
   #auth-screen .auth-card {
     width: 100%;
     max-width: 1200px;
@@ -971,22 +984,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
     border-radius: 20px;
     box-shadow: 0 8px 60px rgba(208, 184, 172, 0.25);
     background: var(--page-bg);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    flex-direction: unset;
+    gap: 0;
+  }
+
+  /* LEFT — Brand panel */
+  .auth-brand-panel { display: flex; }
+
+  /* RIGHT — Form panel */
+  .auth-form-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 40px;
-    box-sizing: border-box;
+    padding: 60px 52px;
+    background: var(--page-bg);
+    overflow-y: auto;
   }
 
-  /* Auth form fields — constrained to a readable width inside the wide card */
-  #auth-screen .auth-card > *:not(.auth-title):not(.auth-sub) {
+  .auth-form-panel > * {
     width: 100%;
-    max-width: 420px;
-  }
-
-  #auth-screen .auth-title {
-    font-size: 36px;
+    max-width: 380px;
   }
 
 }
@@ -1008,24 +1031,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 <!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-title">Ritual</div>
-    <div class="auth-sub">Your daily companion for growth 🌱</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Sign in</button>
-      <button class="auth-tab" id="tab-signup" onclick="showAuthTab('signup')">Create account</button>
+    <div class="auth-brand-panel">
+      <div class="auth-brand-inner">
+        <div class="auth-brand-logo">Ritual</div>
+        <div class="auth-brand-divider"></div>
+        <h2 class="auth-brand-heading">Build the life<br>you actually want.</h2>
+        <p class="auth-brand-body">Ritual is not a to-do list. It's a daily habit system — designed to help you show up consistently, build real momentum, and become the person you're trying to be. One small habit at a time.</p>
+        <div class="auth-brand-pills">
+          <span class="auth-brand-pill">🔥 Streak tracking</span>
+          <span class="auth-brand-pill">⭐ Points & rewards</span>
+          <span class="auth-brand-pill">🎯 Challenges</span>
+        </div>
+        <div class="auth-brand-footer">© 2025 Ritual. Your habits, your rules.</div>
+      </div>
     </div>
-    <div class="auth-msg" id="auth-msg"></div>
-    <div id="auth-form-login">
-      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="your@email.com"/></div>
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="remember-me" checked/><label for="remember-me" class="remember-label">Remember me</label></div>
-      <div class="form-actions"><button class="btn btn-primary" onclick="doLogin()" style="flex:1">Sign in</button></div>
-      <p style="text-align:center;margin-top:14px;font-size:14px;color:var(--ink-faint);cursor:pointer;" onclick="doForgot()">Forgot password?</p>
-    </div>
-    <div id="auth-form-signup" style="display:none;">
-      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="signup-email" type="email" placeholder="your@email.com"/></div>
-      <div class="form-group"><label class="form-label">Password (min 6 characters)</label><input class="form-input" id="signup-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignup()"/></div>
-      <div class="form-actions"><button class="btn btn-primary" onclick="doSignup()" style="flex:1">Create account</button></div>
+    <div class="auth-form-panel">
+      <div class="auth-title">Ritual</div>
+      <div class="auth-sub">Your daily companion for growth 🌱</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Sign in</button>
+        <button class="auth-tab" id="tab-signup" onclick="showAuthTab('signup')">Create account</button>
+      </div>
+      <div class="auth-msg" id="auth-msg"></div>
+      <div id="auth-form-login">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="your@email.com"/></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="remember-me" checked/><label for="remember-me" class="remember-label">Remember me</label></div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="doLogin()" style="flex:1">Sign in</button></div>
+        <p style="text-align:center;margin-top:14px;font-size:14px;color:var(--ink-faint);cursor:pointer;" onclick="doForgot()">Forgot password?</p>
+      </div>
+      <div id="auth-form-signup" style="display:none;">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="signup-email" type="email" placeholder="your@email.com"/></div>
+        <div class="form-group"><label class="form-label">Password (min 6 characters)</label><input class="form-input" id="signup-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="doSignup()" style="flex:1">Create account</button></div>
+      </div>
     </div>
   </div>
 </div>
