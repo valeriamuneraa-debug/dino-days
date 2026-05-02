@@ -2269,6 +2269,7 @@ function openChallengeDetail(id){
           :`<p style="text-align:center;color:var(--danger);font-size:13px;margin:12px 0">Today not counted</p>`;
       })()}
       <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      ${(ch.type==='solo'||ch.type==='custom'||!ch.type)?`<span onclick="editChallenge('${ch.id}')" style="font-size:13px;color:var(--ink-soft);cursor:pointer;text-align:center;display:block;padding:8px;">Edit challenge</span>`:''}
       <span onclick="abandonChallenge('${ch.id}')" style="font-size:13px;color:var(--danger);cursor:pointer;text-align:center;display:block;padding:8px;">Abandon challenge</span>
     `:''}
   </div>`;
@@ -2355,6 +2356,147 @@ function showNewChallengeModal(){
   showModal('New challenge',body);
 }
 window.showNewChallengeModal=showNewChallengeModal;
+
+function editChallenge(chId){
+  const ch=(state.challenges||[]).find(c=>c.id===chId);
+  if(!ch)return;
+  // Pre-fill module-level vars from existing challenge
+  _chDuration=ch.duration||30;
+  _chThreshold=ch.habitIds&&ch.habitIds.length?-1:(ch.completionThreshold||100);
+  _chHabitIds=ch.habitIds?[...ch.habitIds]:[];
+  _chAllowMisses=ch.allowMisses||false;
+  _chVictoryCondition=ch.victoryCondition||'streak';
+  _chTotalTarget=ch.totalTarget||ch.duration||30;
+
+  const habitOptions=state.tasks.map(t=>{
+    const sel=_chHabitIds.includes(t.id);
+    return `<div class="habit-check-row" id="hcrow-${t.id}" onclick="toggleChallengeHabit('${t.id}')"><span style="font-size:18px;margin-right:4px;">${t.emoji||'•'}</span><span style="flex:1;">${t.name}</span><span id="hcc-${t.id}" style="color:var(--almond);">${sel?'✓':'○'}</span></div>`;
+  }).join('');
+
+  // Determine which duration pill should be pre-selected
+  const presetDurs=[21,30,60,180,365];
+  const durIsPreset=presetDurs.includes(_chDuration);
+  const durPills=[21,30,60,180,365].map(d=>{
+    const label=d===180?'6 mo':d===365?'1 yr':d+' days';
+    return `<button class="ch-pill${_chDuration===d?' ch-pill-sel':''}" onclick="setCHDur(${d},this)">${label}</button>`;
+  }).join('');
+  const customPillSel=!durIsPreset?' ch-pill-sel':'';
+
+  const threshSel50=_chThreshold===50?' ch-pill-sel':'';
+  const threshSel100=_chThreshold===100&&!(_chHabitIds.length)?' ch-pill-sel':'';
+  const threshSelSpec=_chThreshold===-1?' ch-pill-sel':'';
+  const habitListDisplay=_chThreshold===-1?'block':'none';
+
+  const vicStreakSel=_chVictoryCondition==='streak'?' ch-pill-sel':'';
+  const vicTotalSel=_chVictoryCondition==='total'?' ch-pill-sel':'';
+  const totalWrapDisplay=_chVictoryCondition==='total'?'flex':'none';
+
+  const misResetSel=!_chAllowMisses?' ch-pill-sel':'';
+  const misNoteSel=_chAllowMisses?' ch-pill-sel':'';
+
+  const hasAdvanced=_chVictoryCondition!=='streak'||_chAllowMisses||ch.description;
+
+  const body=`<div class="modal-scroll">
+    <div style="margin-bottom:20px;">
+      <div class="ch-section-label">Name</div>
+      <input class="form-input" id="ch-title" placeholder="e.g. Morning routine master" maxlength="60" value="${(ch.title||'').replace(/"/g,'&quot;')}"/>
+      <div id="ch-name-error" style="font-size:12px;color:var(--danger);margin-top:4px;display:none;">Please name your challenge</div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div class="ch-section-label">Duration</div>
+      <div class="ch-dur-row" id="ch-dur-row">
+        ${durPills}
+        <button class="ch-pill${customPillSel}" id="ch-custom-dur-pill" onclick="toggleCHCustomDur(this)">Custom</button>
+      </div>
+      <div id="ch-custom-dur-wrap" style="display:${!durIsPreset?'flex':'none'};margin-top:10px;align-items:center;gap:8px;">
+        <input class="form-input" type="number" id="ch-custom-dur-input" min="1" max="3650" placeholder="365" style="width:90px;" value="${!durIsPreset?_chDuration:''}" oninput="setCHCustomDuration(this.value)"/>
+        <span style="font-size:14px;color:var(--ink-soft);">days</span>
+      </div>
+    </div>
+    <div style="margin-bottom:4px;">
+      <div class="ch-section-label">A day counts when I complete</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-thresh-row">
+        <button class="ch-pill${threshSel50}" onclick="setCHThresh(50,this)">50% of habits</button>
+        <button class="ch-pill${threshSel100}" onclick="setCHThresh(100,this)">All habits</button>
+        <button class="ch-pill${threshSelSpec}" onclick="setCHThresh(-1,this)">Specific habits</button>
+      </div>
+    </div>
+    <div id="ch-habit-list" style="display:${habitListDisplay};margin-top:10px;">
+      <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div>
+    </div>
+    <div onclick="toggleCHAdvanced()" style="font-size:13px;color:var(--ink-faint);cursor:pointer;display:flex;align-items:center;gap:6px;margin:20px 0 0;user-select:none;">
+      <span id="ch-adv-arrow" style="display:inline-block;transition:transform .2s;font-size:16px;line-height:1;${hasAdvanced?'transform:rotate(90deg)':''}">›</span>
+      Advanced options
+    </div>
+    <div id="ch-advanced" style="max-height:${hasAdvanced?'800px':'0'};overflow:hidden;transition:max-height .35s ease;">
+      <div style="padding-top:16px;">
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">Description (optional)</div>
+          <input class="form-input" id="ch-desc" placeholder="What's your goal?" value="${(ch.description||'').replace(/"/g,'&quot;')}"/>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">I win when</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-vic-row">
+            <button class="ch-pill${vicStreakSel}" id="ch-vic-streak" onclick="setCHVictory('streak',this)">I reach my streak goal</button>
+            <button class="ch-pill${vicTotalSel}" id="ch-vic-total" onclick="setCHVictory('total',this)">I complete X total days</button>
+          </div>
+          <div id="ch-total-target-wrap" style="display:${totalWrapDisplay};margin-top:10px;align-items:center;gap:8px;">
+            <span style="font-size:14px;color:var(--ink-soft);">Target:</span>
+            <input class="form-input" type="number" id="ch-total-target" min="1" max="3650" value="${_chTotalTarget}" style="width:90px;" oninput="setCHTotalTarget(this.value)"/>
+            <span style="font-size:14px;color:var(--ink-soft);">days</span>
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="ch-section-label">If I miss a day</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ch-miss-row">
+            <button class="ch-pill${misResetSel}" id="ch-miss-reset" onclick="setCHMissMode(false,this)">Streak resets</button>
+            <button class="ch-pill${misNoteSel}" id="ch-miss-note" onclick="setCHMissMode(true,this)">Just note it</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink-faint);margin-top:8px;">Just note it counts total completions instead of consecutive days</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="saveEditChallenge('${chId}')">Save changes</button>
+  </div>`;
+  showModal('Edit challenge',body);
+}
+window.editChallenge=editChallenge;
+
+window.saveEditChallenge=function(chId){
+  const ch=(state.challenges||[]).find(c=>c.id===chId);
+  if(!ch)return;
+  const title=(document.getElementById('ch-title')?.value||'').trim();
+  if(!title){
+    const ni=document.getElementById('ch-title');
+    const errEl=document.getElementById('ch-name-error');
+    if(ni){ni.style.animation='none';requestAnimationFrame(()=>{ni.style.animation='chShake .3s ease';});}
+    if(errEl)errEl.style.display='block';
+    return;
+  }
+  const desc=(document.getElementById('ch-desc')?.value||'').trim();
+  const threshold=_chThreshold===-1?100:_chThreshold;
+  const habitIds=_chThreshold===-1?[..._chHabitIds]:[];
+  const isCustom=_chVictoryCondition!=='streak'||_chAllowMisses!==false;
+
+  ch.title=title;
+  ch.description=desc;
+  ch.duration=_chDuration;
+  ch.completionThreshold=threshold;
+  ch.habitIds=habitIds;
+  ch.type=isCustom?'custom':'solo';
+  if(isCustom){
+    ch.allowMisses=_chAllowMisses;
+    ch.victoryCondition=_chVictoryCondition;
+    ch.totalTarget=_chTotalTarget||_chDuration;
+  }else{
+    delete ch.allowMisses;
+    delete ch.victoryCondition;
+    delete ch.totalTarget;
+  }
+
+  save();closeModal();renderChallenges();renderTodayBanner();
+  showToast('Challenge updated');
+};
 
 // Social challenge modal duration/threshold (uses .duration-pill/.threshold-pill classes)
 window.setChallengeD=(d,btn)=>{
