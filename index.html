@@ -658,8 +658,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
   #challenges-inner > div { padding-left: 32px; padding-right: 32px; }
 
   /* MODAL — center on desktop */
-  .modal-overlay.open { align-items: center; }
-  .modal { border-radius: 24px !important; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+  .modal-overlay.open { align-items: center; z-index: 600; }
+  .modal { border-radius: 24px !important; max-width: 480px; max-height: 85vh; overflow-y: auto; z-index: 601; position: relative; }
 
   /* ── FIX 1: SETTINGS PAGE — in-flow inside #desktop-main ── */
   #page-settings {
