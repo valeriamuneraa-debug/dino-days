@@ -4417,6 +4417,13 @@ window.removeFriend=removeFriend;
 window.updateDisplayName=updateDisplayName;
 
 window.openSettings=async function(){
+  if(window.innerWidth>=900){
+    // Hide all active pages so they don't bleed through behind modals
+    document.querySelectorAll('#desktop-main .page').forEach(p=>{
+      p.dataset.wasVisible=p.style.display;
+      p.style.display='none';
+    });
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelector('.tab-bar').style.display='none';
   document.querySelector('.fab').style.display='none';
@@ -4428,6 +4435,13 @@ window.openSettings=async function(){
 window.closeSettings=function(){
   document.getElementById('page-settings').style.display='none';
   if(window.innerWidth>=900){
+    // Restore previously visible pages
+    document.querySelectorAll('#desktop-main .page').forEach(p=>{
+      if(p.dataset.wasVisible!==undefined){
+        p.style.display=p.dataset.wasVisible||'';
+        delete p.dataset.wasVisible;
+      }
+    });
     restoreActiveTab();
   }else{
     document.getElementById('app-header').style.display='flex';
