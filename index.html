@@ -2081,7 +2081,7 @@ function recalcChallengeStreak(ch){
 
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
-  const TODAY_NOW=getToday();
+  const LIVE_TODAY=getToday();
   let changed=false;
 
   for(const ch of state.challenges){
@@ -2127,11 +2127,12 @@ function evaluateChallenges(){
     }
 
     // Also evaluate today if habits are already logged
-    if(ch.completedDays[TODAY_NOW]===undefined&&state.completedDays[TODAY_NOW]){
-      const dayData=state.completedDays[TODAY_NOW];
+    if(ch.completedDays[LIVE_TODAY]!==true&&state.completedDays[LIVE_TODAY]){
+      const dayData=state.completedDays[LIVE_TODAY];
       const doneCount=habitPool.filter(t=>dayData[t.id]).length;
       const pct=Math.round(doneCount/habitPool.length*100);
-      if(pct>=threshold){ch.completedDays[TODAY_NOW]=true;changed=true;}
+      if(pct>=threshold){ch.completedDays[LIVE_TODAY]=true;changed=true;}
+      else if(ch.completedDays[LIVE_TODAY]===undefined){ch.completedDays[LIVE_TODAY]=false;}
     }
 
     // Rebuild streak from complete history by walking backwards from today
@@ -2163,7 +2164,7 @@ function evaluateChallenges(){
         }
       } else {
         // undefined on a past day = no data = treat as miss only if before today
-        if(k<TODAY_NOW)break;
+        if(k<LIVE_TODAY)break;
         walkD.setDate(walkD.getDate()-1);
       }
     }
@@ -2244,8 +2245,9 @@ function openChallengeDetail(id){
       heatmapHTML+=`<div style="aspect-ratio:1;background:transparent;border:none;" title="${k}"></div>`;
       return;
     }
-    const isToday=k===TODAY;
-    const isFuture=k>TODAY;
+    const LIVE_NOW=getToday();
+    const isToday=k===LIVE_NOW;
+    const isFuture=k>LIVE_NOW;
     let cls;
     if(isToday){cls='heatmap-cell today';}
     else if(isFuture){cls='heatmap-cell future';}
@@ -2280,8 +2282,9 @@ function openChallengeDetail(id){
     <div class="challenge-heatmap">${heatmapHTML}</div>
     ${ch.status==='active'?`
       ${(()=>{
-        const tdDone=ch.completedDays&&ch.completedDays[TODAY]===true;
-        const tdPending=!ch.completedDays||ch.completedDays[TODAY]===undefined;
+        const _ld=getToday();
+        const tdDone=ch.completedDays&&ch.completedDays[_ld]===true;
+        const tdPending=!ch.completedDays||ch.completedDays[_ld]===undefined;
         return tdDone
           ?`<p style="text-align:center;color:var(--success);font-size:14px;margin:12px 0">✓ Today counted</p>`
           :tdPending
