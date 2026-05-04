@@ -2888,6 +2888,9 @@ function renderActiveRaceCard(ch){
       <div class="race-participant-bar-wrap"><div class="race-participant-bar-fill" style="width:${friendPct}%;background:${friendPct>myPct?'var(--almond)':'var(--border)'};"></div></div>
       <div class="race-participant-streak" style="color:var(--ink-soft);">${friendStreak}/${dur}</div>
     </div>
+    <div style="font-size:12px;color:var(--ink-faint);text-align:center;margin-top:8px;">
+      💡 You have 48 hours to retroactively complete a missed day
+    </div>
     ${bottomRow}
   </div>`;
 }
@@ -2931,6 +2934,9 @@ function renderActiveBondCard(ch){
     <div class="bond-participant-status-row"><span style="font-weight:600;color:var(--ink);">You</span><span style="color:${iDone?'var(--success)':'var(--ink-faint)'};font-weight:${iDone?'500':'400'};">${iDone?'✓ Done today':'⏳ Pending'}</span></div>
     <div class="bond-participant-status-row"><span style="color:var(--ink-soft);">${friendName.split(' ')[0]}</span><span style="color:${friendDone?'var(--success)':'var(--ink-faint)'};">${friendDone?'✓ Done today':'⏳ Pending'}</span></div>
     ${warningHtml}
+    <div style="font-size:12px;color:var(--ink-faint);text-align:center;margin-top:8px;">
+      ⚠️ Both participants must complete habits each day — no grace period for shared streaks
+    </div>
     ${btn}
   </div>`;
 }
@@ -3274,6 +3280,9 @@ function showSendChallengeModal(friendUid,friendName){
         <button class="threshold-pill" onclick="setSCThreshold(50,this)">50% of habits</button>
         <button class="threshold-pill selected" onclick="setSCThreshold(100,this)">All habits</button>
       </div>
+    </div>
+    <div style="font-size:12px;color:var(--ink-faint);margin-top:6px;">
+      💡 Race & custom: 48 hours to retroactively log a missed day. Bond: both must complete daily — no grace period.
     </div>
     <div id="sc-custom-fields" style="display:none;">
       <div class="form-group"><label class="form-label">Victory condition</label>
