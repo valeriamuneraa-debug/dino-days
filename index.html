@@ -2118,14 +2118,17 @@ function evaluateChallenges(){
           const met=pct>=threshold;
           if(met){ch.completedDays[k]=true;changed=true;}
           else if(!isToday2){
-            // Only mark past days as false — never today
-            ch.completedDays[k]=false;changed=true;
+            const _ms=(new Date())-cursor;
+            const _hrs=_ms/(1000*60*60);
+            if(_hrs>48){ch.completedDays[k]=false;changed=true;}
           }
         }else{
           // No habit data — only mark past days as false, never today
           if(!isToday2){
+            const msSinceDay=(todayD2||new Date())-cursor;
+            const hoursSinceDay=msSinceDay/(1000*60*60);
             const daysSinceStart=Math.floor((cursor-startD)/86400000);
-            if(daysSinceStart>0&&ch.completedDays[k]===undefined){
+            if(daysSinceStart>0&&ch.completedDays[k]===undefined&&hoursSinceDay>48){
               ch.completedDays[k]=false;
             }
           }
