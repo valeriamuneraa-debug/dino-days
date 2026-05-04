@@ -2058,7 +2058,7 @@ function evaluateChallenges(){
     if(!habitPool.length)continue;
 
     const threshold=ch.completionThreshold??100;
-    const _sdP2=(ch.startDate||LIVE_TODAY).split('-');const startD=new Date(+_sdP2[0],+_sdP2[1]-1,+_sdP2[2]);startD.setHours(0,0,0,0);
+    const _sdP=(ch.startDate||LIVE_TODAY).split('-');const startD=new Date(+_sdP[0],+_sdP[1]-1,+_sdP[2]);startD.setHours(0,0,0,0);
     const today=new Date();today.setHours(0,0,0,0);
     const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
 
