@@ -2081,6 +2081,7 @@ function recalcChallengeStreak(ch){
 
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
+  const TODAY_NOW=getToday();
   let changed=false;
 
   for(const ch of state.challenges){
@@ -2126,11 +2127,11 @@ function evaluateChallenges(){
     }
 
     // Also evaluate today if habits are already logged
-    if(ch.completedDays[TODAY]===undefined&&state.completedDays[TODAY]){
-      const dayData=state.completedDays[TODAY];
+    if(ch.completedDays[TODAY_NOW]===undefined&&state.completedDays[TODAY_NOW]){
+      const dayData=state.completedDays[TODAY_NOW];
       const doneCount=habitPool.filter(t=>dayData[t.id]).length;
       const pct=Math.round(doneCount/habitPool.length*100);
-      if(pct>=threshold){ch.completedDays[TODAY]=true;changed=true;}
+      if(pct>=threshold){ch.completedDays[TODAY_NOW]=true;changed=true;}
     }
 
     // Rebuild streak from complete history by walking backwards from today
@@ -2162,7 +2163,7 @@ function evaluateChallenges(){
         }
       } else {
         // undefined on a past day = no data = treat as miss only if before today
-        if(k<TODAY)break;
+        if(k<TODAY_NOW)break;
         walkD.setDate(walkD.getDate()-1);
       }
     }
