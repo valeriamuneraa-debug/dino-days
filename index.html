@@ -2139,9 +2139,28 @@ function evaluateChallenges(){
     for(let i=0;i<=ch.duration+1;i++){
       const k=`${walkD.getFullYear()}-${String(walkD.getMonth()+1).padStart(2,'0')}-${String(walkD.getDate()).padStart(2,'0')}`;
       if(walkD<startD)break;
-      if(ch.completedDays[k]===true){streak++;walkD.setDate(walkD.getDate()-1);}
-      else if(ch.completedDays[k]===false){break;}
-      else{
+      if(ch.completedDays[k]===true){
+        streak++;
+        walkD.setDate(walkD.getDate()-1);
+      } else if(ch.completedDays[k]===false){
+        // Before breaking, re-check if habit data now supports this day
+        const recheck=state.completedDays[k];
+        if(recheck){
+          const doneCount=habitPool.filter(t=>recheck[t.id]).length;
+          const pct=Math.round(doneCount/habitPool.length*100);
+          if(pct>=threshold){
+            // Day was actually completed — correct the record and continue streak
+            ch.completedDays[k]=true;
+            changed=true;
+            streak++;
+            walkD.setDate(walkD.getDate()-1);
+          } else {
+            break; // genuinely missed
+          }
+        } else {
+          break; // no habit data at all — genuine miss
+        }
+      } else {
         // undefined on a past day = no data = treat as miss only if before today
         if(k<TODAY)break;
         walkD.setDate(walkD.getDate()-1);
