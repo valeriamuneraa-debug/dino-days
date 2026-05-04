@@ -2032,14 +2032,13 @@ function recalcChallengeStreak(ch){
   const cursor=new Date(startD);
   while(cursor<=yesterday){
     const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-    if(ch.completedDays[k]===undefined){
+    if(ch.completedDays[k]!==true){
       const dayData=state.completedDays[k];
       if(dayData){
         const doneCount=habitPool.filter(t=>dayData[t.id]).length;
         const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
         ch.completedDays[k]=pct>=threshold;
-      }else{
-        // No habit data — mark false only if challenge had already started (day > startDate)
+      }else if(ch.completedDays[k]===undefined){
         const daysSinceStart=Math.floor((cursor-startD)/(1000*60*60*24));
         if(daysSinceStart>0)ch.completedDays[k]=false;
       }
@@ -2048,11 +2047,12 @@ function recalcChallengeStreak(ch){
   }
 
   // Also resolve today if habits are already completed
-  if(ch.completedDays[TODAY]===undefined&&state.completedDays[TODAY]){
-    const dayData=state.completedDays[TODAY];
+  const _recalcToday=getToday();
+  if(ch.completedDays[_recalcToday]!==true&&state.completedDays[_recalcToday]){
+    const dayData=state.completedDays[_recalcToday];
     const doneCount=habitPool.filter(t=>dayData[t.id]).length;
     const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
-    if(pct>=threshold)ch.completedDays[TODAY]=true;
+    if(pct>=threshold)ch.completedDays[_recalcToday]=true;
   }
 
   // Pass 2: count consecutive streak backwards from today
