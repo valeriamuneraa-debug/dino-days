@@ -2067,7 +2067,7 @@ function recalcChallengeStreak(ch){
     const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
     if(checkD<startD2)break;
     if(ch.completedDays[k]===true){streak++;checkD.setDate(checkD.getDate()-1);}
-    else if(ch.completedDays[k]===false){break;}
+    else if(ch.completedDays[k]===false){if(checkD.getTime()>=todayD.getTime()){checkD.setDate(checkD.getDate()-1);continue;}break;}
     else{
       // undefined — today or future: skip and keep counting backwards
       if(checkD.getTime()>=todayD.getTime()){checkD.setDate(checkD.getDate()-1);continue;}
@@ -2104,35 +2104,34 @@ function evaluateChallenges(){
     // Re-evaluate any day where ch.completedDays[k] is undefined
     // but state.completedDays[k] has habit data — handles retroactive logging.
     const cursor=new Date(startD);
-    while(cursor<=yesterday){
+    const todayD2=new Date();todayD2.setHours(0,0,0,0);
+    // Include today in the loop — never mark today as false (day not over)
+    while(cursor<=todayD2){
       const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-      // Re-evaluate if: never recorded (undefined), OR recorded as false but habit data now exists
+      const isToday2=k===LIVE_TODAY;
       const alreadyTrue=ch.completedDays[k]===true;
       if(!alreadyTrue){
         const dayData=state.completedDays[k];
         if(dayData){
           const doneCount=habitPool.filter(t=>dayData[t.id]).length;
           const pct=Math.round(doneCount/habitPool.length*100);
-          ch.completedDays[k]=pct>=threshold;
-        }else{
-          const daysSinceStart=Math.floor((cursor-startD)/86400000);
-          if(daysSinceStart>0&&ch.completedDays[k]===undefined){
-            ch.completedDays[k]=false;
+          const met=pct>=threshold;
+          if(met){ch.completedDays[k]=true;changed=true;}
+          else if(!isToday2){
+            // Only mark past days as false — never today
+            ch.completedDays[k]=false;changed=true;
           }
-          // If already false and no habit data, leave it — don't overwrite
+        }else{
+          // No habit data — only mark past days as false, never today
+          if(!isToday2){
+            const daysSinceStart=Math.floor((cursor-startD)/86400000);
+            if(daysSinceStart>0&&ch.completedDays[k]===undefined){
+              ch.completedDays[k]=false;
+            }
+          }
         }
-        changed=true;
       }
       cursor.setDate(cursor.getDate()+1);
-    }
-
-    // Also evaluate today if habits are already logged
-    if(ch.completedDays[LIVE_TODAY]!==true&&state.completedDays[LIVE_TODAY]){
-      const dayData=state.completedDays[LIVE_TODAY];
-      const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-      const pct=Math.round(doneCount/habitPool.length*100);
-      if(pct>=threshold){ch.completedDays[LIVE_TODAY]=true;changed=true;}
-      else if(ch.completedDays[LIVE_TODAY]===undefined){ch.completedDays[LIVE_TODAY]=false;}
     }
 
     // Use the proven streak recalculator
@@ -3936,7 +3935,7 @@ async function updatePublicProfile(){
     },{merge:true});
   }catch(e){console.warn('Could not update public profile:',e);}
 }
-function updateAll(){window.state=state;window.getToday=getToday;evaluateChallenges();evaluateSocialChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();updateSidebarStats();}
+function updateAll(){evaluateChallenges();evaluateSocialChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();updateSidebarStats();}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
