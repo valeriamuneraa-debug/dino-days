@@ -4209,10 +4209,12 @@ window.addEventListener('resize',()=>{
 // ─────────────────────────────────────────────────────────────────────
 
 window.switchTab=(name,btn)=>{
-  // Close settings page if open on desktop
-  const settingsPage=document.getElementById('page-settings');
-  if(settingsPage&&settingsPage.style.display!=='none'&&window.innerWidth>=900){
-    settingsPage.style.display='none';
+  // Close settings properly on desktop so hidden pages are restored
+  if(window.innerWidth>=900&&typeof closeSettings==='function'){
+    const settingsPage=document.getElementById('page-settings');
+    if(settingsPage&&settingsPage.style.display!=='none'){
+      closeSettings();
+    }
   }
   if(currentTab==='challenges'&&name!=='challenges'){cleanupFriendListeners();}
   currentTab=name;
