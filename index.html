@@ -2260,6 +2260,9 @@ function openChallengeDetail(id){
           ?`<p style="text-align:center;color:var(--ink-faint);font-size:13px;margin:12px 0">Complete your habits today to count this day</p>`
           :`<p style="text-align:center;color:var(--danger);font-size:13px;margin:12px 0">Today not counted</p>`;
       })()}
+      <div style="font-size:12px;color:var(--ink-faint);text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+        💡 You have 48 hours to retroactively complete a missed day
+      </div>
       <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
       ${(ch.type==='solo'||ch.type==='custom'||!ch.type)?`<span onclick="editChallenge('${ch.id}')" style="font-size:13px;color:var(--ink-soft);cursor:pointer;text-align:center;display:block;padding:8px;">Edit challenge</span>`:''}
       <span onclick="abandonChallenge('${ch.id}')" style="font-size:13px;color:var(--danger);cursor:pointer;text-align:center;display:block;padding:8px;">Abandon challenge</span>
@@ -2306,6 +2309,9 @@ function showNewChallengeModal(){
     </div>
     <div id="ch-habit-list" style="display:none;margin-top:10px;">
       <div class="habit-checklist">${habitOptions||'<p style="padding:12px;font-size:15px;color:var(--ink-faint);">No habits yet</p>'}</div>
+    </div>
+    <div style="font-size:12px;color:var(--ink-faint);margin-top:6px;margin-bottom:4px;">
+      💡 Forgot to log yesterday? You have 48 hours to complete habits and still count the day.
     </div>
     <div onclick="toggleCHAdvanced()" style="font-size:13px;color:var(--ink-faint);cursor:pointer;display:flex;align-items:center;gap:6px;margin:20px 0 0;user-select:none;">
       <span id="ch-adv-arrow" style="display:inline-block;transition:transform .2s;font-size:16px;line-height:1;">›</span>
