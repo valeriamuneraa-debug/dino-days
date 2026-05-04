@@ -3726,120 +3726,182 @@ window.showBondCelebration=showBondCelebration;
 
 async function evaluateSocialChallenges(){
   if(!currentUser||!state||!socialChallengesCache.length)return;
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+
+  const now=new Date();
+  const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);yesterday.setHours(0,0,0,0);
   const yKey=`${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
-  if(_socialChEvalDay===yKey)return;
-  _socialChEvalDay=yKey;
+  const todayKey=getToday();
+
+  // Helper: hours since a given YYYY-MM-DD key
+  function hoursSince(k){
+    const parts=k.split('-');
+    const d=new Date(+parts[0],+parts[1]-1,+parts[2]);
+    return(now-d)/(1000*60*60);
+  }
+
   for(const ch of socialChallengesCache){
     if(ch.status!=='active')continue;
     const myData=ch.participants?.[currentUser.uid];
     if(!myData)continue;
 
-    // ── Custom evaluation ────────────────────────────────────────
+    // ── Custom social evaluation ─────────────────────────────────
     if(ch.type==='custom'){
       if(myData.status!=='active')continue;
-      if(myData.completedDays&&myData.completedDays[yKey]!==undefined)continue;
-      const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
-      const yDone=state.completedDays[yKey]||{};
-      const doneCount=habitPool.length>0?habitPool.filter(t=>yDone[t.id]).length:0;
-      const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+      const habitPool=ch.habitIds&&ch.habitIds.length>0
+        ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
+        :state.tasks;
       const threshold=ch.completionThreshold??100;
       const pk=`participants.${currentUser.uid}`;
-      const newCompletedDays={...(myData.completedDays||{}),[yKey]:pct>=threshold};
-      const updates={[`${pk}.completedDays`]:newCompletedDays,[`${pk}.lastCompletedDay`]:pct>=threshold?yKey:myData.lastCompletedDay};
-      if(pct>=threshold){
-        let newStreak=0;
-        const checkD=new Date(yesterday);
-        while(newStreak<=ch.duration){
-          const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
-          if(newCompletedDays[k]){newStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+
+      // Evaluate yesterday AND today — skip only if already true
+      const keysToEval=[yKey,todayKey];
+      let anyUpdate=false;
+      const newCompletedDays={...(myData.completedDays||{})};
+
+      for(const k of keysToEval){
+        if(newCompletedDays[k]===true)continue; // never overwrite a success
+        const hrs=hoursSince(k);
+        const dayData=state.completedDays[k]||{};
+        const doneCount=habitPool.length>0?habitPool.filter(t=>dayData[t.id]).length:0;
+        const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+        const met=pct>=threshold;
+        if(met){
+          newCompletedDays[k]=true;
+          anyUpdate=true;
+        } else if(hrs>48&&k!==todayKey){
+          // Only write false after 48hr grace window, never for today
+          if(newCompletedDays[k]===undefined){
+            newCompletedDays[k]=false;
+            anyUpdate=true;
+          }
         }
-        const newBest=Math.max(myData.bestStreak||0,newStreak);
-        const newTotal=(myData.completedDaysTotal||0)+1;
-        updates[`${pk}.currentStreak`]=newStreak;
-        updates[`${pk}.bestStreak`]=newBest;
-        updates[`${pk}.completedDaysTotal`]=newTotal;
-        const won=ch.victoryCondition==='total'
-          ?(newTotal>=(ch.totalTarget||ch.duration))
-          :(newStreak>=(ch.streakRequired||ch.duration));
-        if(won){
-          updates[`${pk}.status`]='won';
-          updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
-          Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
+      }
+
+      if(!anyUpdate)continue;
+
+      const updates={
+        [`${pk}.completedDays`]:newCompletedDays,
+        [`${pk}.lastCompletedDay`]:newCompletedDays[yKey]===true?yKey:myData.lastCompletedDay
+      };
+
+      // Rebuild streak from completedDays
+      let newStreak=0;
+      const checkD=new Date(now);checkD.setHours(0,0,0,0);
+      for(let i=0;i<=ch.duration+1;i++){
+        const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+        if(newCompletedDays[k]===true){newStreak++;checkD.setDate(checkD.getDate()-1);}
+        else if(newCompletedDays[k]===false){break;}
+        else{
+          // undefined — skip today, break on past
+          if(checkD.getTime()>=(new Date()).setHours(0,0,0,0)){checkD.setDate(checkD.getDate()-1);continue;}
+          break;
         }
-      }else if(!ch.allowMisses){
-        updates[`${pk}.currentStreak`]=0;
+      }
+      const newBest=Math.max(myData.bestStreak||0,newStreak);
+      const newTotal=Object.values(newCompletedDays).filter(v=>v===true).length;
+      updates[`${pk}.currentStreak`]=newStreak;
+      updates[`${pk}.bestStreak`]=newBest;
+      updates[`${pk}.completedDaysTotal`]=newTotal;
+
+      const won=ch.victoryCondition==='total'
+        ?(newTotal>=(ch.totalTarget||ch.duration))
+        :(newStreak>=(ch.streakRequired||ch.duration));
+      if(won){
+        updates[`${pk}.status`]='won';
+        updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
+        Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
       }
       try{await updateDoc(doc(db,'socialChallenges',ch.id),updates);}
       catch(e){console.warn('evaluateSocialChallenges custom error:',e);}
       continue;
     }
 
-    // ── Bond evaluation ─────────────────────────────────────────
+    // ── Bond evaluation — keep strict (shared streak, intentional) ──
     if(ch.type==='bond'){
       if(ch.lastEvaluatedDay===yKey)continue;
       const allUids=Object.keys(ch.participants||{});
       const allCompleted=allUids.length>=2&&allUids.every(uid=>ch.participants[uid].completedDays?.[yKey]===true);
       const iDid=myData?.completedDays?.[yKey]===true;
       if(allCompleted){
-        // Already handled in real-time — just set the guard
         try{await updateDoc(doc(db,'socialChallenges',ch.id),{lastEvaluatedDay:yKey});}
         catch(e){console.warn('Bond eval guard error:',e);}
       }else{
         const prevSharedStreak=ch.sharedStreak||0;
         const friendUid=allUids.find(u=>u!==currentUser.uid);
         const friendName=friendUid?ch.participants[friendUid]?.displayName||'Your friend':'Your friend';
-        const friendDid=friendUid&&ch.participants[friendUid]?.completedDays?.[yKey]===true;
         try{
           await updateDoc(doc(db,'socialChallenges',ch.id),{sharedStreak:0,lastEvaluatedDay:yKey});
           if(prevSharedStreak>0){
-            if(!iDid){
-              showToast(`You missed yesterday — the bond streak reset 💔`);
-            }else{
-              // Friend missed, I didn't — unfair reset
-              showToast(`${friendName} missed yesterday — your shared streak reset to 0 💔`,4000,'danger');
-            }
+            if(!iDid){showToast(`You missed yesterday — the bond streak reset 💔`);}
+            else{showToast(`${friendName} missed yesterday — your shared streak reset to 0 💔`,4000,'danger');}
           }
         }catch(e){console.warn('Bond eval reset error:',e);}
       }
-      continue; // Do not fall through to race logic
+      continue;
     }
 
     // ── Race evaluation ──────────────────────────────────────────
     if(myData.status!=='active')continue;
-    if(myData.completedDays&&myData.completedDays[yKey]!==undefined)continue;
-    const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
-    const yDone=state.completedDays[yKey]||{};
-    const doneCount=habitPool.length>0?habitPool.filter(t=>yDone[t.id]).length:0;
-    const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+    const habitPool=ch.habitIds&&ch.habitIds.length>0
+      ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
+      :state.tasks;
     const threshold=ch.completionThreshold??100;
     const pk=`participants.${currentUser.uid}`;
-    if(pct>=threshold){
-      const newCompletedDays={...(myData.completedDays||{}),[yKey]:true};
-      let newStreak=0;
-      const checkD=new Date(yesterday);
-      while(newStreak<=ch.duration){
-        const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
-        if(newCompletedDays[k]){newStreak++;checkD.setDate(checkD.getDate()-1);}else break;
+
+    // Evaluate yesterday AND today — skip only if already true
+    const keysToEval=[yKey,todayKey];
+    for(const k of keysToEval){
+      const currentVal=(myData.completedDays||{})[k];
+      if(currentVal===true)continue; // never overwrite a success
+      const hrs=hoursSince(k);
+      const dayData=state.completedDays[k]||{};
+      const doneCount=habitPool.length>0?habitPool.filter(t=>dayData[t.id]).length:0;
+      const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+      const met=pct>=threshold;
+
+      if(met){
+        const newCompletedDays={...(myData.completedDays||{}),[k]:true};
+        // Rebuild streak
+        let newStreak=0;
+        const checkD=new Date(now);checkD.setHours(0,0,0,0);
+        for(let i=0;i<=ch.duration+1;i++){
+          const sk=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+          if(newCompletedDays[sk]===true){newStreak++;checkD.setDate(checkD.getDate()-1);}
+          else if(newCompletedDays[sk]===false){break;}
+          else{
+            if(checkD.getTime()>=(new Date()).setHours(0,0,0,0)){checkD.setDate(checkD.getDate()-1);continue;}
+            break;
+          }
+        }
+        const newBest=Math.max(myData.bestStreak||0,newStreak);
+        const won=newStreak>=ch.duration;
+        const updates={
+          [`${pk}.completedDays`]:newCompletedDays,
+          [`${pk}.currentStreak`]:newStreak,
+          [`${pk}.bestStreak`]:newBest,
+          [`${pk}.lastCompletedDay`]:k
+        };
+        if(won){
+          updates[`${pk}.status`]='won';updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
+          Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
+        }
+        try{
+          await updateDoc(doc(db,'socialChallenges',ch.id),updates);
+          if(won){const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==currentUser.uid);showWinnerCelebration(ch.id,true,ch.participants?.[otherUids[0]]?.displayName||'your friend',newStreak,ch.duration);}
+        }catch(e){console.warn('evaluateSocialChallenges race win error:',e);}
+      } else if(hrs>48&&k!==todayKey&&currentVal===undefined){
+        // Only write false and reset streak after 48hr grace window
+        const newCompletedDays={...(myData.completedDays||{}),[k]:false};
+        const prevStreak=myData.currentStreak||0;
+        try{
+          await updateDoc(doc(db,'socialChallenges',ch.id),{
+            [`${pk}.currentStreak`]:0,
+            [`${pk}.completedDays`]:newCompletedDays
+          });
+          if(prevStreak>0)showToast(`Streak reset in "${ch.title}" race 😔 Keep going!`);
+        }catch(e){console.warn('evaluateSocialChallenges race reset error:',e);}
       }
-      const newBest=Math.max(myData.bestStreak||0,newStreak);
-      const won=newStreak>=ch.duration;
-      const updates={[`${pk}.completedDays`]:newCompletedDays,[`${pk}.currentStreak`]:newStreak,[`${pk}.bestStreak`]:newBest,[`${pk}.lastCompletedDay`]:yKey};
-      if(won){
-        updates[`${pk}.status`]='won';updates.status='completed';updates.winnerId=currentUser.uid;updates.completedAt=new Date().toISOString();
-        Object.keys(ch.participants||{}).forEach(uid=>{if(uid!==currentUser.uid)updates[`participants.${uid}.status`]='lost';});
-      }
-      try{
-        await updateDoc(doc(db,'socialChallenges',ch.id),updates);
-        if(won){const otherUids=Object.keys(ch.participants||{}).filter(u=>u!==currentUser.uid);showWinnerCelebration(ch.id,true,ch.participants?.[otherUids[0]]?.displayName||'your friend',newStreak,ch.duration);}
-      }catch(e){console.warn('evaluateSocialChallenges race win error:',e);}
-    }else{
-      const prevStreak=myData.currentStreak||0;
-      const newCompletedDays={...(myData.completedDays||{}),[yKey]:false};
-      try{
-        await updateDoc(doc(db,'socialChallenges',ch.id),{[`${pk}.currentStreak`]:0,[`${pk}.completedDays`]:newCompletedDays});
-        if(prevStreak>0)showToast(`Streak reset in "${ch.title}" race 😔 Keep going!`);
-      }catch(e){console.warn('evaluateSocialChallenges race reset error:',e);}
+      // Within 48hrs and not met — do nothing, let user retroactively complete
     }
   }
 }
