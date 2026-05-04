@@ -2024,44 +2024,19 @@ function recalcChallengeStreak(ch){
     ?state.tasks.filter(t=>ch.habitIds.includes(t.id))
     :state.tasks;
   const threshold=ch.completionThreshold??100;
-  const startD=new Date(ch.startDate);
+  // Parse startDate as local date (not UTC) to avoid timezone offset bug
+  const _sdParts=(ch.startDate||getToday()).split('-');
+  const startD=new Date(+_sdParts[0],+_sdParts[1]-1,+_sdParts[2]);
+  startD.setHours(0,0,0,0);
 
-  // Pass 1: fill in any day from startDate to yesterday that has habit data
-  // but no recorded challenge result — covers retroactive completions
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const cursor=new Date(startD);
-  while(cursor<=yesterday){
-    const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-    if(ch.completedDays[k]!==true){
-      const dayData=state.completedDays[k];
-      if(dayData){
-        const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-        const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
-        ch.completedDays[k]=pct>=threshold;
-      }else if(ch.completedDays[k]===undefined){
-        const daysSinceStart=Math.floor((cursor-startD)/(1000*60*60*24));
-        if(daysSinceStart>0)ch.completedDays[k]=false;
-      }
-    }
-    cursor.setDate(cursor.getDate()+1);
-  }
-
-  // Also resolve today if habits are already completed
-  const _recalcToday=getToday();
-  if(ch.completedDays[_recalcToday]!==true&&state.completedDays[_recalcToday]){
-    const dayData=state.completedDays[_recalcToday];
-    const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-    const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
-    if(pct>=threshold)ch.completedDays[_recalcToday]=true;
-  }
-
-  // Pass 2: count consecutive streak backwards from today
+  // Pass 2 only: evaluateChallenges() already fills completedDays correctly.
+  // Just count the consecutive streak backwards from today.
   let streak=0;
   const checkD=new Date();
   checkD.setHours(0,0,0,0);
   const todayD=new Date();
   todayD.setHours(0,0,0,0);
-  const startD2=new Date(ch.startDate);
+  const startD2=new Date(+_sdParts[0],+_sdParts[1]-1,+_sdParts[2]);
   startD2.setHours(0,0,0,0);
   for(let i=0;i<=ch.duration+1;i++){
     const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
@@ -2094,7 +2069,8 @@ function evaluateChallenges(){
     if(!habitPool.length)continue;
 
     const threshold=ch.completionThreshold??100;
-    const startD=new Date(ch.startDate);startD.setHours(0,0,0,0);
+    const _sdP=(ch.startDate||LIVE_TODAY).split('-');
+    const startD=new Date(+_sdP[0],+_sdP[1]-1,+_sdP[2]);startD.setHours(0,0,0,0);
     const today=new Date();today.setHours(0,0,0,0);
     const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
 
