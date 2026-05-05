@@ -2073,13 +2073,18 @@ function evaluateChallenges(){
     ch.completedDays=ch.completedDays||{};
 
     // ONE-TIME REPAIR: wipe any false entry where state.completedDays shows full completion
-    // This fixes corrupted Firestore data from previous buggy evaluator runs
+    // Uses day-of-week scheduling to match global streak logic exactly
     Object.keys(ch.completedDays).forEach(k=>{
       if(ch.completedDays[k]===false){
         const dayData=state.completedDays[k];
         if(dayData){
-          const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-          const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):0;
+          const [ky,km,kd]=k.split('-').map(Number);
+          const kDate=new Date(ky,km-1,kd);
+          const kDow=kDate.getDay();
+          const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(kDow));
+          if(scheduledPool.length===0){ch.completedDays[k]=true;changed=true;return;}
+          const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
+          const pct=Math.round(doneCount/scheduledPool.length*100);
           if(pct>=threshold){ch.completedDays[k]=true;changed=true;}
         }
       }
@@ -2100,8 +2105,12 @@ function evaluateChallenges(){
 
       if(dayData){
         // Habit data exists — always recompute, never skip
-        const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-        const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):0;
+        // Only count habits scheduled for this day of week (mirrors global streak logic)
+        const dow=cursor.getDay();
+        const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(dow));
+        if(scheduledPool.length===0){cursor.setDate(cursor.getDate()+1);continue;}
+        const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
+        const pct=Math.round(doneCount/scheduledPool.length*100);
         const met=pct>=threshold;
         if(met){
           if(ch.completedDays[k]!==true){ch.completedDays[k]=true;changed=true;}
@@ -3767,8 +3776,12 @@ async function evaluateSocialChallenges(){
         if(newCompletedDays[k]===true)continue; // never overwrite a success
         const hrs=hoursSince(k);
         const dayData=state.completedDays[k]||{};
-        const doneCount=habitPool.length>0?habitPool.filter(t=>dayData[t.id]).length:0;
-        const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+        // Only check habits scheduled for this day of week
+        const kParts=k.split('-');const kDow=new Date(+kParts[0],+kParts[1]-1,+kParts[2]).getDay();
+        const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(kDow));
+        const poolSize=scheduledPool.length||habitPool.length;
+        const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
+        const pct=poolSize>0?Math.round(doneCount/poolSize*100):100;
         const met=pct>=threshold;
         if(met){
           newCompletedDays[k]=true;
@@ -3860,8 +3873,12 @@ async function evaluateSocialChallenges(){
       if(currentVal===true)continue; // never overwrite a success
       const hrs=hoursSince(k);
       const dayData=state.completedDays[k]||{};
-      const doneCount=habitPool.length>0?habitPool.filter(t=>dayData[t.id]).length:0;
-      const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+      // Only check habits scheduled for this day of week
+      const rParts=k.split('-');const rDow=new Date(+rParts[0],+rParts[1]-1,+rParts[2]).getDay();
+      const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(rDow));
+      const poolSize=scheduledPool.length||habitPool.length;
+      const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
+      const pct=poolSize>0?Math.round(doneCount/poolSize*100):100;
       const met=pct>=threshold;
 
       if(met){
