@@ -2027,7 +2027,7 @@ function recalcChallengeStreak(ch){
   const startD2=new Date(+_sp[0],+_sp[1]-1,+_sp[2]);
   startD2.setHours(0,0,0,0);
   const todayD=new Date();todayD.setHours(0,0,0,0);
-  const LIVE_NOW=getToday();
+  const LIVE_NOW=TODAY; // Must match TODAY used by toggleTask
   let streak=0;
   let inCurrentStreak=true;
   let localStreak=0;
@@ -2053,7 +2053,7 @@ function recalcChallengeStreak(ch){
 
 function evaluateChallenges(){
   if(!state||!state.challenges||!state.challenges.length)return;
-  const LIVE_TODAY=getToday();
+  const LIVE_TODAY=TODAY; // Must match TODAY used by toggleTask to store habit data
   let changed=false;
 
   for(const ch of state.challenges){
