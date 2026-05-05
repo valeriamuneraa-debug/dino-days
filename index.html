@@ -2137,6 +2137,16 @@ function evaluateChallenges(){
       cursor.setDate(cursor.getDate()+1);
     }
 
+    // Always re-evaluate today — habits can be toggled on/off at any time
+    const _todayData=state.completedDays[LIVE_TODAY]||{};
+    const _todayDone=habitPool.filter(t=>_todayData[t.id]).length;
+    const _todayPct=habitPool.length>0?Math.round(_todayDone/habitPool.length*100):0;
+    const _todayMet=_todayPct>=threshold;
+    if(ch.completedDays[LIVE_TODAY]!==(_todayMet?true:undefined)){
+      if(_todayMet){ch.completedDays[LIVE_TODAY]=true;changed=true;}
+      else{delete ch.completedDays[LIVE_TODAY];changed=true;}
+    }
+
     // Use the proven streak recalculator
     recalcChallengeStreak(ch);
 
