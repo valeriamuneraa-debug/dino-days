@@ -3165,9 +3165,9 @@ async function renderFriends(){
       const statsEl=document.getElementById('fstats-'+p.uid);
       if(statsEl){
         statsEl.innerHTML=`
-          <div class="friend-mini-stat"><div class="friend-mini-num">${data.streak??'—'}</div><div class="friend-mini-lbl">🔥 Streak</div></div>
-          <div class="friend-mini-stat"><div class="friend-mini-num">${data.points??'—'}</div><div class="friend-mini-lbl">⭐ Points</div></div>
-          <div class="friend-mini-stat"><div class="friend-mini-num">${data.activeChallenges??'—'}</div><div class="friend-mini-lbl">🎯 Challenges</div></div>`;
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.streak??'—'}</div><div class="friend-mini-lbl">Streak</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.points??'—'}</div><div class="friend-mini-lbl">Points</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${data.activeChallenges??'—'}</div><div class="friend-mini-lbl">Challenges</div></div>`;
         // Update cache
         const cached=_friendProfilesCache.find(x=>x.uid===p.uid);
         if(cached){cached.streak=data.streak;cached.points=data.points;cached.activeChallenges=data.activeChallenges;cached.lastSeen=data.lastSeen;}
