@@ -2997,11 +2997,14 @@ window.markCustomSocialToday=async(id,e)=>{
   if(myData.completedDays?.[TODAY]){showToast('Already marked today ✓');return;}
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDoneState=state.completedDays[TODAY]||{};
-  const doneCount=habitPool.length>0?habitPool.filter(t=>todayDoneState[t.id]).length:0;
-  const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+  const todayDow2=new Date().getDay();
+  const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2));
+  const poolForThreshold=scheduledPool.length>0?scheduledPool:habitPool;
+  const doneCount=poolForThreshold.filter(t=>todayDoneState[t.id]).length;
+  const pct=poolForThreshold.length>0?Math.round(doneCount/poolForThreshold.length*100):100;
   const threshold=ch.completionThreshold??100;
-  if(habitPool.length>0&&pct<threshold){
-    const need=Math.ceil(habitPool.length*(threshold/100))-doneCount;
+  if(poolForThreshold.length>0&&pct<threshold){
+    const need=Math.ceil(poolForThreshold.length*(threshold/100))-doneCount;
     showToast(`Complete ${need} more habit${need!==1?'s':''} first!`);
     return;
   }
@@ -3458,11 +3461,14 @@ window.markRaceToday=async(id,e)=>{
   // Check habit completion threshold
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDone=state.completedDays[TODAY]||{};
-  const doneCount=habitPool.length>0?habitPool.filter(t=>todayDone[t.id]).length:0;
-  const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+  const todayDow2b=new Date().getDay();
+  const scheduledPool2=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2b));
+  const poolForThreshold2=scheduledPool2.length>0?scheduledPool2:habitPool;
+  const doneCount=poolForThreshold2.filter(t=>todayDone[t.id]).length;
+  const pct=poolForThreshold2.length>0?Math.round(doneCount/poolForThreshold2.length*100):100;
   const threshold=ch.completionThreshold??100;
-  if(habitPool.length>0&&pct<threshold){
-    const need=Math.ceil(habitPool.length*(threshold/100))-doneCount;
+  if(poolForThreshold2.length>0&&pct<threshold){
+    const need=Math.ceil(poolForThreshold2.length*(threshold/100))-doneCount;
     showToast(`Complete ${need} more habit${need!==1?'s':''} first!`);
     return;
   }
@@ -3511,11 +3517,14 @@ window.markBondToday=async(id,e)=>{
   // Check threshold
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDoneState=state.completedDays[TODAY]||{};
-  const doneCount=habitPool.length>0?habitPool.filter(t=>todayDoneState[t.id]).length:0;
-  const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):100;
+  const todayDow2c=new Date().getDay();
+  const scheduledPool3=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2c));
+  const poolForThreshold3=scheduledPool3.length>0?scheduledPool3:habitPool;
+  const doneCount=poolForThreshold3.filter(t=>todayDoneState[t.id]).length;
+  const pct=poolForThreshold3.length>0?Math.round(doneCount/poolForThreshold3.length*100):100;
   const threshold=ch.completionThreshold??100;
-  if(habitPool.length>0&&pct<threshold){
-    const need=Math.ceil(habitPool.length*(threshold/100))-doneCount;
+  if(poolForThreshold3.length>0&&pct<threshold){
+    const need=Math.ceil(poolForThreshold3.length*(threshold/100))-doneCount;
     showToast(`Complete ${need} more habit${need!==1?'s':''} first!`);
     return;
   }
