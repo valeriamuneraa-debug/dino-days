@@ -2018,34 +2018,33 @@ function renderSectionTabs(){
 function makeChallengeId(){return 'ch'+Date.now()+Math.random().toString(36).slice(2,6);}
 
 function recalcChallengeStreak(ch){
-  // Pass 2 ONLY — evaluateChallenges() owns all day evaluation including today.
-  // This function ONLY counts the consecutive streak from ch.completedDays.
+  // Mirrors recalculateStreak() exactly — same logic, scoped to challenge duration.
+  // NEVER writes to ch.completedDays. NEVER reads state.completedDays.
+  // evaluateChallenges() owns all writes to ch.completedDays.
   if(!ch)return;
   ch.completedDays=ch.completedDays||{};
-  // Parse startDate as LOCAL date — new Date(string) is UTC and shifts date in US timezones
   const _sp=(ch.startDate||getToday()).split('-');
   const startD2=new Date(+_sp[0],+_sp[1]-1,+_sp[2]);
   startD2.setHours(0,0,0,0);
   const todayD=new Date();todayD.setHours(0,0,0,0);
-  const checkD=new Date(todayD);
+  const LIVE_NOW=getToday();
   let streak=0;
+  let inCurrentStreak=true;
+  let localStreak=0;
   for(let i=0;i<=(ch.duration||365)+1;i++){
-    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+    const checkD=new Date(todayD);checkD.setDate(todayD.getDate()-i);
     if(checkD<startD2)break;
-    if(ch.completedDays[k]===true){
-      streak++;
-      checkD.setDate(checkD.getDate()-1);
-    } else if(ch.completedDays[k]===false){
-      // Never break on today or yesterday (48hr grace window)
-      if(checkD.getTime()>=todayD.getTime()){checkD.setDate(checkD.getDate()-1);continue;}
-      const msSince=todayD.getTime()-checkD.getTime();
-      const hrsSince=msSince/(1000*60*60);
-      if(hrsSince<=48){checkD.setDate(checkD.getDate()-1);continue;}
-      break;
+    const k=`${checkD.getFullYear()}-${String(checkD.getMonth()+1).padStart(2,'0')}-${String(checkD.getDate()).padStart(2,'0')}`;
+    const val=ch.completedDays[k];
+    if(val===true){
+      localStreak++;
+      if(inCurrentStreak)streak=localStreak;
+    } else if(k===LIVE_NOW){
+      // Today not yet complete — same as global streak: skip, don't break
     } else {
-      // undefined — skip today/future, break on past
-      if(checkD.getTime()>=todayD.getTime()){checkD.setDate(checkD.getDate()-1);continue;}
-      break;
+      // Past day not completed — end current streak window
+      inCurrentStreak=false;
+      localStreak=0;
     }
   }
   ch.currentStreak=streak;
