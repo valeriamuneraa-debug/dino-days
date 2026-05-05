@@ -3127,12 +3127,12 @@ async function renderFriends(){
           <div class="friend-card-code">${p.userCode||'------'}</div>
         </div>
         <div class="friend-stats-row" id="fstats-${p.uid}">
-          <div class="friend-mini-stat"><div class="friend-mini-num">${streak}</div><div class="friend-mini-lbl">🔥 Streak</div></div>
-          <div class="friend-mini-stat"><div class="friend-mini-num">${points}</div><div class="friend-mini-lbl">⭐ Points</div></div>
-          <div class="friend-mini-stat"><div class="friend-mini-num">${activeCh}</div><div class="friend-mini-lbl">🎯 Challenges</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${streak}</div><div class="friend-mini-lbl">Streak</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${points}</div><div class="friend-mini-lbl">Points</div></div>
+          <div class="friend-mini-stat"><div class="friend-mini-num">${activeCh}</div><div class="friend-mini-lbl">Challenges</div></div>
         </div>
         <div class="friend-card-actions">
-          <button class="friend-challenge-btn" onclick="showSendChallengeModal('${p.uid}','${p.displayName||'Friend'}')">Challenge 🎯</button>
+          <button class="friend-challenge-btn" onclick="showSendChallengeModal('${p.uid}','${p.displayName||'Friend'}')">Challenge</button>
           <button class="friend-remove-btn" onclick="removeFriend('${p.uid}')">Remove</button>
         </div>
       </div>`;
