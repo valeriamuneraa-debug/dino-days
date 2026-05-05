@@ -2610,7 +2610,7 @@ function renderTodayBanner(){
     const friendName=friendUid?urgentBond.participants[friendUid]?.displayName||'Your partner':'Your partner';
     bt.textContent=`🤝 ${friendName} is waiting for you!`;
     banner.style.background='linear-gradient(135deg,var(--linen),var(--powder))';
-    banner.style.border='1px solid var(--almond)';
+    banner.style.border='none';
   }else{
     bt.textContent=`🎯 ${total} active challenge${total!==1?'s':''}`;
     banner.style.background='';
