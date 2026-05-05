@@ -2072,6 +2072,19 @@ function evaluateChallenges(){
 
     ch.completedDays=ch.completedDays||{};
 
+    // ONE-TIME REPAIR: wipe any false entry where state.completedDays shows full completion
+    // This fixes corrupted Firestore data from previous buggy evaluator runs
+    Object.keys(ch.completedDays).forEach(k=>{
+      if(ch.completedDays[k]===false){
+        const dayData=state.completedDays[k];
+        if(dayData){
+          const doneCount=habitPool.filter(t=>dayData[t.id]).length;
+          const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):0;
+          if(pct>=threshold){ch.completedDays[k]=true;changed=true;}
+        }
+      }
+    });
+
     // Re-evaluate every day from startDate through today.
     // Days with habit data: always recompute (never skip — habit data may have changed).
     // Days without habit data: only write false if >48hrs old and not already evaluated.
@@ -2609,12 +2622,12 @@ function renderTodayBanner(){
     const friendUid=uids.find(u=>u!==myUid);
     const friendName=friendUid?urgentBond.participants[friendUid]?.displayName||'Your partner':'Your partner';
     bt.textContent=`🤝 ${friendName} is waiting for you!`;
-    banner.style.background='linear-gradient(135deg,var(--linen),var(--powder))';
+    banner.style.background='var(--linen)';
     banner.style.border='none';
   }else{
     bt.textContent=`🎯 ${total} active challenge${total!==1?'s':''}`;
-    banner.style.background='';
-    banner.style.border='';
+    banner.style.background='var(--linen)';
+    banner.style.border='none';
   }
 }
 
