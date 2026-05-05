@@ -3117,6 +3117,7 @@ async function renderFriends(){
     </div>`;
   }else{
     // Friend cards with skeleton stats (will be populated by listeners)
+    html+=`<div class="challenge-section-label">FRIENDS</div>`;
     html+=profiles.map(p=>{
       const streak=p.streak??'—';
       const points=p.points??'—';
