@@ -2072,51 +2072,52 @@ function evaluateChallenges(){
 
     ch.completedDays=ch.completedDays||{};
 
-    // Walk every day from startDate through yesterday.
-    // Re-evaluate any day where ch.completedDays[k] is undefined
-    // but state.completedDays[k] has habit data — handles retroactive logging.
-    const cursor=new Date(startD);
+    // Re-evaluate every day from startDate through today.
+    // Days with habit data: always recompute (never skip — habit data may have changed).
+    // Days without habit data: only write false if >48hrs old and not already evaluated.
+    // Today: never write false, always delete if threshold not met (day not over).
     const todayD2=new Date();todayD2.setHours(0,0,0,0);
-    // Include today in the loop — never mark today as false (day not over)
+    const cursor=new Date(startD);
     while(cursor<=todayD2){
       const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
       const isToday2=k===LIVE_TODAY;
-      const alreadyTrue=ch.completedDays[k]===true;
-      if(!alreadyTrue){
-        const dayData=state.completedDays[k];
-        if(dayData){
-          const doneCount=habitPool.filter(t=>dayData[t.id]).length;
-          const pct=Math.round(doneCount/habitPool.length*100);
-          const met=pct>=threshold;
-          if(met){ch.completedDays[k]=true;changed=true;}
-          else if(!isToday2){
-            const _ms=(new Date())-cursor;
-            const _hrs=_ms/(1000*60*60);
-            if(_hrs>48){ch.completedDays[k]=false;changed=true;}
+      const msSince=todayD2.getTime()-cursor.getTime();
+      const hrsSince=msSince/(1000*60*60);
+      const dayData=state.completedDays[k];
+
+      if(dayData){
+        // Habit data exists — always recompute, never skip
+        const doneCount=habitPool.filter(t=>dayData[t.id]).length;
+        const pct=habitPool.length>0?Math.round(doneCount/habitPool.length*100):0;
+        const met=pct>=threshold;
+        if(met){
+          if(ch.completedDays[k]!==true){ch.completedDays[k]=true;changed=true;}
+        } else {
+          if(isToday2){
+            // Today not met — delete so streak walk skips it (day not over)
+            if(ch.completedDays[k]!==undefined){delete ch.completedDays[k];changed=true;}
+          } else if(hrsSince>48){
+            // Past day, grace window expired — mark as miss
+            if(ch.completedDays[k]!==false){ch.completedDays[k]=false;changed=true;}
+          } else {
+            // Within 48hr grace window — delete so user can still complete
+            if(ch.completedDays[k]===false){delete ch.completedDays[k];changed=true;}
           }
-        }else{
-          // No habit data — only mark past days as false, never today
-          if(!isToday2){
-            const msSinceDay=(todayD2||new Date())-cursor;
-            const hoursSinceDay=msSinceDay/(1000*60*60);
-            const daysSinceStart=Math.floor((cursor-startD)/86400000);
-            if(daysSinceStart>0&&ch.completedDays[k]===undefined&&hoursSinceDay>48){
-              ch.completedDays[k]=false;
-            }
+        }
+      } else {
+        // No habit data at all
+        if(!isToday2&&hrsSince>48){
+          // Only mark as false if >48hrs old and not already set
+          const daysSinceStart=Math.floor(msSince/86400000);
+          if(daysSinceStart>0&&ch.completedDays[k]===undefined){
+            ch.completedDays[k]=false;changed=true;
           }
+        } else if(isToday2||hrsSince<=48){
+          // Within grace window — clear any stale false
+          if(ch.completedDays[k]===false){delete ch.completedDays[k];changed=true;}
         }
       }
       cursor.setDate(cursor.getDate()+1);
-    }
-
-    // Always re-evaluate today — habits can be toggled on/off at any time
-    const _todayData=state.completedDays[LIVE_TODAY]||{};
-    const _todayDone=habitPool.filter(t=>_todayData[t.id]).length;
-    const _todayPct=habitPool.length>0?Math.round(_todayDone/habitPool.length*100):0;
-    const _todayMet=_todayPct>=threshold;
-    if(ch.completedDays[LIVE_TODAY]!==(_todayMet?true:undefined)){
-      if(_todayMet){ch.completedDays[LIVE_TODAY]=true;changed=true;}
-      else{delete ch.completedDays[LIVE_TODAY];changed=true;}
     }
 
     // Use the proven streak recalculator
