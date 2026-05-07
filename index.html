@@ -2091,11 +2091,11 @@ function evaluateChallenges(){
     });
 
     // Re-evaluate every day from startDate through today.
-    // Days with habit data: always recompute (never skip — habit data may have changed).
-    // Days without habit data: only write false if >48hrs old and not already evaluated.
-    // Today: never write false, always delete if threshold not met (day not over).
-    // NEW CHALLENGE GUARD: if completedDays is empty, only evaluate today.
-    // Prevents backfilling all past habit data into a brand new challenge.
+    // KEY RULES:
+    // 1. New challenge (empty completedDays): only evaluate today, never backfill past.
+    // 2. Already-true past days (>48hrs): NEVER overwrite — locks in completed days.
+    // 3. False or undefined past days: re-evaluate against current habit data.
+    // 4. Today: never write false (day not over), delete if threshold not met.
     const todayD2=new Date();todayD2.setHours(0,0,0,0);
     const isNewChallenge=Object.keys(ch.completedDays).length===0;
     const cursor=new Date(isNewChallenge?todayD2:startD);
@@ -2105,13 +2105,19 @@ function evaluateChallenges(){
       const msSince=todayD2.getTime()-cursor.getTime();
       const hrsSince=msSince/(1000*60*60);
       const dayData=state.completedDays[k];
+      const alreadyTrue=ch.completedDays[k]===true;
+
+      // LOCK: past days already marked true and outside grace window — never touch
+      if(alreadyTrue&&!isToday2&&hrsSince>48){cursor.setDate(cursor.getDate()+1);continue;}
 
       if(dayData){
-        // Habit data exists — always recompute, never skip
-        // Only count habits scheduled for this day of week (mirrors global streak logic)
         const dow=cursor.getDay();
         const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(dow));
-        if(scheduledPool.length===0){cursor.setDate(cursor.getDate()+1);continue;}
+        if(scheduledPool.length===0){
+          // No habits scheduled this day — count as success
+          if(!alreadyTrue){ch.completedDays[k]=true;changed=true;}
+          cursor.setDate(cursor.getDate()+1);continue;
+        }
         const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
         const pct=Math.round(doneCount/scheduledPool.length*100);
         const met=pct>=threshold;
@@ -2119,26 +2125,20 @@ function evaluateChallenges(){
           if(ch.completedDays[k]!==true){ch.completedDays[k]=true;changed=true;}
         } else {
           if(isToday2){
-            // Today not met — delete so streak walk skips it (day not over)
             if(ch.completedDays[k]!==undefined){delete ch.completedDays[k];changed=true;}
           } else if(hrsSince>48){
-            // Past day, grace window expired — mark as miss
             if(ch.completedDays[k]!==false){ch.completedDays[k]=false;changed=true;}
           } else {
-            // Within 48hr grace window — delete so user can still complete
             if(ch.completedDays[k]===false){delete ch.completedDays[k];changed=true;}
           }
         }
       } else {
-        // No habit data at all
         if(!isToday2&&hrsSince>48){
-          // Only mark as false if >48hrs old and not already set
           const daysSinceStart=Math.floor(msSince/86400000);
           if(daysSinceStart>0&&ch.completedDays[k]===undefined){
             ch.completedDays[k]=false;changed=true;
           }
         } else if(isToday2||hrsSince<=48){
-          // Within grace window — clear any stale false
           if(ch.completedDays[k]===false){delete ch.completedDays[k];changed=true;}
         }
       }
