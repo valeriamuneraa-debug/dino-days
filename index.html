@@ -5362,15 +5362,19 @@ onAuthStateChanged(auth,async(user)=>{
       setupSocialChallengeListeners();
       document.getElementById('loading-screen').style.display='none';
       document.getElementById('auth-screen').style.display='none';
-      document.getElementById('app-screen').style.display='block';
-      currentTab='today';restoreActiveTab();updateFAB('today');initDesktop();
-      document.getElementById('header-date').textContent=formatDate(new Date());
-      const[g,s]=getGreeting();
-      document.getElementById('hero-greeting').textContent=g;
-      document.getElementById('hero-sub').textContent=s;
-      updateAll();
-      if(isNewUser){setTimeout(()=>showThemePicker(),500);}
-      else if(!state.onboardingComplete){showWelcome();}
+      requestAnimationFrame(()=>{
+        document.getElementById('app-screen').style.display='block';
+        requestAnimationFrame(()=>{
+          currentTab='today';restoreActiveTab();updateFAB('today');initDesktop();
+          document.getElementById('header-date').textContent=formatDate(new Date());
+          const[g,s]=getGreeting();
+          document.getElementById('hero-greeting').textContent=g;
+          document.getElementById('hero-sub').textContent=s;
+          updateAll();
+          if(isNewUser){setTimeout(()=>showThemePicker(),500);}
+          else if(!state.onboardingComplete){showWelcome();}
+        });
+      });
     }else{
       currentUser=null;state=null;
       if(unsub){unsub();unsub=null;}
