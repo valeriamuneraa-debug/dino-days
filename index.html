@@ -2094,8 +2094,11 @@ function evaluateChallenges(){
     // Days with habit data: always recompute (never skip — habit data may have changed).
     // Days without habit data: only write false if >48hrs old and not already evaluated.
     // Today: never write false, always delete if threshold not met (day not over).
+    // NEW CHALLENGE GUARD: if completedDays is empty, only evaluate today.
+    // Prevents backfilling all past habit data into a brand new challenge.
     const todayD2=new Date();todayD2.setHours(0,0,0,0);
-    const cursor=new Date(startD);
+    const isNewChallenge=Object.keys(ch.completedDays).length===0;
+    const cursor=new Date(isNewChallenge?todayD2:startD);
     while(cursor<=todayD2){
       const k=`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
       const isToday2=k===LIVE_TODAY;
