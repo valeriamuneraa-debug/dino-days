@@ -5365,7 +5365,11 @@ onAuthStateChanged(auth,async(user)=>{
       requestAnimationFrame(()=>{
         document.getElementById('app-screen').style.display='block';
         requestAnimationFrame(()=>{
-          currentTab='today';restoreActiveTab();updateFAB('today');initDesktop();
+          currentTab='today';
+          initDesktop();
+          const todayBtn=document.querySelector('.sidebar-nav-item[data-tab="today"]')||document.querySelector('.tab[data-tab="today"]');
+          if(todayBtn){switchTab('today',todayBtn);}else{restoreActiveTab();}
+          updateFAB('today');
           document.getElementById('header-date').textContent=formatDate(new Date());
           const[g,s]=getGreeting();
           document.getElementById('hero-greeting').textContent=g;
