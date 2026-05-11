@@ -130,6 +130,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--page-bg);color:var(--ink)
 .day-picker{display:flex;gap:6px;flex-wrap:wrap;}
 .day-pill{width:36px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--linen);color:var(--ink-soft);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .day-pill.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
+.schedule-mode-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.schedule-mode-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;transition:all .15s;}
+.schedule-mode-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.schedule-stepper{display:flex;align-items:center;gap:10px;}
+.schedule-stepper button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);}
+.schedule-stepper .step-val{font-size:17px;font-weight:600;color:var(--ink);min-width:28px;text-align:center;}
+.schedule-preview{font-size:13px;color:var(--ink-soft);margin-top:8px;font-style:italic;}
+.month-day-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-top:8px;}
+.month-day-pill{padding:6px 0;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;text-align:center;transition:all .15s;}
+.month-day-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:16px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
 .btn-primary{background:var(--ink);color:white;}
 .btn-primary:hover{background:#333;}
@@ -1807,7 +1817,7 @@ window.undoRedemption=()=>{
   showToast('Redemption undone ↩️');
 };
 function checkStreak(){
-  const todayDow=new Date().getDay(),todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
+  const _todayD=new Date(),todayTasks=state.tasks.filter(t=>isHabitScheduledToday(t,_todayD));
   const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
   if(total>0&&doneCount===total){
     if(state.lastFullDay!==TODAY){
@@ -1822,6 +1832,34 @@ function checkStreak(){
 
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const DAY_ABBR=['Su','Mo','Tu','We','Th','Fr','Sa'];
+function isHabitScheduledToday(task,dateObj){
+  const d=dateObj||new Date();
+  const mode=task.scheduleMode;
+  if(!mode||mode==='weekly'){
+    const days=task.days??ALL_DAYS;
+    if(!days.includes(d.getDay()))return false;
+    const interval=task.weekInterval||1;
+    if(interval>1){
+      const epoch=new Date(1970,0,4);// Jan 4 1970 is a Sunday
+      const weeksSinceEpoch=Math.floor((d-epoch)/(7*86400000));
+      if(weeksSinceEpoch%interval!==0)return false;
+    }
+    return true;
+  }
+  if(mode==='every-x-days'){
+    const interval=task.intervalDays||1;
+    const created=task.createdAt?new Date(task.createdAt):new Date(0);
+    const createdDay=new Date(created.getFullYear(),created.getMonth(),created.getDate());
+    const today=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const daysSince=Math.round((today-createdDay)/86400000);
+    return daysSince%interval===0;
+  }
+  if(mode==='monthly'){
+    const monthDays=task.monthDays||[];
+    return monthDays.includes(d.getDate());
+  }
+  return true;
+}
 let cf='all',expandedTaskId=null,expandedRewardId=null,dayEditState=null,weekOffset=0,currentTab='today';
 function renderTasks(){
   const c=document.getElementById('tasks-container');c.innerHTML='';
@@ -1831,7 +1869,7 @@ function renderTasks(){
   const lbls=Object.fromEntries(state.sections.map(s=>[s.id,s.label]));
   let td=0,ta=0;
   for(const sec of secs){
-    const tasks=state.tasks.filter(t=>t.section===sec&&(t.days??ALL_DAYS).includes(todayDow));if(!tasks.length)continue;
+    const _rtd=new Date();const tasks=state.tasks.filter(t=>t.section===sec&&isHabitScheduledToday(t,_rtd));if(!tasks.length)continue;
     const ds=tasks.filter(t=>done[t.id]).length;
     const lbl=document.createElement('div');lbl.className='section-label';
     lbl.innerHTML=`<span>${lbls[sec]}</span><span class="section-badge">${ds}/${tasks.length}</span>`;c.appendChild(lbl);
@@ -1840,15 +1878,17 @@ function renderTasks(){
       ta++;const isDone=!!done[task.id];if(isDone)td++;
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
       item.onclick=(e)=>window.expandTask(task.id,e);
-      const tDays=task.days??ALL_DAYS;
-      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      const _schMode=task.scheduleMode;let dayTag='';
+      if(_schMode==='every-x-days'){dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">Every ${task.intervalDays||3}d</span>`;}
+      else if(_schMode==='monthly'){dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">Monthly</span>`;}
+      else{const tDays=task.days??ALL_DAYS;if(tDays.length<7)dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`;}
       item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta"><span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
   }
   // Fallback: show tasks whose section id doesn't match any known section
   const knownSecs=new Set(state.sections.map(s=>s.id));
-  const orphanTasks=state.tasks.filter(t=>!knownSecs.has(t.section)&&(t.days??ALL_DAYS).includes(todayDow));
+  const _rtd2=new Date();const orphanTasks=state.tasks.filter(t=>!knownSecs.has(t.section)&&isHabitScheduledToday(t,_rtd2));
   if(orphanTasks.length){
     const lbl=document.createElement('div');lbl.className='section-label';
     const ds=orphanTasks.filter(t=>done[t.id]).length;
@@ -1858,8 +1898,10 @@ function renderTasks(){
       ta++;const isDone=!!done[task.id];if(isDone)td++;
       const item=document.createElement('div');item.className='task-item'+(isDone?' done':'');
       item.onclick=(e)=>window.expandTask(task.id,e);
-      const tDays=task.days??ALL_DAYS;
-      const dayTag=tDays.length<7?`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`:'';
+      const _schMode2=task.scheduleMode;let dayTag='';
+      if(_schMode2==='every-x-days'){dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">Every ${task.intervalDays||3}d</span>`;}
+      else if(_schMode2==='monthly'){dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">Monthly</span>`;}
+      else{const tDays=task.days??ALL_DAYS;if(tDays.length<7)dayTag=`&nbsp;·&nbsp;<span style="font-size:12px;background:var(--linen);border-radius:6px;padding:1px 5px;color:var(--ink-soft)">${tDays.map(d=>DAY_ABBR[d]).join(' ')}</span>`;}
       item.innerHTML=`<div class="task-check ${isDone?'checked':''}" onclick="toggleTask('${task.id}',event)"></div><div class="task-content"><div class="task-name">${task.emoji?task.emoji+' ':''}${task.name}</div><div class="task-meta"><span style="font-size:13px;color:var(--ink-faint);${(task.points??5)===0?'opacity:0.5;':''}">${(task.points??5)===0?'+0 pts':'+'+(task.points??5)+' pts'}</span>${dayTag}</div></div><div class="task-actions${task.id===expandedTaskId?' visible':''}"><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button></div>`;
       list.appendChild(item);
     }c.appendChild(list);
@@ -1875,8 +1917,8 @@ function renderTasks(){
 function renderProgress(){
   if(!state) return;
   const streak=state.streak||0;
-  const todayDow=new Date().getDay();
-  const todayTasks=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(todayDow));
+  const _rpd=new Date();
+  const todayTasks=state.tasks.filter(t=>isHabitScheduledToday(t,_rpd));
   const done=state.completedDays[TODAY]||{};
   const doneTasks=todayTasks.filter(t=>done[t.id]);
   const pct=todayTasks.length>0?Math.round(doneTasks.length/todayTasks.length*100):0;
@@ -1953,7 +1995,7 @@ function renderProgress(){
       const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       const isT=weekOffset===0&&k===TODAY;
       const dotDow=d.getDay();
-      const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dotDow));
+      const scheduled=state.tasks.filter(t=>isHabitScheduledToday(t,d));
       const dd=state.completedDays[k]||{};
       // For past days: only count habits with recorded data.
       // Newly added habits have no data for past days — ignore them.
@@ -1983,12 +2025,10 @@ function renderProgress(){
   // Habit streaks
   function calcHabitStreak(task){
     let count=0;
-    const scheduledDays=task.days??ALL_DAYS;
     const now2=new Date();
     let checkDate=new Date(now2);
     while(true){
-      const dayOfWeek=checkDate.getDay();
-      if(scheduledDays.includes(dayOfWeek)){
+      if(isHabitScheduledToday(task,checkDate)){
         const k=`${checkDate.getFullYear()}-${String(checkDate.getMonth()+1).padStart(2,'0')}-${String(checkDate.getDate()).padStart(2,'0')}`;
         const dayDone=state.completedDays[k]||{};
         if(dayDone[task.id]){count++;}
@@ -2118,8 +2158,7 @@ function evaluateChallenges(){
         if(dayData){
           const [ky,km,kd]=k.split('-').map(Number);
           const kDate=new Date(ky,km-1,kd);
-          const kDow=kDate.getDay();
-          const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(kDow));
+          const scheduledPool=habitPool.filter(t=>isHabitScheduledToday(t,kDate));
           if(scheduledPool.length===0){ch.completedDays[k]=true;changed=true;return;}
           const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
           const pct=Math.round(doneCount/scheduledPool.length*100);
@@ -2143,10 +2182,9 @@ function evaluateChallenges(){
       const dayData=state.completedDays[k];
 
       if(dayData){
-        const dow=cursor.getDay();
         // For past days: only count habits with recorded data (mirrors week dots logic).
         // New habits added later have no entry — don't count them against old days.
-        const allScheduled=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(dow));
+        const allScheduled=habitPool.filter(t=>isHabitScheduledToday(t,cursor));
         const scheduledPool=(!isToday2&&hrsSince>48)
           ?allScheduled.filter(t=>dayData[t.id]!==undefined)
           :allScheduled;
@@ -3037,8 +3075,8 @@ window.markCustomSocialToday=async(id,e)=>{
   if(myData.completedDays?.[TODAY]){showToast('Already marked today ✓');return;}
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDoneState=state.completedDays[TODAY]||{};
-  const todayDow2=new Date().getDay();
-  const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2));
+  const _td2=new Date();
+  const scheduledPool=habitPool.filter(t=>isHabitScheduledToday(t,_td2));
   const poolForThreshold=scheduledPool.length>0?scheduledPool:habitPool;
   const doneCount=poolForThreshold.filter(t=>todayDoneState[t.id]).length;
   const pct=poolForThreshold.length>0?Math.round(doneCount/poolForThreshold.length*100):100;
@@ -3502,8 +3540,8 @@ window.markRaceToday=async(id,e)=>{
   // Check habit completion threshold
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDone=state.completedDays[TODAY]||{};
-  const todayDow2b=new Date().getDay();
-  const scheduledPool2=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2b));
+  const _td2b=new Date();
+  const scheduledPool2=habitPool.filter(t=>isHabitScheduledToday(t,_td2b));
   const poolForThreshold2=scheduledPool2.length>0?scheduledPool2:habitPool;
   const doneCount=poolForThreshold2.filter(t=>todayDone[t.id]).length;
   const pct=poolForThreshold2.length>0?Math.round(doneCount/poolForThreshold2.length*100):100;
@@ -3558,8 +3596,8 @@ window.markBondToday=async(id,e)=>{
   // Check threshold
   const habitPool=ch.habitIds&&ch.habitIds.length>0?state.tasks.filter(t=>ch.habitIds.includes(t.id)):state.tasks;
   const todayDoneState=state.completedDays[TODAY]||{};
-  const todayDow2c=new Date().getDay();
-  const scheduledPool3=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(todayDow2c));
+  const _td2c=new Date();
+  const scheduledPool3=habitPool.filter(t=>isHabitScheduledToday(t,_td2c));
   const poolForThreshold3=scheduledPool3.length>0?scheduledPool3:habitPool;
   const doneCount=poolForThreshold3.filter(t=>todayDoneState[t.id]).length;
   const pct=poolForThreshold3.length>0?Math.round(doneCount/poolForThreshold3.length*100):100;
@@ -3827,8 +3865,8 @@ async function evaluateSocialChallenges(){
         const hrs=hoursSince(k);
         const dayData=state.completedDays[k]||{};
         // Only check habits scheduled for this day of week
-        const kParts=k.split('-');const kDow=new Date(+kParts[0],+kParts[1]-1,+kParts[2]).getDay();
-        const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(kDow));
+        const kParts=k.split('-');const kDate=new Date(+kParts[0],+kParts[1]-1,+kParts[2]);
+        const scheduledPool=habitPool.filter(t=>isHabitScheduledToday(t,kDate));
         const poolSize=scheduledPool.length||habitPool.length;
         const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
         const pct=poolSize>0?Math.round(doneCount/poolSize*100):100;
@@ -3924,8 +3962,8 @@ async function evaluateSocialChallenges(){
       const hrs=hoursSince(k);
       const dayData=state.completedDays[k]||{};
       // Only check habits scheduled for this day of week
-      const rParts=k.split('-');const rDow=new Date(+rParts[0],+rParts[1]-1,+rParts[2]).getDay();
-      const scheduledPool=habitPool.filter(t=>(t.days??[0,1,2,3,4,5,6]).includes(rDow));
+      const rParts=k.split('-');const rDate=new Date(+rParts[0],+rParts[1]-1,+rParts[2]);
+      const scheduledPool=habitPool.filter(t=>isHabitScheduledToday(t,rDate));
       const poolSize=scheduledPool.length||habitPool.length;
       const doneCount=scheduledPool.filter(t=>dayData[t.id]).length;
       const pct=poolSize>0?Math.round(doneCount/poolSize*100):100;
@@ -4090,8 +4128,7 @@ function recalculateStreak(){
   for(let offset=0;offset<365;offset++){
     const dt=new Date(now);dt.setDate(now.getDate()-offset);
     const k=dateKey(dt);
-    const dow=dt.getDay();
-    const scheduled=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+    const scheduled=state.tasks.filter(t=>isHabitScheduledToday(t,dt));
     const done=state.completedDays[k]||{};
     const full=scheduled.length===0||scheduled.every(t=>done[t.id]);
     if(full){
@@ -4121,7 +4158,7 @@ function openDayModal(k){
   const isFuture=k>TODAY,isToday=k===TODAY;
   if(!state.completedDays[k])state.completedDays[k]={};
   dayEditState={k,completions:{...state.completedDays[k]}};
-  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  const habits=state.tasks.filter(t=>isHabitScheduledToday(t,dt));
   const doneCount=()=>habits.filter(t=>dayEditState.completions[t.id]).length;
   document.getElementById('modal-title').textContent=`${DAY_NAMES[dow]}, ${MONTH_NAMES[m-1]} ${d}`;
   function buildBody(){
@@ -4156,8 +4193,8 @@ window.toggleDayHabit=function(k,habitId){
   if(item)item.className='task-item'+(done?' done':'');
   if(check)check.className='task-check'+(done?' checked':'');
   const[y,m,d]=k.split('-').map(Number);
-  const dow=new Date(y,m-1,d).getDay();
-  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  const _dmdt=new Date(y,m-1,d);
+  const habits=state.tasks.filter(t=>isHabitScheduledToday(t,_dmdt));
   const dc=habits.filter(t=>dayEditState.completions[t.id]).length;
   const s=document.getElementById('day-modal-summary');
   if(s)s.textContent=`${dc} of ${habits.length} habit${habits.length!==1?'s':''} completed`;
@@ -4168,8 +4205,8 @@ window.saveDayModal=function(){
   const{k,completions}=dayEditState;
   const orig=state.completedDays[k]||{};
   const[y,m,d]=k.split('-').map(Number);
-  const dow=new Date(y,m-1,d).getDay();
-  const habits=state.tasks.filter(t=>(t.days??ALL_DAYS).includes(dow));
+  const _smdt=new Date(y,m-1,d);
+  const habits=state.tasks.filter(t=>isHabitScheduledToday(t,_smdt));
   let diff=0;
   for(const t of habits){
     const was=!!orig[t.id],now2=!!completions[t.id];
@@ -4496,7 +4533,7 @@ window.showTaskManagerModal=(defaultTab)=>{
       const sh=document.createElement('div');sh.className='tm-sec-header';sh.style.marginTop='16px';sh.textContent=sec.emoji+' '+sec.label;c.appendChild(sh);
       for(const task of tasks){
         const tDays=task.days??ALL_DAYS;
-        const daysLabel=tDays.length===7?'All days':tDays.map(d=>DAY_ABBR[d]).join(' ');
+        const daysLabel=task.scheduleMode==='every-x-days'?`Every ${task.intervalDays||3}d`:task.scheduleMode==='monthly'?`Monthly`:tDays.length===7?'All days':tDays.map(d=>DAY_ABBR[d]).join(' ');
         const row=document.createElement('div');row.className='tm-task-row';
         row.innerHTML=`<span style="flex:1;font-size:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${task.emoji?task.emoji+' ':''}${task.name}</span><span style="font-size:13px;color:var(--ink-faint);flex-shrink:0;margin-right:6px">⭐${task.points??5}</span><span style="font-size:12px;background:var(--linen);border-radius:6px;padding:2px 6px;color:var(--ink-soft);flex-shrink:0;margin-right:6px">${daysLabel}</span><button class="task-action-btn" onclick="editTask('${task.id}',event)">✏️</button><button class="task-action-btn" onclick="deleteTask('${task.id}',event)">🗑️</button>`;
         c.appendChild(row);
@@ -4519,10 +4556,164 @@ window._toggleDay=function(d){
   else{fDays.push(d);fDays.sort((a,b)=>a-b);}
   ALL_DAYS.forEach(dd=>{const btn=document.getElementById('dp-'+dd);if(btn)btn.classList.toggle('active',fDays.includes(dd));});
 };
-window.showAddTaskModal=()=>{document.getElementById('modal-title').textContent='Add habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map((s,i)=>`<option value="${s.id}"${i===0?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="0" max="100" value="5" style="width:100px"/></div>${dayPickerHTML([0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;openModal();setTimeout(()=>document.getElementById('f-name').focus(),100);};
-window.submitAddTask=()=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(0,parseInt(document.getElementById('f-points').value)||0));if(!name){showToast('Please enter a habit name');return;}state.tasks.push({id:'c'+Date.now(),name,section,emoji,points,days:[...fDays]});save();updateAll();closeModal();showToast('Habit added! ✅');};
-window.editTask=(id,e)=>{if(e)e.stopPropagation();const task=state.tasks.find(t=>t.id===id);if(!task)return;document.getElementById('modal-title').textContent='Edit habit';document.getElementById('modal-body').innerHTML=`<div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div><div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div><div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="0" max="100" value="${task.points??5}" style="width:100px"/></div>${dayPickerHTML(task.days??[0,1,2,3,4,5,6])}<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;openModal();};
-window.submitEditTask=(id)=>{const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(0,parseInt(document.getElementById('f-points').value)||0));if(!name)return;const task=state.tasks.find(t=>t.id===id);if(task){task.name=name;task.section=section;task.emoji=emoji;task.points=points;task.days=[...fDays];}save();updateAll();closeModal();showToast('Habit updated');};
+
+// ── Advanced Scheduling ──────────────────────────────────────────
+let fSchedule={mode:'weekly',days:[0,1,2,3,4,5,6],weekInterval:1,intervalDays:3,monthDays:[]};
+
+function _ordinal(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+
+function _updateSchedulePreview(){
+  const prev=document.getElementById('sch-preview');
+  if(!prev)return;
+  if(fSchedule.mode==='every-x-days'){
+    prev.textContent=`This habit will appear every ${fSchedule.intervalDays} days`;
+  }else if(fSchedule.mode==='monthly'){
+    if(!fSchedule.monthDays.length){prev.textContent='Select at least one date';return;}
+    const sorted=[...fSchedule.monthDays].sort((a,b)=>a-b);
+    prev.textContent=`This habit will appear on the ${sorted.map(_ordinal).join(' and ')} of each month`;
+  }
+}
+
+window._schSetMode=function(mode){
+  fSchedule.mode=mode;
+  fDays=mode==='weekly'?[...fSchedule.days]:[0,1,2,3,4,5,6];
+  ['weekly','every-x-days','monthly'].forEach(m=>{
+    const el=document.getElementById('sch-mode-'+m);
+    if(el)el.classList.toggle('active',m===mode);
+  });
+  document.getElementById('sch-weekly').style.display=mode==='weekly'?'block':'none';
+  document.getElementById('sch-everyx').style.display=mode==='every-x-days'?'block':'none';
+  document.getElementById('sch-monthly').style.display=mode==='monthly'?'block':'none';
+  _updateSchedulePreview();
+};
+
+window._schStepWeekInterval=function(delta){
+  fSchedule.weekInterval=Math.min(4,Math.max(1,(fSchedule.weekInterval||1)+delta));
+  const el=document.getElementById('sch-week-interval-val');
+  if(el)el.textContent=fSchedule.weekInterval;
+};
+
+window._schStepInterval=function(delta){
+  fSchedule.intervalDays=Math.min(30,Math.max(2,(fSchedule.intervalDays||3)+delta));
+  const el=document.getElementById('sch-interval-val');
+  if(el)el.textContent=fSchedule.intervalDays;
+  _updateSchedulePreview();
+};
+
+window._schToggleMonthDay=function(d){
+  const idx=fSchedule.monthDays.indexOf(d);
+  if(idx>=0)fSchedule.monthDays.splice(idx,1);
+  else fSchedule.monthDays.push(d);
+  const btn=document.getElementById('sch-md-'+d);
+  if(btn)btn.classList.toggle('active',fSchedule.monthDays.includes(d));
+  _updateSchedulePreview();
+};
+
+function schedulePickerHTML(task){
+  // Initialise fSchedule from task
+  const mode=task.scheduleMode||'weekly';
+  fSchedule={
+    mode,
+    days:task.days??[0,1,2,3,4,5,6],
+    weekInterval:task.weekInterval||1,
+    intervalDays:task.intervalDays||3,
+    monthDays:task.monthDays?[...task.monthDays]:[],
+  };
+  fDays=[...fSchedule.days];
+
+  const modePills=['weekly','every-x-days','monthly'].map(m=>{
+    const label=m==='weekly'?'Weekly':m==='every-x-days'?'Every X days':'Monthly';
+    return `<button type="button" class="schedule-mode-pill${mode===m?' active':''}" id="sch-mode-${m}" onclick="_schSetMode('${m}')">${label}</button>`;
+  }).join('');
+
+  const dayBtns=ALL_DAYS.map(d=>`<button type="button" id="dp-${d}" class="day-pill${fSchedule.days.includes(d)?' active':''}" onclick="_toggleDay(${d})">${DAY_ABBR[d]}</button>`).join('');
+
+  const monthGrid=Array.from({length:31},(_,i)=>i+1).map(d=>`<button type="button" id="sch-md-${d}" class="month-day-pill${fSchedule.monthDays.includes(d)?' active':''}" onclick="_schToggleMonthDay(${d})">${d}</button>`).join('');
+
+  const prevText=mode==='every-x-days'
+    ?`This habit will appear every ${fSchedule.intervalDays} days`
+    :mode==='monthly'
+    ?(fSchedule.monthDays.length?`This habit will appear on the ${[...fSchedule.monthDays].sort((a,b)=>a-b).map(_ordinal).join(' and ')} of each month`:'Select at least one date')
+    :'';
+
+  return `<div class="form-group">
+    <label class="form-label">Schedule</label>
+    <div class="schedule-mode-row">${modePills}</div>
+    <div id="sch-weekly" style="display:${mode==='weekly'?'block':'none'}">
+      <div class="day-picker" style="margin-bottom:10px;">${dayBtns}</div>
+      <div class="schedule-stepper">
+        <span style="font-size:13px;color:var(--ink-soft);">Repeat every</span>
+        <button type="button" onclick="_schStepWeekInterval(-1)">−</button>
+        <span class="step-val" id="sch-week-interval-val">${fSchedule.weekInterval}</span>
+        <button type="button" onclick="_schStepWeekInterval(1)">+</button>
+        <span style="font-size:13px;color:var(--ink-soft);">week(s)</span>
+      </div>
+    </div>
+    <div id="sch-everyx" style="display:${mode==='every-x-days'?'block':'none'}">
+      <div class="schedule-stepper">
+        <span style="font-size:13px;color:var(--ink-soft);">Every</span>
+        <button type="button" onclick="_schStepInterval(-1)">−</button>
+        <span class="step-val" id="sch-interval-val">${fSchedule.intervalDays}</span>
+        <button type="button" onclick="_schStepInterval(1)">+</button>
+        <span style="font-size:13px;color:var(--ink-soft);">days</span>
+      </div>
+      <div class="schedule-preview" id="sch-preview">${prevText}</div>
+    </div>
+    <div id="sch-monthly" style="display:${mode==='monthly'?'block':'none'}">
+      <div class="month-day-grid">${monthGrid}</div>
+      <div class="schedule-preview" id="sch-preview">${prevText}</div>
+    </div>
+  </div>`;
+}
+window.showAddTaskModal=()=>{
+  document.getElementById('modal-title').textContent='Add habit';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" placeholder="e.g. Drink water"/></div>
+    <div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map((s,i)=>`<option value="${s.id}"${i===0?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Emoji (optional)</label><input class="form-input" id="f-emoji" placeholder="e.g. 💧" maxlength="2" style="width:80px"/></div>
+    <div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="0" max="100" value="5" style="width:100px"/></div>
+    ${schedulePickerHTML({})}
+    <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitAddTask()">Add habit</button></div>`;
+  openModal();
+  setTimeout(()=>document.getElementById('f-name').focus(),100);
+};
+window.submitAddTask=()=>{
+  const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(0,parseInt(document.getElementById('f-points').value)||0));
+  if(!name){showToast('Please enter a habit name');return;}
+  const task={id:'c'+Date.now(),name,section,emoji,points,createdAt:new Date().toISOString(),scheduleMode:fSchedule.mode};
+  if(fSchedule.mode==='weekly'){task.days=[...fDays];task.weekInterval=fSchedule.weekInterval;}
+  else if(fSchedule.mode==='every-x-days'){task.intervalDays=fSchedule.intervalDays;}
+  else if(fSchedule.mode==='monthly'){task.monthDays=[...fSchedule.monthDays];}
+  state.tasks.push(task);
+  save();updateAll();closeModal();showToast('Habit added! ✅');
+};
+window.editTask=(id,e)=>{
+  if(e)e.stopPropagation();
+  const task=state.tasks.find(t=>t.id===id);
+  if(!task)return;
+  document.getElementById('modal-title').textContent='Edit habit';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="form-group"><label class="form-label">Habit name</label><input class="form-input" id="f-name" value="${task.name}"/></div>
+    <div class="form-group"><label class="form-label">Section</label><select class="form-select" id="f-section">${state.sections.map(s=>`<option value="${s.id}"${s.id===task.section?' selected':''}>${s.emoji} ${s.label}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" value="${task.emoji||''}" maxlength="2" style="width:80px"/></div>
+    <div class="form-group"><label class="form-label">Points when completed</label><input class="form-input" id="f-points" type="number" min="0" max="100" value="${task.points??5}" style="width:100px"/></div>
+    ${schedulePickerHTML(task)}
+    <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitEditTask('${id}')">Save</button></div>`;
+  openModal();
+};
+window.submitEditTask=(id)=>{
+  const name=document.getElementById('f-name').value.trim(),section=document.getElementById('f-section').value,emoji=document.getElementById('f-emoji').value.trim(),points=Math.min(100,Math.max(0,parseInt(document.getElementById('f-points').value)||0));
+  if(!name)return;
+  const task=state.tasks.find(t=>t.id===id);
+  if(task){
+    task.name=name;task.section=section;task.emoji=emoji;task.points=points;
+    task.scheduleMode=fSchedule.mode;
+    if(fSchedule.mode==='weekly'){task.days=[...fDays];task.weekInterval=fSchedule.weekInterval;delete task.intervalDays;delete task.monthDays;}
+    else if(fSchedule.mode==='every-x-days'){task.intervalDays=fSchedule.intervalDays;delete task.days;delete task.weekInterval;delete task.monthDays;}
+    else if(fSchedule.mode==='monthly'){task.monthDays=[...fSchedule.monthDays];delete task.days;delete task.weekInterval;delete task.intervalDays;}
+  }
+  save();updateAll();closeModal();showToast('Habit updated');
+};
 
 let PC=null;
 window.deleteTask=(id,e)=>{e.stopPropagation();PC=()=>{state.tasks=state.tasks.filter(t=>t.id!==id);Object.values(state.completedDays).forEach(d=>delete d[id]);save();updateAll();showToast('Habit removed');};document.getElementById('confirm-title').textContent='Delete this habit?';document.getElementById('confirm-msg').textContent='This habit will be removed from your daily routine.';document.getElementById('confirm-ok').textContent='Delete';document.getElementById('confirm-ok').className='btn btn-danger';document.getElementById('confirm-overlay').classList.add('open');};
