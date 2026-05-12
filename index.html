@@ -2005,10 +2005,10 @@ function renderProgress(){
       if(isPastDay&&hasDayData){
         const habitsWithData=scheduled.filter(t=>dd[t.id]!==undefined);
         tot=habitsWithData.length;
-        dn2=habitsWithData.filter(t=>dd[t.id]).length;
+        dn2=habitsWithData.filter(t=>dd[t.id]===true).length;
       } else {
         tot=scheduled.length;
-        dn2=scheduled.filter(t=>dd[t.id]).length;
+        dn2=scheduled.filter(t=>dd[t.id]===true).length;
       }
       let cls='week-dot-circle';
       if(isT)cls+=' today';
