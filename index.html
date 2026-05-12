@@ -1817,15 +1817,29 @@ window.undoRedemption=()=>{
   showToast('Redemption undone ↩️');
 };
 function checkStreak(){
-  const _todayD=new Date(),todayTasks=state.tasks.filter(t=>isHabitScheduledToday(t,_todayD));
-  const done=state.completedDays[TODAY]||{},doneCount=todayTasks.filter(t=>done[t.id]).length,total=todayTasks.length;
-  if(total>0&&doneCount===total){
-    if(state.lastFullDay!==TODAY){
-      state.lastFullDay=TODAY;
-      state.streak++;
-      if(state.lastFullDay===TODAY&&state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
+  const _todayD=new Date();
+  const todayTasks=state.tasks.filter(t=>isHabitScheduledToday(t,_todayD));
+  const done=state.completedDays[getToday()]||{};
+  const total=todayTasks.length;
+  const doneCount=todayTasks.filter(t=>done[t.id]===true).length;
+  const allDoneToday=total>0&&doneCount===total;
+
+  if(allDoneToday){
+    if(state.lastFullDay!==getToday()){
+      // First time completing all habits today — award streak bonus
+      state.lastFullDay=getToday();
+      recalculateStreak(); // recalc first so streak number is accurate
+      if(state.streak>(state.bestStreak||0))state.bestStreak=state.streak;
       awardPts(10+state.streak*2,`Streak day ${state.streak}`);
     }
+    // If lastFullDay===TODAY already, do nothing — bonus already awarded today
+  } else {
+    // Day is no longer fully complete (habit was untapped, or day just started)
+    if(state.lastFullDay===getToday()){
+      // User untapped a habit — clear today's full-day status and recalc
+      state.lastFullDay=null;
+    }
+    recalculateStreak(); // always recalc so sidebar/today counter reflects reality
   }
 }
 
