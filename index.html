@@ -2011,15 +2011,14 @@ function renderProgress(){
       const dotDow=d.getDay();
       const scheduled=state.tasks.filter(t=>isHabitScheduledToday(t,d));
       const dd=state.completedDays[k]||{};
-      // For past days: only count habits with recorded data.
-      // Newly added habits have no data for past days — ignore them.
       const isPastDay=!isT&&k<TODAY;
-      const hasDayData=Object.keys(dd).length>0;
       let tot,dn2;
-      if(isPastDay&&hasDayData){
-        const habitsWithData=scheduled.filter(t=>dd[t.id]!==undefined);
-        tot=habitsWithData.length;
-        dn2=habitsWithData.filter(t=>dd[t.id]===true).length;
+      if(isPastDay){
+        // For past days: count all scheduled habits that existed on that day.
+        // Habits added after the day count as never scheduled. Untouched habits count as missed.
+        const existedThen=scheduled.filter(t=>!isHabitAddedAfter(t,k));
+        tot=existedThen.length;
+        dn2=existedThen.filter(t=>dd[t.id]===true).length;
       } else {
         tot=scheduled.length;
         dn2=scheduled.filter(t=>dd[t.id]===true).length;
