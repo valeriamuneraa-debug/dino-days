@@ -1951,13 +1951,26 @@ function renderProgress(){
   const sm=document.getElementById('progress-streak-msg');
   if(sm){
     if(streak===0)sm.textContent='Start your streak today ✨';
-    else if(streak<=3)sm.textContent="You're getting started! Keep going 💪";
-    else if(streak<=6)sm.textContent="Building momentum! Don't stop now 🔥";
-    else if(streak<=13)sm.textContent="One week strong! You're on a roll 🌟";
-    else if(streak<=29)sm.textContent="Two weeks of consistency! Incredible 🚀";
-    else if(streak<=59)sm.textContent="A whole month! You're unstoppable 🏆";
-    else if(streak<=179)sm.textContent="Two months strong! This is a lifestyle now 💎";
-    else sm.textContent="Half a year of consistency. Legendary 👑";
+    else if(streak===1)sm.textContent="Day one — the hardest step is done 💪";
+    else if(streak<=3)sm.textContent=`${streak} days in. Keep stacking 🔥`;
+    else if(streak<=6)sm.textContent=`${streak} days strong. Momentum is real 🌟`;
+    else if(streak===7)sm.textContent="One full week! You're locked in 🎯";
+    else if(streak<=13)sm.textContent=`${streak} days. Past the first week — this is becoming you ✨`;
+    else if(streak===14)sm.textContent="Two weeks! Half a month of showing up 🚀";
+    else if(streak<=20)sm.textContent=`${streak} days. Two weeks behind you, three ahead 💎`;
+    else if(streak===21)sm.textContent="Three weeks! They say this is when habits stick 🌿";
+    else if(streak<=27)sm.textContent=`${streak} days. Almost a month — incredible discipline 🏆`;
+    else if(streak<=30)sm.textContent=`${streak} days! A full month is right here 👑`;
+    else if(streak<=44)sm.textContent=`${streak} days. Over a month of consistency 🔥`;
+    else if(streak<=59)sm.textContent=`${streak} days. Six weeks of pure commitment 💎`;
+    else if(streak===60)sm.textContent="Two months! This is who you are now 🌟";
+    else if(streak<=89)sm.textContent=`${streak} days. Closing in on three months 🚀`;
+    else if(streak===90)sm.textContent="90 days! A full quarter of consistency 👑";
+    else if(streak<=119)sm.textContent=`${streak} days. Past three months — extraordinary 🏆`;
+    else if(streak<=179)sm.textContent=`${streak} days. Months of showing up. Legendary 💎`;
+    else if(streak<=364)sm.textContent=`${streak} days. Approaching a full year 🌿`;
+    else if(streak===365)sm.textContent="365 days. One full year of ritual 👑✨";
+    else sm.textContent=`${streak} days. You've redefined what's possible 🚀`;
   }
 
   // Stats grid
