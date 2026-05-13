@@ -2011,19 +2011,11 @@ function renderProgress(){
       const dotDow=d.getDay();
       const scheduled=state.tasks.filter(t=>isHabitScheduledToday(t,d));
       const dd=state.completedDays[k]||{};
-      const isPastDay=!isT&&k<TODAY;
-      let tot,dn2;
-      if(isPastDay){
-        // Past day: include habits that existed on that day, plus any habit
-        // with a recorded entry (user retroactively marked it via day modal).
-        // Habits added after the day with no entry are silently ignored.
-        const relevant=scheduled.filter(t=>!isHabitAddedAfter(t,k)||dd[t.id]!==undefined);
-        tot=relevant.length;
-        dn2=relevant.filter(t=>dd[t.id]===true).length;
-      } else {
-        tot=scheduled.length;
-        dn2=scheduled.filter(t=>dd[t.id]===true).length;
-      }
+      // Heatmap uses the same rule as the day modal and recalculateStreak():
+      // all habits scheduled for that day-of-week are the universe. A day is
+      // only "full" when every scheduled habit has dd[t.id]===true.
+      const tot=scheduled.length;
+      const dn2=scheduled.filter(t=>dd[t.id]===true).length;
       let cls='week-dot-circle';
       if(isT)cls+=' today';
       else if(tot>0&&dn2===tot)cls+=' full';
