@@ -4135,7 +4135,28 @@ async function updatePublicProfile(){
     },{merge:true});
   }catch(e){console.warn('Could not update public profile:',e);}
 }
-function updateAll(){evaluateChallenges();evaluateSocialChallenges();renderProgress();renderTasks();renderRewards();renderSectionTabs();renderChallenges();updateAvatarDisplay();updatePublicProfile();updateSidebarStats();}
+let _updateAllScheduled=false;
+function updateAll(){
+  // State evaluation always runs synchronously so any caller that reads
+  // state after updateAll() gets fresh values. Only DOM writes are deferred.
+  evaluateChallenges();
+  evaluateSocialChallenges();
+
+  // Coalesce multiple updateAll() calls within the same frame into one render.
+  if(_updateAllScheduled)return;
+  _updateAllScheduled=true;
+  requestAnimationFrame(()=>{
+    _updateAllScheduled=false;
+    renderProgress();
+    renderTasks();
+    renderRewards();
+    renderSectionTabs();
+    renderChallenges();
+    updateAvatarDisplay();
+    updatePublicProfile();
+    updateSidebarStats();
+  });
+}
 
 function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
