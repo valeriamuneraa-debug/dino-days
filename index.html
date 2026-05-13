@@ -5632,6 +5632,15 @@ onAuthStateChanged(auth,async(user)=>{
           const[g,s]=getGreeting();
           document.getElementById('hero-greeting').textContent=g;
           document.getElementById('hero-sub').textContent=s;
+          // Streak hygiene: recalculate on app load so a missed day correctly resets
+          // the streak instead of showing the stale value last written to Firebase.
+          // Guard: only run if user has tasks. Empty task list would let the
+          // "scheduled.length===0 → full=true" branch inflate streak incorrectly.
+          if(!isNewUser&&state&&Array.isArray(state.tasks)&&state.tasks.length>0){
+            const prevStreak=state.streak;
+            recalculateStreak();
+            if(state.streak!==prevStreak)save();
+          }
           updateAll();
           if(isNewUser){setTimeout(()=>showThemePicker(),500);}
           else if(!state.onboardingComplete){showWelcome();}
