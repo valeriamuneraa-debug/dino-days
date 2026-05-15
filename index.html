@@ -4162,7 +4162,9 @@ function dateKey(dt){return`${dt.getFullYear()}-${String(dt.getMonth()+1).padSta
 function isHabitAddedAfter(habit,k){if(!habit.id.startsWith('c'))return false;const ts=parseInt(habit.id.slice(1));if(isNaN(ts))return false;const[y,m,d]=k.split('-').map(Number);return ts>new Date(y,m-1,d,23,59,59).getTime();}
 
 function recalculateStreak(){
-  const now=new Date(TODAY);
+  const _todayStr=getToday();
+  const[_ty,_tm,_td]=_todayStr.split('-').map(Number);
+  const now=new Date(_ty,_tm-1,_td);
   let streak=0,maxStreak=0,lastFull=null;
   let inCurrentStreak=true,localStreak=0;
   for(let offset=0;offset<365;offset++){
