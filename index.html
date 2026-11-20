@@ -1756,7 +1756,15 @@ let _socialChEvalDay=null;
 let _scDuration=30,_scThreshold=100,_scHabitMode='all',_scHabitIds=[],_scType='race';
 let _scStreakRequired=21,_scAllowMisses=false,_scVictoryCondition='streak',_scTotalTarget=21;
 function getToday(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-const TODAY=getToday();
+// Live local date. This used to be frozen with `const TODAY=getToday()` at
+// page load, so a tab or PWA kept open past midnight still painted yesterday
+// and wrote new taps into that past date.
+Object.defineProperty(globalThis,'TODAY',{configurable:true,enumerable:false,get(){return getToday();}});
+let _activeDay=getToday();
+// Last user-doc payload successfully written. The whole ~100KB doc is sent on
+// every save; skip a write when nothing actually changed.
+let _lastSavedJSON=null;
+let _saveChain=Promise.resolve();
 
 function setSyncing(on){
   const dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
@@ -1764,10 +1772,24 @@ function setSyncing(on){
   dot.className='sync-dot'+(on?' syncing':'');
   lbl.textContent=on?'Syncing…':'Synced';
 }
-async function saveFS(){
+function saveFS(){
+  _saveChain=_saveChain.then(writeUserDoc).catch(e=>{console.error(e);});
+  return _saveChain;
+}
+async function writeUserDoc(){
   if(!currentUser||!state)return;
+  let payload=null;
+  try{payload=JSON.stringify(state);}catch(e){payload=null;}
+  if(payload!==null&&payload===_lastSavedJSON)return;
   setSyncing(true);
-  try{await setDoc(doc(db,'users',currentUser.uid),state);}catch(e){console.error(e);}
+  try{
+    await setDoc(doc(db,'users',currentUser.uid),state);
+    let after=null;
+    try{after=JSON.stringify(state);}catch(e){after=null;}
+    // If state changed while the write was in flight, don't treat this payload
+    // as current — the queued follow-up save still needs to go out.
+    if(payload!==null&&after===payload)_lastSavedJSON=payload;
+  }catch(e){console.error(e);}
   setSyncing(false);
 }
 window.saveFS=saveFS;
@@ -1778,10 +1800,56 @@ window.restartTour=async function(){
   await new Promise(r=>setTimeout(r,300));
   showWelcome();
 };
-function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,800);}
+// Trailing debounce. Habit taps often land a second or two apart; 800ms still
+// sent a full-document write per tap and tripped Firestore's write-bandwidth
+// quota. Three seconds batches a check-off burst into one write. Hiding or
+// leaving the page flushes immediately so a lock/switch doesn't drop the last tap.
+const SAVE_DEBOUNCE_MS=3000;
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveFS,SAVE_DEBOUNCE_MS);}
+function flushSave(){
+  if(!saveTimer)return;
+  clearTimeout(saveTimer);
+  saveTimer=null;
+  saveFS();
+}
 
 function showToast(msg,dur=2200,type=''){const t=document.getElementById('toast');t.textContent=msg;t.style.background=type==='danger'?'var(--danger)':'';t.classList.add('show');setTimeout(()=>{t.classList.remove('show');t.style.background='';},dur);}
 function getGreeting(){const h=new Date().getHours();if(h<12)return['Good morning ☀️','Start your day with intention'];if(h<17)return['Good afternoon 🌤️','Keep the momentum going'];return['Good evening 🌙','Wind down with care'];}
+function renderTodayChrome(){
+  const dateEl=document.getElementById('header-date');
+  if(dateEl)dateEl.textContent=formatDate(new Date());
+  const pair=getGreeting();
+  const hg=document.getElementById('hero-greeting');
+  const hs=document.getElementById('hero-sub');
+  if(hg)hg.textContent=pair[0];
+  if(hs)hs.textContent=pair[1];
+}
+function checkDayRollover(){
+  const nowKey=getToday();
+  if(nowKey===_activeDay)return;
+  _activeDay=nowKey;
+  renderTodayChrome();
+  if(!state||!currentUser)return;
+  if(!state.completedDays)state.completedDays={};
+  if(!state.completedDays[nowKey])state.completedDays[nowKey]={};
+  // Same streak hygiene as sign-in: a missed day resets the visible streak
+  // instead of leaving the last value that was written to Firebase.
+  // Guard: an empty task list makes "nothing scheduled" look like a full day.
+  if(!isNewUser&&Array.isArray(state.tasks)&&state.tasks.length>0){
+    const prevStreak=state.streak;
+    recalculateStreak();
+    if(state.streak!==prevStreak)save();
+  }
+  // Re-render today blank and re-run solo + social challenge evaluation,
+  // which updateAll already does on load.
+  updateAll();
+}
+function scheduleMidnightRollover(){
+  const now=new Date();
+  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2,0);
+  const delay=Math.max(1000,next.getTime()-now.getTime());
+  setTimeout(()=>{checkDayRollover();scheduleMidnightRollover();},delay);
+}
 function formatDate(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;}
 function awardPts(amt,reason){state.points+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:true});if(state.history.length>50)state.history.pop();save();updateAll();showToast(`+${amt} pts — ${reason} 🌟`);}
 function spendPts(amt,reason,allowUndo=false){state.points-=amt;state.totalSpent+=amt;state.history.unshift({reason,amount:amt,date:TODAY,pos:false});save();updateAll();if(allowUndo){showUndoSnackbar(amt,reason);}else{showToast(`Enjoyed: ${reason} 🎉`);}}
@@ -5630,10 +5698,10 @@ onAuthStateChanged(auth,async(user)=>{
           const todayBtn=document.querySelector('.sidebar-nav-item[data-tab="today"]')||document.querySelector('.tab[data-tab="today"]');
           if(todayBtn){switchTab('today',todayBtn);}else{restoreActiveTab();}
           updateFAB('today');
-          document.getElementById('header-date').textContent=formatDate(new Date());
-          const[g,s]=getGreeting();
-          document.getElementById('hero-greeting').textContent=g;
-          document.getElementById('hero-sub').textContent=s;
+          // Auth can resolve after midnight on a page that loaded yesterday.
+          // Anchor the rollover watch to the day we just rendered.
+          _activeDay=getToday();
+          renderTodayChrome();
           // Streak hygiene: recalculate on app load so a missed day correctly resets
           // the streak instead of showing the stale value last written to Firebase.
           // Guard: only run if user has tasks. Empty task list would let the
@@ -5670,6 +5738,19 @@ setTimeout(()=>{
     document.getElementById('auth-screen').style.display='flex';
   }
 },8000);
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')flushSave();
+  else checkDayRollover();
+});
+window.addEventListener('focus',checkDayRollover);
+window.addEventListener('pageshow',checkDayRollover);
+window.addEventListener('pagehide',flushSave);
+window.addEventListener('beforeunload',flushSave);
+scheduleMidnightRollover();
+// Backup for a visible page whose midnight timer was throttled, and for a
+// clock change that doesn't cross the scheduled timeout.
+setInterval(checkDayRollover,60000);
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
